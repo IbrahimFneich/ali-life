@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="fx-on">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>harness</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Amiri+Quran&family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Reem+Kufi:wght@400..700&display=swap">
+<link rel="stylesheet" href="../styles.css">
+<style>.harness .scene { height: 100vh !important; } .harness .stage { position: relative !important; }</style>
+<script src="../scenes/core.js"></script>
+</head>
+<body class="harness">
+<main id="host"></main>
+<script>
+// Usage: dev/harness.html?scene=NAME&p=0.5[&t=1]
+// Loads scenes/NAME.{css,html,js}, renders the stage as one screen at progress p, evaluates data-fx overlays at p.
+const q = new URLSearchParams(location.search);
+const name = q.get('scene');
+const p = +(q.get('p') ?? .5);
+const t = +(q.get('t') ?? 1);
+const EASE = { lin: (x) => x, in: (x) => x ** 3, out: (x) => 1 - (1 - x) ** 3, io: (x) => (x < .5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2), tick: (x) => Math.floor(x * 28) / 28 };
+const unitOf = (v) => { const m = /^(-?[\d.]+)([a-z%]*)$/.exec(v); return [parseFloat(m[1]), m[2]]; };
+function applyFx(root, pp) {
+  root.querySelectorAll('[data-fx]').forEach((el) => {
+    const props = {};
+    el.dataset.fx.split('|').forEach((tr) => {
+      const [prop, from, to, a, b, e = 'lin'] = tr.trim().split(/\s+/);
+      (props[prop] ||= []).push({ from: from.split('_').map(unitOf), to: to.split('_').map(unitOf), a: +a, b: +b, e: EASE[e] });
+    });
+    const v = {};
+    for (const k in props) {
+      const tracks = props[k].sort((m, n) => m.a - n.a);
+      let tr = tracks[0];
+      for (const x of tracks) if (pp >= x.a) tr = x;
+      const kk = tr.e(Math.min(1, Math.max(0, (pp - tr.a) / (tr.b - tr.a || 1))));
+      v[k] = tr.from.map(([f, fu], i) => { const [to, tu] = tr.to[i]; return fu === tu ? `${f + (to - f) * kk}${fu}` : `calc(${f}${fu} * ${1 - kk} + ${to}${tu} * ${kk})`; });
+    }
+    const s = el.style;
+    if (v.x || v.y || v.s || v.sx || v.r || v.rx || v.ry) s.transform = `translate3d(${v.x?.[0] ?? 0}, ${v.y?.[0] ?? 0}, 0) rotateX(${v.rx?.[0] ?? '0deg'}) rotateY(${v.ry?.[0] ?? '0deg'}) rotate(${v.r?.[0] ?? '0deg'}) scale(${+(v.s?.[0] ?? 1) * +(v.sx?.[0] ?? 1)}, ${v.s?.[0] ?? 1})`;
+    if (v.o) s.opacity = v.o[0];
+    if (v.g || v.b || v.bl) s.filter = `grayscale(${v.g?.[0] ?? 0}) brightness(${v.b?.[0] ?? 1}) blur(${v.bl?.[0] ?? '0px'})`;
+    if (v.clip) s.clipPath = `inset(${v.clip.join(' ')})`;
+    if (v.dash) s.strokeDashoffset = v.dash[0];
+  });
+}
+(async () => {
+  const css = document.createElement('link');
+  css.rel = 'stylesheet'; css.href = `../scenes/${name}.css`;
+  document.head.append(css);
+  const res = await fetch(`../scenes/${name}.html`);
+  host.innerHTML = res.ok ? await res.text() : '';
+  await new Promise((r) => { const s = document.createElement('script'); s.src = `../scenes/${name}.js`; s.onload = r; s.onerror = r; document.body.append(s); });
+  await document.fonts.ready;
+  const el = host.querySelector('[data-scene]');
+  const st = {};
+  S[name].init?.(el, st);
+  S[name].frame(p, t, el, st);
+  applyFx(host, p);
+  document.title = 'ready';
+})().catch((e) => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:red;position:fixed;top:0;z-index:9">${e.stack}</pre>`); });
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+/* المباهلة والكساء: the words keep to a right-hand column; the plain, the five and the cloak take the left and
+   centre. Name labels are placed by kisa.js under each light during the walk (desktop only). */
+.kisa .stage { background: #1a140d; }
+.kisa .kx-col { top: 8vh; max-width: min(100%, 31rem); }
+.kisa .kx-col::before {
+  content: ""; position: absolute; z-index: -1; inset: -40vh -4vw -30vh -12vw; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(14, 10, 6, .6), rgba(14, 10, 6, .3) 60%, rgba(14, 10, 6, 0));
+}
+.kisa .kx-a1 .ayah { font-size: clamp(1.15rem, 1.25vw + .55rem, 1.7rem); line-height: 2.05; }
+.kisa .kx-a1 mark { background: none; color: #fff; text-shadow: 0 0 18px rgba(243, 217, 143, .9); }
+.kisa .kx-a2 .ayah { font-size: clamp(1.5rem, 2vw + .6rem, 2.6rem); line-height: 2.1; }
+.kisa .cap { text-shadow: 0 1px 3px rgba(0, 0, 0, .9), 0 2px 22px rgba(0, 0, 0, .85); }
+.kisa .ayah { text-shadow: 0 2px 26px rgba(10, 6, 2, .95), 0 0 2px rgba(10, 6, 2, .8); }
+.kisa .kx-names { position: absolute; z-index: 2; left: 0; top: 0; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.kisa .kx-names li { position: absolute; left: 0; top: 0; opacity: 0; white-space: nowrap; font: 500 .82rem var(--f-kufi); color: var(--gold-hi); text-shadow: 0 1px 8px rgba(0, 0, 0, .9); will-change: transform; }
+:root:not(.fx-on) .kisa .ov:not(.kx-rest) { display: none; }
+@media (max-width: 640px) {
+  .kisa .kx-col { top: 6vh; left: 0; right: 0; max-width: 100%; }
+  .kisa .kx-col::before { inset: -10vh 0 -12vh; background: linear-gradient(to bottom, rgba(14, 10, 6, .82) 55%, rgba(14, 10, 6, 0)); }
+  .kisa .kx-a1 .ayah { font-size: 1.12rem; line-height: 1.95; }
+  .kisa .kx-a2 .ayah { font-size: 1.45rem; }
+}

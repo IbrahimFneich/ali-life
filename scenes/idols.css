@@ -1,0 +1,25 @@
+/* فتح مكة: all words keep to the haze above the court; the ring of idols owns the lower two-thirds. */
+.idols .stage { background: #d8c6a6; }
+.idols .ov { color: #1d1710; }
+.idols .idols-kick { top: 5vh; }
+.idols .idols-kick .kick { color: #6b4f1c; }
+.idols .idols-count { top: 5vh; text-align: start; max-width: 15rem; }
+.idols .idols-n { margin: 0; font-family: var(--f-kufi); font-weight: 600; font-size: clamp(3.4rem, 6vw + 1rem, 6.6rem); line-height: 1; color: #1a140c; font-variant-numeric: tabular-nums; letter-spacing: .02em; text-shadow: 0 1px 0 rgba(255, 244, 220, .45); }
+.idols .idols-lbl { margin: .35rem 0 0; font-family: var(--f-ui); font-size: .9rem; line-height: 1.5; color: #4a3a22; }
+.idols .idols-note { margin: .5rem 0 0; font-family: var(--f-naskh); font-size: .95rem; line-height: 1.7; color: #5b4a30; max-width: 13rem; }
+.idols .idols-top { top: 11vh; right: 4vw; max-width: min(100% - 22rem, 40rem); text-shadow: 0 0 18px rgba(236, 222, 196, .9), 0 0 2px rgba(236, 222, 196, .9); }
+.idols .idols-ayah { right: 0; left: 0; margin: 0 auto; text-align: center; max-width: min(100%, 44rem); }
+.idols .idols-ayah .ayah { color: #4e3610; font-size: clamp(1.5rem, 2.2vw + .7rem, 2.8rem); }
+.idols .idols-cap .cap { color: #1d1710; text-shadow: inherit; max-width: 36ch; }
+.idols .src { color: #6b4f1c; border-color: rgba(107, 79, 28, .45); }
+/* reduced motion: one still at data-rest (the court cleared), so only the words that belong to it */
+:root:not(.fx-on) .idols .ov:not(.idols-rest), :root:not(.fx-on) .idols .idols-note { display: none; }
+@media (max-width: 640px) {
+  .idols .idols-kick { top: 3.5vh; }
+  .idols .idols-count { top: auto; bottom: 3vh; left: 0; right: 0; text-align: center; max-width: none; }
+  .idols .idols-count::before { content: ""; position: absolute; inset: -30% 0 -20%; z-index: -1; background: radial-gradient(closest-side, rgba(226, 208, 176, .85), rgba(226, 208, 176, .5) 60%, rgba(226, 208, 176, 0)); }
+  .idols .idols-n { font-size: 3.6rem; }
+  .idols .idols-note { margin-inline: auto; }
+  .idols .idols-top { top: 8vh; left: 0; right: 0; max-width: none; }
+  .idols .idols-ayah .ayah { font-size: 1.35rem; }
+}

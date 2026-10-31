@@ -1,0 +1,30 @@
+/* Uhud: words in the sky band above the dark mountain; the field, the hill and the knot below. */
+.uhud .stage { background: #0e0c0b; }
+.uhud .uh-t { top: 6vh; max-width: min(100%, 36rem); }
+.uhud .uh-t::before {
+  content: ""; position: absolute; z-index: -1; inset: -7vh -40vw -6vh -60vw; pointer-events: none;
+  background: radial-gradient(ellipse 60% 70% at 70% 40%, rgba(10, 9, 9, .5), rgba(10, 9, 9, 0) 75%);
+}
+.uhud .cap { max-width: 38ch; }
+/* a small place label that the scene pins to the archers' hill each frame */
+.uhud .uh-tag {
+  position: absolute; z-index: 2; left: -999px; top: -999px; margin: 0; transform: translate(-50%, calc(-100% - 14px));
+  font-size: .78rem; white-space: nowrap; color: var(--gold-hi); text-shadow: 0 1px 10px rgba(0, 0, 0, .8); pointer-events: none;
+}
+.uhud .uh-tag::after { content: ""; position: absolute; left: 50%; top: 100%; width: 1px; height: 12px; background: rgba(243, 217, 143, .55); }
+html:not(.fx-on) .uhud .uh-tag { display: none; }
+/* the sword lands over the night sky; the call sits on the dark plain below it */
+.uhud .zf { top: 12vh; }
+.uhud .uhud-call { bottom: 6vh; }
+.uhud .uhud-call::before {
+  content: ""; position: absolute; z-index: -1; inset: -4vh -20vw -6vh; pointer-events: none;
+  background: radial-gradient(ellipse 55% 60% at 50% 55%, rgba(6, 7, 12, .55), rgba(6, 7, 12, 0) 75%);
+}
+
+@media (max-width: 640px) {
+  .uhud .uh-t { top: 3.5vh; right: 0; left: 0; max-width: 100%; }
+  .uhud .uh-t::before { inset: -4vh 0 -5vh; background: linear-gradient(to bottom, rgba(10, 9, 9, .78) 55%, rgba(10, 9, 9, 0)); }
+  .uhud .cap { font-size: .98rem; line-height: 1.8; }
+  .uhud .zf { top: 22vh; }
+  .uhud .uhud-call { bottom: 7vh; }
+}

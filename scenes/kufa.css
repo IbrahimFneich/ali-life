@@ -1,0 +1,21 @@
+/* Kufa: the first caption sits in the night sky; the vow sits high, clear of the mihrab; the closing line low left. */
+.kufa .stage { background: #070912; }
+.kufa .kf-a { top: 7vh; width: min(40vw, 34rem); }
+.kufa .kf-a .cap { max-width: none; }
+.kufa .kf-a::before, .kufa .kf-k::before {
+  content: ""; position: absolute; z-index: -1; inset: -6vh -8vw -6vh -14vw; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(5, 6, 12, .5), rgba(5, 6, 12, 0));
+}
+.kufa .kf-vow { top: 8vh; inset-inline: 0; margin: 0 auto; width: fit-content; max-width: min(100%, 52rem); text-align: center; z-index: 4; }
+.kufa .kf-vow .vow { margin: 0; font-family: var(--f-ruqaa); font-weight: 700; font-size: clamp(2.6rem, 7vw, 6.2rem); line-height: 1.4; color: var(--gold-hi); text-shadow: 0 0 50px rgba(0, 0, 0, .9), 0 0 30px rgba(243, 217, 143, .4); }
+.kufa .kf-k { bottom: 9vh; z-index: 4; }
+.kufa .kf-k .cap { font-family: var(--f-naskh); font-weight: 700; font-size: clamp(1.3rem, 1.3vw + .7rem, 2.1rem); line-height: 1.8; max-width: 22ch; color: var(--paper); }
+.kufa .kf-k::before { inset: -6vh -14vw -6vh -8vw; }
+@media (max-width: 640px) {
+  .kufa .kf-a { top: 4vh; right: 0; width: 100%; }
+  .kufa .kf-a .cap { font-size: 1rem; }
+  .kufa .kf-vow { top: 6vh; }
+  .kufa .kf-vow .vow { font-size: 2.6rem; }
+  .kufa .kf-k { bottom: 5vh; left: 0; width: 100%; }
+  .kufa .kf-k .cap { font-size: 1.2rem; }
+}

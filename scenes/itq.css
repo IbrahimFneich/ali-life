@@ -1,0 +1,17 @@
+/* العتق: the oasis owns the lower frame and the sunrise its centre; the count keeps to the upper right. */
+.itq .stage { background: #0e1424; }
+.itq .iq-o { top: 7vh; max-width: min(100%, 27rem); }
+.itq .iq-o::before { content: ""; position: absolute; z-index: -1; inset: -200vh -6vw -60vh -16vw; background: linear-gradient(to left, rgba(10, 12, 20, .5), rgba(10, 12, 20, .26) 62%, rgba(10, 12, 20, 0)); pointer-events: none; }
+.itq .iq-num { margin: .3rem 0 .5rem; display: flex; align-items: baseline; gap: .8rem; font-family: var(--f-kufi); }
+.itq .iq-num b { font-size: clamp(4rem, 9vw, 7.5rem); line-height: 1; font-weight: 600; color: var(--gold-hi); font-variant-numeric: tabular-nums; text-shadow: 0 2px 30px rgba(8, 10, 18, .7); }
+.itq .iq-num span { font-size: 1.3rem; color: var(--fg); opacity: .8; }
+.itq .iq-cap .cap { font-size: clamp(1.3rem, 1.2vw + .8rem, 1.85rem); line-height: 1.8; text-shadow: 0 1px 3px rgba(8, 10, 18, .8), 0 2px 22px rgba(8, 10, 18, .8); }
+
+@media (max-width: 640px) {
+  .itq .iq-o { top: 4vh; right: 0; left: 0; max-width: 100%; }
+  .itq .iq-o::before { inset: -4vh 0 -6vh; background: linear-gradient(to bottom, rgba(10, 12, 20, .72) 55%, rgba(10, 12, 20, 0)); }
+  .itq .iq-num { margin: .1rem 0 .2rem; }
+  .itq .iq-num b { font-size: 3.6rem; }
+  .itq .iq-num span { font-size: 1.1rem; }
+  .itq .iq-cap .cap { font-size: 1.2rem; line-height: 1.7; }
+}

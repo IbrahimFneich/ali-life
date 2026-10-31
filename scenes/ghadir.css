@@ -1,0 +1,22 @@
+/* Ghadir: the map sits left of centre on wide screens and high on phones; the words take the right column / the foot. */
+.ghadir .gh-b { max-width: min(100%, 31rem); }
+.ghadir .gh-b::before,
+.ghadir .gh-qt::before {
+  content: ""; position: absolute; z-index: -1; inset: -200vh -6vw -200vh -14vw;
+  background: linear-gradient(to left, rgba(10, 9, 6, .72), rgba(10, 9, 6, .45) 60%, rgba(10, 9, 6, 0));
+  pointer-events: none;
+}
+.ghadir .gh-qt { top: 0; bottom: 0; right: 4vw; margin: auto 0; height: fit-content; max-width: min(100%, 36rem); }
+.ghadir .gh-qt .qt { color: var(--paper); max-width: 17ch; }
+.ghadir .ayah { font-size: clamp(1.25rem, 1.5vw + .6rem, 2rem); }
+.ghadir .gh-raise { font-size: 1rem; color: var(--fg-dim); margin-bottom: .7rem; max-width: none; }
+.ghadir .gh-raise .src { margin: 0 .4rem 0 0; vertical-align: middle; }
+:root:not(.fx-on) .ghadir .ov:not(.gh-rest) { display: none; }
+
+@media (max-width: 640px) {
+  .ghadir .gh-b, .ghadir .gh-qt { top: auto; bottom: 6vh; right: 0; left: 0; margin: 0; max-width: 100%; }
+  .ghadir .gh-b::before, .ghadir .gh-qt::before { inset: -5rem 0 -6vh; background: linear-gradient(to top, rgba(10, 9, 6, .88) 55%, rgba(10, 9, 6, 0)); }
+  .ghadir .gh-qt .qt { font-size: 1.4rem; max-width: none; }
+  .ghadir .gh-raise { font-size: .92rem; margin-bottom: .4rem; }
+  .ghadir .ayah { font-size: 1.3rem; line-height: 2; }
+}

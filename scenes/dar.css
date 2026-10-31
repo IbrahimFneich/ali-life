@@ -1,0 +1,30 @@
+/* يوم الدار: the words keep to a right-hand column over the dark of the wall; the ring and the two lights take
+   the left and centre. The counter sits top-left; the last word sits at the foot under the two lights. */
+.dar .stage { background: #060504; }
+.dar .dr-col { top: 9vh; max-width: min(100%, 30rem); }
+.dar .dr-col::before {
+  content: ""; position: absolute; z-index: -1; inset: -40vh -4vw -30vh -12vw; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(6, 4, 2, .62), rgba(6, 4, 2, .3) 60%, rgba(6, 4, 2, 0));
+}
+.dar .dr-ayah .ayah { font-size: clamp(1.7rem, 2.4vw + .6rem, 3rem); }
+.dar .dr-q .qt { font-size: clamp(1.4rem, 1.8vw + .6rem, 2.3rem); max-width: 19ch; color: var(--paper); }
+.dar .cap { text-shadow: 0 1px 3px rgba(0, 0, 0, .9), 0 2px 22px rgba(0, 0, 0, .85); }
+.dar .dr-n { position: absolute; z-index: 2; left: 4vw; top: 8vh; margin: 0; font: 600 clamp(1.3rem, 2.2vw, 2.1rem) var(--f-kufi); color: var(--gold-hi); text-shadow: 0 2px 18px rgba(0, 0, 0, .8); }
+.dar .dr-n span { position: absolute; left: 0; top: 0; white-space: nowrap; }
+.dar .dr-end { left: 0; right: 0; bottom: 6vh; margin: 0 auto; text-align: center; max-width: min(100%, 46rem); }
+.dar .dr-end::before {
+  content: ""; position: absolute; z-index: -1; inset: -30% -10% -40%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(6, 4, 2, .7), rgba(6, 4, 2, .35) 60%, rgba(6, 4, 2, 0));
+}
+.dar .dr-end .qt { margin-inline: auto; max-width: 26ch; font-size: clamp(1.35rem, 1.7vw + .6rem, 2.2rem); }
+:root:not(.fx-on) .dar .ov:not(.dr-rest) { display: none; }
+@media (max-width: 640px) {
+  .dar .dr-col { top: 7vh; left: 0; right: 0; max-width: 100%; }
+  .dar .dr-col::before { inset: -10vh 0 -12vh; background: linear-gradient(to bottom, rgba(6, 4, 2, .82) 55%, rgba(6, 4, 2, 0)); }
+  .dar .dr-ayah .ayah { font-size: 1.7rem; }
+  .dar .dr-q .qt { font-size: 1.22rem; max-width: none; }
+  .dar .dr-n { left: auto; right: var(--gut-r); top: auto; bottom: 6vh; font-size: 1.15rem; }
+  .dar .dr-n span { left: auto; right: 0; }
+  .dar .dr-end { bottom: 4vh; }
+  .dar .dr-end .qt { font-size: 1.25rem; }
+}

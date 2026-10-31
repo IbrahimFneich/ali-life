@@ -1,0 +1,18 @@
+/* Khandaq: the words keep to the sky; the duel owns the ground at the centre of the frame. */
+.khandaq .kq-a { top: 8vh; width: min(38vw, 32rem); }
+.khandaq .kq-a .cap { max-width: none; }
+.khandaq .clash { top: 15vh; font-size: clamp(2rem, 5.2vw, 5rem); }
+.khandaq .cl-a { text-shadow: 0 0 34px rgba(243, 217, 143, .45), 0 2px 18px rgba(0, 0, 0, .6); }
+.khandaq .cl-b { color: #9a917e; text-shadow: 0 2px 18px rgba(0, 0, 0, .7); }
+.khandaq .flash { background: radial-gradient(circle at 50% 54%, rgba(255, 250, 232, .95), rgba(243, 217, 143, .32) 26%, transparent 58%); }
+.khandaq .kh-end { top: 7vh; }
+.khandaq .kh-end .qt { font-size: clamp(1.45rem, 2vw + .6rem, 2.6rem); max-width: 26ch; }
+.khandaq .kh-src2 { color: #b9b09a; }
+html:not(.fx-on) .khandaq .clash { position: relative; inset: auto; top: auto; flex-wrap: wrap; white-space: normal; padding-inline: 4vw; }
+@media (max-width: 640px) {
+  .khandaq .kq-a { top: 6vh; right: 0; width: 100%; }
+  .khandaq .kq-a .cap { font-size: 1.02rem; line-height: 1.85; }
+  .khandaq .clash { top: 9vh; font-size: 2.3rem; }
+  .khandaq .kh-end { top: 5vh; }
+  .khandaq .kh-end .qt { font-size: 1.45rem; }
+}

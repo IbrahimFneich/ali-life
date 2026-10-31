@@ -1,0 +1,21 @@
+.khaybar .stage { background: var(--night); }
+.khaybar .kh-raya { top: 8vh; width: min(40vw, 34rem); }
+.khaybar .kh-raya .qt { font-size: clamp(1.3rem, 1.25vw + .65rem, 2rem); line-height: 1.85; max-width: none; }
+.khaybar .kh-duel, .khaybar .kh-gate { bottom: 9vh; width: min(36vw, 30rem); }
+.khaybar .kh-duel .cap, .khaybar .kh-gate .cap, .khaybar .kh-men .cap { max-width: none; }
+.khaybar .kh-men { bottom: 9vh; width: min(42vw, 34rem); }
+.khaybar .kh-row { display: flex; align-items: center; gap: 1.1rem; }
+.khaybar .kh-n { font-family: var(--f-kufi); font-weight: 600; font-size: clamp(3.2rem, 5vw, 5.4rem); line-height: 1; color: var(--gold-hi); text-shadow: 0 0 30px rgba(201, 165, 78, .45); min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
+.khaybar .kh-men .cap { font-family: var(--f-naskh); font-weight: 700; font-size: clamp(1.35rem, 1.2vw + .7rem, 2rem); }
+.khaybar .kh-pay { top: 7vh; right: 4vw; width: min(46vw, 40rem); max-width: none; }
+.khaybar .kh-pay .qt { font-size: clamp(1.3rem, 1.2vw + .7rem, 2rem); line-height: 1.9; max-width: none; color: var(--paper); text-shadow: 0 0 36px rgba(243, 217, 143, .2), 0 2px 24px rgba(0, 0, 0, .8); }
+@media (max-width: 640px) {
+  .khaybar .kh-raya { top: 5vh; right: 0; width: 100%; }
+  .khaybar .kh-raya .qt { font-size: 1.12rem; line-height: 1.8; }
+  .khaybar .kh-duel, .khaybar .kh-gate, .khaybar .kh-men { right: 0; bottom: 5vh; width: 100%; }
+  .khaybar .kh-duel .cap, .khaybar .kh-gate .cap { font-size: 1.02rem; }
+  .khaybar .kh-men .cap { font-size: 1.2rem; }
+  .khaybar .kh-n { font-size: 2.8rem; }
+  .khaybar .kh-pay { top: 5vh; right: 0; width: 100%; }
+  .khaybar .kh-pay .qt { font-size: 1.12rem; line-height: 1.8; }
+}

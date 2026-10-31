@@ -1,0 +1,21 @@
+/* البيعة: the press keeps the light left of centre, so its words take the right column; the dusk quote takes the sky. */
+.bayaa .stage { background: #0b0d14; }
+.bayaa .by-kick { top: 6vh; }
+.bayaa .by-c { top: 8vh; max-width: min(100%, 31rem); }
+.bayaa .by-c .qt { font-size: clamp(1.4rem, 1.7vw + .7rem, 2.35rem); line-height: 1.75; max-width: 19ch; }
+.bayaa .by-b::before,
+.bayaa .by-end::before { content: ""; position: absolute; z-index: -1; pointer-events: none; }
+.bayaa .by-b::before { inset: -200vh -6vw -200vh -18vw; background: linear-gradient(to left, rgba(12, 10, 9, .6), rgba(12, 10, 9, .34) 62%, rgba(12, 10, 9, 0)); }
+.bayaa .by-end { top: 6vh; left: 0; right: 0; margin: 0 auto; text-align: center; max-width: min(100%, 52rem); }
+.bayaa .by-end::before { inset: -6vh -100vw -8vh; background: linear-gradient(to bottom, rgba(9, 10, 20, .55), rgba(9, 10, 20, .32) 70%, rgba(9, 10, 20, 0)); }
+.bayaa .by-end .qt { font-size: clamp(1.15rem, 1.25vw + .62rem, 1.85rem); line-height: 2; max-width: 44ch; margin-inline: auto; text-wrap: pretty; text-shadow: 0 1px 3px rgba(6, 7, 14, .9), 0 2px 26px rgba(6, 7, 14, .9); }
+
+@media (max-width: 640px) {
+  .bayaa .by-kick { top: 4vh; }
+  .bayaa .by-c { top: auto; bottom: 5vh; right: 0; left: 0; max-width: 100%; }
+  .bayaa .by-c .qt { font-size: 1.32rem; line-height: 1.8; max-width: none; }
+  .bayaa .by-b::before { inset: -8vh 0 -5vh; background: linear-gradient(to top, rgba(10, 9, 8, .86) 55%, rgba(10, 9, 8, 0)); }
+  .bayaa .by-end { top: 3.5vh; }
+  .bayaa .by-end::before { inset: -4vh 0 -7vh; background: linear-gradient(to bottom, rgba(9, 10, 18, .88) 60%, rgba(9, 10, 18, 0)); }
+  .bayaa .by-end .qt { font-size: 1.06rem; line-height: 1.95; }
+}

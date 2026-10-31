@@ -1,0 +1,17 @@
+/* ليلة المبيت: captions keep to the dark near city at the bottom; the ayah takes the dawn sky at the top. */
+.mabit .stage { background: #070b16; }
+.mabit .mabit-kick { top: 5vh; }
+.mabit .mabit-cap { bottom: 7vh; max-width: min(100%, 30rem); }
+.mabit .mabit-cap .cap { text-shadow: 0 1px 3px rgba(0, 0, 0, .9), 0 2px 22px rgba(0, 0, 0, .85); }
+.mabit .mabit-ayah { top: 11vh; left: 0; right: 0; margin: 0 auto; text-align: center; max-width: min(100%, 50rem); }
+.mabit .mabit-ayah::before { content: ""; position: absolute; inset: -40% -18%; z-index: -1; background: radial-gradient(closest-side, rgba(5, 7, 14, .72), rgba(5, 7, 14, .38) 55%, rgba(5, 7, 14, 0)); pointer-events: none; }
+.mabit .mabit-ayah .ayah { font-size: clamp(1.6rem, 2.5vw + .7rem, 3.1rem); line-height: 2; text-shadow: 0 2px 30px rgba(4, 6, 14, .95), 0 0 2px rgba(4, 6, 14, .8); }
+/* reduced motion: one still at data-rest, so only the words that belong to it */
+:root:not(.fx-on) .mabit .ov:not(.mabit-rest) { display: none; }
+@media (max-width: 640px) {
+  .mabit .mabit-kick { top: 3.5vh; }
+  .mabit .mabit-cap { bottom: 5vh; left: 0; right: 0; }
+  .mabit .mabit-ayah { top: 8vh; }
+  .mabit .mabit-ayah::before { content: ""; position: absolute; inset: -40% -18%; z-index: -1; background: radial-gradient(closest-side, rgba(5, 7, 14, .72), rgba(5, 7, 14, .38) 55%, rgba(5, 7, 14, 0)); pointer-events: none; }
+.mabit .mabit-ayah .ayah { font-size: 1.45rem; }
+}

@@ -1,0 +1,22 @@
+/* Camel: the words keep to the sky; the knot, the howdah and the road west own the ground. */
+.camel .cm-t { top: 8vh; width: min(38vw, 32rem); }
+.camel .cm-t .cap { max-width: none; }
+.camel .cm-c { width: min(40vw, 34rem); }
+.camel .cm-end { top: 7vh; bottom: auto; max-width: min(100%, 50rem); }
+.camel .cm-end .qt { font-size: clamp(1.35rem, 1.6vw + .6rem, 2.3rem); max-width: 30ch; margin-inline: auto; }
+@media (max-width: 640px) {
+  .camel .cm-t { top: 6vh; right: 0; width: 100%; }
+  .camel .cm-t .cap { font-size: 1.02rem; line-height: 1.85; }
+  .camel .cm-end { top: 5vh; }
+  .camel .cm-end .qt { font-size: 1.28rem; line-height: 1.8; }
+}
+.camel .cm-t::before {
+  content: ""; position: absolute; z-index: -1; inset: -6vh -40vw -6vh -60vw;
+  background: radial-gradient(ellipse 60% 70% at 70% 45%, rgba(10, 9, 8, .5), rgba(10, 9, 8, 0) 75%);
+  pointer-events: none;
+}
+.camel .cm-end::before {
+  content: ""; position: absolute; z-index: -1; inset: -5vh -20vw -6vh;
+  background: radial-gradient(ellipse 60% 70% at 50% 45%, rgba(10, 9, 8, .45), rgba(10, 9, 8, 0) 75%);
+  pointer-events: none;
+}
