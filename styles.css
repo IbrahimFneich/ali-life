@@ -804,8 +804,32 @@ html:not(.fx-on) .mtq-list { position: relative; right: auto; top: auto; margin:
 
 /* Play mode: the guided, read-aloud tour */
 .play-btn { position: fixed; z-index: 30; left: calc(max(14px, env(safe-area-inset-left, 0px)) + 14.4rem); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); font: 600 .78rem var(--f-ui); color: #1a1408; background: linear-gradient(#f3d98f, #c9a54e); border: 1px solid rgba(243, 217, 143, .8); border-radius: 999px; padding: .45rem 1.05rem .55rem; cursor: pointer; box-shadow: 0 0 18px rgba(201, 165, 78, .35); }
-.play-btn[aria-pressed="true"] { background: rgba(13, 14, 11, .8); color: var(--gold-hi); }
 .play-btn:disabled { opacity: .6; cursor: progress; }
+/* Play mode player bar: media controls keep their usual left-to-right order (next = right), as players do in Arabic too */
+.player { position: fixed; z-index: 31; right: max(14px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); width: min(440px, calc(100vw - 32px)); padding: .5rem .75rem .45rem; color: var(--fg); background: rgba(13, 14, 11, .88); border: 1px solid rgba(201, 165, 78, .4); border-radius: 18px; box-shadow: 0 12px 40px rgba(0, 0, 0, .5); backdrop-filter: blur(10px); font: 500 .78rem var(--f-ui); }
+.player[hidden] { display: none; }
+.pl-top { display: flex; align-items: center; gap: .5rem; }
+.pl-ch { flex: 1; min-width: 0; padding: .15rem .1rem; text-align: start; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: inherit; color: var(--fg-dim); background: none; border: 0; border-radius: 8px; cursor: pointer; }
+.pl-ch b { color: var(--gold-hi); font-weight: 600; }
+.pl-x { padding: .15rem .45rem; font: inherit; font-size: .85rem; color: var(--fg-dim); background: none; border: 0; border-radius: 8px; cursor: pointer; }
+:is(.pl-ch, .pl-x):is(:hover, :focus-visible) { color: var(--gold-hi); background: rgba(201, 165, 78, .12); }
+.pl-track { position: relative; height: 16px; margin: .3rem 0 .15rem; direction: ltr; cursor: pointer; touch-action: none; }
+.pl-track::before { content: ""; position: absolute; inset: 7px 0; background: rgba(201, 165, 78, .2); border-radius: 2px; }
+.pl-fill { position: absolute; left: 0; top: 7px; height: 2px; background: var(--gold-hi); border-radius: 2px; box-shadow: 0 0 8px rgba(243, 217, 143, .6); }
+.pl-tick { position: absolute; top: 5px; width: 1px; height: 6px; background: rgba(243, 217, 143, .5); }
+.pl-tip { position: absolute; bottom: 20px; transform: translateX(-50%); padding: .15rem .55rem; white-space: nowrap; direction: rtl; color: var(--gold-hi); background: #0d0e0b; border: 1px solid rgba(201, 165, 78, .45); border-radius: 6px; pointer-events: none; }
+.pl-btns { display: flex; justify-content: center; align-items: center; gap: .2rem; direction: ltr; }
+.pl-btns button { display: grid; justify-items: center; gap: 1px; min-width: 54px; padding: .25rem .4rem .2rem; color: var(--gold-hi); background: none; border: 0; border-radius: 10px; cursor: pointer; }
+.pl-btns button:is(:hover, :focus-visible) { background: rgba(201, 165, 78, .14); }
+.pl-btns svg { width: 22px; height: 22px; fill: currentColor; }
+.pl-btns small { font: 500 .62rem var(--f-ui); color: var(--fg-dim); }
+.pl-btns .pl-pp { min-width: 0; width: 46px; height: 46px; margin: 0 .35rem; place-content: center; color: #1a1408; background: linear-gradient(#f3d98f, #c9a54e); border-radius: 50%; box-shadow: 0 0 18px rgba(201, 165, 78, .35); }
+.pl-btns .pl-pp:is(:hover, :focus-visible) { background: linear-gradient(#f8e3a6, #d4b05a); }
+.pl-btns .pl-pp svg { width: 24px; height: 24px; }
+@media (max-width: 860px) {
+  .player { right: 50%; transform: translateX(50%); }
+  html.playing :is(.sound-btn, .en-btn) { bottom: calc(env(safe-area-inset-bottom, 0px) + 128px); }
+}
 .speaking { text-shadow: 0 0 22px rgba(243, 217, 143, .55), 0 2px 18px rgba(0, 0, 0, .7); transition: text-shadow .4s; }
 /* while the tour plays, side-by-side text becomes one column so it can be read in order */
 html.playing :is(.facts, .three, .trio ol, .vcards, .bib, .kcards, .comp) { grid-template-columns: minmax(0, 1fr); }

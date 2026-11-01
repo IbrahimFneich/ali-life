@@ -57,6 +57,8 @@ time.sleep(4)
 for i, sh in enumerate(SHOTS):
     if sh.startswith('js:'):  # 'js:EXPR' evaluates EXPR in the page and prints its value
         print(i, send('Runtime.evaluate', expression=sh[3:], awaitPromise=True, returnByValue=True).get('result', {}).get('value')); time.sleep(.8); continue
+    if sh == 'shot':  # 'shot' captures the screen as it is, no scrolling
+        r = send('Page.captureScreenshot', format='png'); open(os.path.join(OUT, f'{i:02d}.png'), 'wb').write(base64.b64decode(r['data'])); print(i, sh); continue
     sel, pp = sh.rsplit('@', 1)
     js = f"""(() => {{ const t = document.querySelector({json.dumps(sel)}); let top = 0; for (let n = t; n; n = n.offsetParent) top += n.offsetTop;
       const pin = t.classList.contains('scene'); const y = pin ? top + {pp} * Math.max(0, t.offsetHeight - innerHeight) : top + {pp} * t.offsetHeight; scrollTo(0, y); return y; }})()"""
