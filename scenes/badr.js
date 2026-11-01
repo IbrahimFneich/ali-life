@@ -118,7 +118,7 @@ S.badr = {
     const gs = () => (R() + R() + R() - 1.5) / 1.5;
     st.NS = 68; st.NK = 80;
     st.TX = new Float32Array(st.NS * (st.NK + 1)); st.TY = new Float32Array(st.NS * (st.NK + 1));
-    st.TC = new Array(st.NS * (st.NK / 4 + 1));
+    st.TC = new Float32Array(st.NS * (st.NK / 2 + 1) * 3);
     st.ridges = [0, 1].map((L) => { const a = []; let h = .02; for (let i = 0; i <= 360; i++) { h = mix(h, (L ? .028 : .045) + (L ? .02 : .03) * Math.sin(i * .07 + L * 2) ** 2 + R() * .012, .3); a.push(h); } return a; });
     st.stars = Array.from({ length: 200 }, () => [R() * TAU, .04 + R() ** .8 * 1.1, R()]);
     st.clouds = Array.from({ length: 16 }, () => [-1.4 + R() * 3.2, .1 + R() * .32, .5 + R() * 1.2, .02 + R() * .03, .25 + R() * .5]);
@@ -216,17 +216,17 @@ S.badr = {
       c.save(); c.translate(x, y); c.scale(rw, rh); const g = c.createRadialGradient(0, 0, 0, 0, 0, 1); g.addColorStop(0, rgb(cl, a * .5)); g.addColorStop(1, rgb(cl, 0)); c.fillStyle = g; c.fillRect(-1, -1, 2, 2); c.restore();
     });
     st.ridges.forEach((rg, L) => {
-      const col = lerp(lerp(haze0, skH, L ? .35 : .55), [70, 60, 70], L ? .25 : .12);
+      const col = lerp(lerp(skH, haze0, L ? .5 : .25), skT, L ? .14 : .08); // far ranges: pale and cool, almost the sky
       c.fillStyle = rgb(col); c.beginPath(); c.moveTo(-2, hy + 4);
       for (let x = -2; x <= W + 22; x += 22) { const az = az0 + Math.atan((x - cx) / F); const ii = ((az / TAU * 720) % 360 + 360) % 360, i0 = Math.floor(ii), h = mix(rg[i0], rg[(i0 + 1) % 361], ii - i0); c.lineTo(x, hy - F * Math.tan(h) * (L ? .7 : .45)); }
       c.lineTo(W + 22, hy + 4); c.closePath(); c.fill();
     });
-    // ----- terrain: depth bands, far to near, each band filled down to the next nearer one -----
-    const NS = st.NS, NK = st.NK, NC = NK / 4 + 1, TX = st.TX, TY = st.TY, TC = st.TC;
+    // ----- terrain: depth bands, far to near (painted by terrainRaster in core.js) -----
+    const NS = st.NS, NK = st.NK, NC = NK / 2 + 1, TX = st.TX, TY = st.TY, TC = st.TC;
     const hf = norm([f0, 0, f2]), hr = [hf[2], 0, -hf[0]], cp = Math.cos(pitch), sp = Math.sin(pitch);
     const by = (H - cy) / F, dyb = sp - by * cp, dhb = cp + by * sp;
     const dMin = dyb < -.01 ? Math.max(1.5, E1 / -dyb * dhb * .8) : 4, dMax = 4200;
-    const albedo = [196, 162, 118];
+    const albedo = [196, 162, 118], gravel = [164, 128, 92];
     for (let i = 0; i < NS; i++) {
       const d = dMin * (dMax / dMin) ** (1 - i / (NS - 1));
       const zc0 = Math.max(.6, d * cp - E1 * sp), fogK = 1 - Math.exp(-d / fogL);
@@ -235,25 +235,18 @@ S.badr = {
         const x = E0 + hf[0] * d + hr[0] * u, z = E2 + hf[2] * d + hr[2] * u, h = height(x, z);
         const o = i * (NK + 1) + k;
         if (pj(x, h, z)) { TX[o] = PX; TY[o] = Math.max(-H, Math.min(H * 3, PY)); } else { TX[o] = sx; TY[o] = H * 3; }
-        if (k % 4 === 0) {
-          const e = Math.max(.5, d * .004), hx = (height(x + e, z) - h) / e, hz = (height(x, z + e) - h) / e, nl = Math.hypot(hx, 1, hz);
+        if (k % 2 === 0) {
+          const e = Math.max(.5, d * .004), hx = (height(x + e, z) - h) / e, hz = (height(x, z + e) - h) / e, nl = Math.hypot(hx, 1, hz); // fine: the dunes' slip faces stay crisp
           let lam = Math.max(0, (-hx * sun[0] + sun[1] - hz * sun[2]) / nl); const sky = .55 + .45 / nl;
           if (lam > 0 && sun[1] > -.02) { let sh = 1; for (let m = 0, L = 7; m < 4; m++, L *= 2.6) { const q = height(x + sun[0] * L, z + sun[2] * L) - (h + .4 + sun[1] * L); if (q > 0) { sh = Math.min(sh, 1 - c01(q / 3)); if (sh <= 0) break; } } lam *= sh; }
-          const lit = [0, 1, 2].map((j) => albedo[j] / 255 * (amb[j] * sky * .78 + sunC[j] * lam * 1.3));
-          TC[i * NC + k / 4] = rgb(lerp(lit, hazeAt(x - E0, z - E2), Math.min(.97, fogK * (1 - .25 * c01(h / 120)))));
+          const drift = c01(.55 + .45 * Math.sin(x * .021 + Math.sin(z * .013) * 2) * Math.sin(z * .017 - x * .007 + 1)), al = lerp(gravel, albedo, drift); // firm darker ground, paler drifted sand
+          const lit = [0, 1, 2].map((j) => al[j] / 255 * (amb[j] * sky * .78 + sunC[j] * lam * 1.3));
+          const hz2 = hazeAt(x - E0, z - E2), fa = Math.min(.97, fogK * (1 - .25 * c01(h / 120))), n = (i * NC + k / 2) * 3;
+          TC[n] = mix(lit[0], hz2[0], fa); TC[n + 1] = mix(lit[1], hz2[1], fa); TC[n + 2] = mix(lit[2], hz2[2], fa);
         }
       }
     }
-    for (let i = 0; i < NS; i++) {
-      const o = i * (NK + 1), last = i === NS - 1;
-      c.beginPath(); c.moveTo(TX[o], TY[o]);
-      for (let k = 1; k <= NK; k++) c.lineTo(TX[o + k], TY[o + k]);
-      for (let k = NK; k >= 0; k--) c.lineTo(last ? TX[o + k] : TX[o + NK + 1 + k], last ? H + 4 : Math.max(TY[o + k], TY[o + NK + 1 + k]) + 1.2); // the nearer band's own x: no seams on steep faces
-      c.closePath();
-      const g = c.createLinearGradient(TX[o], 0, TX[o + NK], 0);
-      for (let k = 0; k < NC; k++) g.addColorStop(k / (NC - 1), TC[i * NC + k]);
-      c.fillStyle = g; c.fill();
-    }
+    terrainRaster(st, c, W, H, NS, NK, 2, TX, TY, TC, .12);
     const sandLit = albedo.map((v, j) => v / 255 * (amb[j] * .8 + sunC[j] * Math.max(0, sun[1]) * 1.15));
     // ground marks: wind ripples and stones near the camera
     c.lineWidth = 1;

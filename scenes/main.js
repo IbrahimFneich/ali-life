@@ -180,21 +180,6 @@ const f4 = (v) => v.toFixed(4);
   });
 })();
 
-// Tasbih al-Zahra: a hundred beads, 34 + 33 + 33, each group lighting in its own colour.
-(() => {
-  const box = $('#rosary');
-  if (!box) return;
-  const groups = [[0, 34, .56], [34, 67, .67], [67, 100, .78]];
-  for (let i = 0; i < 100; i++) {
-    const [g0, g1, a0] = groups.find(([x, y]) => i >= x && i < y);
-    const ang = Math.PI / 2 + (i + .5) / 100 * TAU;
-    const b = el('i', `bead g${groups.findIndex(([x]) => x === g0)}`, `left:${f4(50 + Math.cos(ang) * 46)}%;top:${f4(50 + Math.sin(ang) * 46)}%`);
-    const a = a0 + ((i - g0) / (g1 - g0)) * .09;
-    b.dataset.fx = `o .18 1 ${f4(a)} ${f4(a + .006)} | s .6 1 ${f4(a)} ${f4(a + .012)} out`;
-    box.append(b);
-  }
-})();
-
 // Letter 31: the father's epithets on one side, the son's on the other, one by one.
 (() => {
   const stagger = (sel, a, b) => {
@@ -882,8 +867,21 @@ S.cover = {
     st.cv = host.querySelector('canvas');
     const r = rng(1);
     st.stars = Array.from({ length: 260 }, () => [r(), r(), r() * .9 + .1, r() * TAU]);
+    // Hero art: the three painted heroes (proto/hero-1..3.html) in a shuffled order, the next one every 14 s
+    // with a 1.6 s crossfade. Hidden (so the page stops painting) once the cover has faded it out.
+    const art = st.art = host.querySelector('.hero-art'), pages = [1, 2, 3].sort(() => Math.random() - .5);
+    let i = 0, cur = null;
+    const show = () => {
+      const f = document.createElement('iframe');
+      f.src = `proto/hero-${pages[i++ % 3]}.html?embed`; f.tabIndex = -1; f.title = 'عليّ';
+      f.onload = () => { requestAnimationFrame(() => f.classList.add('on')); const old = cur; cur = f; if (old) setTimeout(() => old.remove(), 1700); };
+      art.append(f);
+    };
+    show();
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setInterval(() => { if (!document.hidden && !art.hidden) show(); }, 14000);
   },
   frame(p, t, host, st) {
+    st.art.hidden = p > .68;
     const cv = st.cv;
     fit(cv);
     const c = ctxOf(cv), W = cv.width, H = cv.height, s = W / cv.clientWidth;

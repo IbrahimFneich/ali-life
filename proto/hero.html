@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>نماذج الغلاف</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Amiri+Quran&family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Reem+Kufi:wght@400..700&display=swap">
+<style>
+:root {
+  --ink: #0d0e0b; --night: #070b16; --paper: #e6dcc3; --gold: #c9a54e; --gold-hi: #f3d98f; --green: #2e7558; --fg: #ebe3cf; --fg-dim: #a59c86;
+  --f-kufi: "Reem Kufi", "Noto Kufi Arabic", "Geeza Pro", sans-serif;
+  --f-ruqaa: "Aref Ruqaa", Amiri, serif;
+  --f-ui: "IBM Plex Sans Arabic", "Geeza Pro", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: radial-gradient(ellipse at 50% 30%, #161a28 0%, var(--night) 70%); color: var(--fg); }
+body { min-height: 100vh; min-height: 100svh; display: grid; align-content: center; padding: 48px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)); }
+.k { margin: 0 0 .4rem; text-align: center; font: 500 .8rem var(--f-ui); color: var(--gold); }
+h1 { margin: 0 0 2.4rem; text-align: center; font: 700 clamp(2.4rem, 7vw, 4rem)/1.2 var(--f-ruqaa); color: var(--gold-hi); text-shadow: 0 0 40px rgba(243, 217, 143, .25); }
+.cards { list-style: none; margin: 0 auto; padding: 0; width: min(1100px, 100%); display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.cards a { display: grid; gap: .5rem; height: 100%; padding: 28px 24px 26px; border: 1px solid rgba(201, 165, 78, .35); border-radius: 4px; text-decoration: none; color: inherit;
+  background: linear-gradient(160deg, rgba(201, 165, 78, .09), rgba(13, 14, 11, .2) 60%); transition: border-color .2s, transform .2s, background .2s; }
+.cards a:hover, .cards a:focus-visible { border-color: var(--gold-hi); transform: translateY(-2px); background: linear-gradient(160deg, rgba(243, 217, 143, .16), rgba(13, 14, 11, .2) 60%); outline: none; }
+.n { font: 700 clamp(2rem, 5vw, 2.8rem)/1.1 var(--f-kufi); color: var(--gold-hi); }
+.d { margin: 0; font: 400 1rem/1.8 var(--f-ui); color: var(--fg-dim); }
+.m { margin: 0; font: 400 .78rem/1.7 var(--f-ui); color: var(--gold); opacity: .85; }
+@media (prefers-reduced-motion: reduce) { .cards a { transition: none; } }
+</style>
+</head>
+<body>
+<p class="k">سيرة أمير المؤمنين · من مصادر الإمامية</p>
+<h1>ثلاثة نماذج للغلاف</h1>
+<ul class="cards">
+  <li><a href="hero-1.html"><span class="n">١ — الاسم</span><p class="d">كلمة «عليّ» بخطّ كوفيّ نافذةً على مشاهد سيرته: الكعبة، وذو الفقار في اللام، وخيبر، وصفّين، وغدير خمّ، ومحراب الكوفة.</p><p class="m">فرسان يعدون، باب يُرفع، نهر يلمع، حمام يطير</p></a></li>
+  <li><a href="hero-2.html"><span class="n">٢ — القبّة</span><p class="d">قبّة النجف ومئذنتاها وإيوانها نافذةٌ واحدة: الكعبة في القبّة، وليلة المبيت، وبدر وخيبر، والغدير، ومحراب الكوفة.</p><p class="m">حمام يطوف بالقبّة، زوّار يمشون إلى الباب، قنديل يرتعش</p></a></li>
+  <li><a href="hero-3.html"><span class="n">٣ — النور</span><p class="d">نورٌ في الوسط بحلقته الذهبية، وحوله مشاهد السيرة في بقع من الحبر، تصلها خيوط من نور.</p><p class="m">نور يتنفّس، شرر يجري في الخيوط، دخان يدور</p></a></li>
+</ul>
+</body>
+</html>
