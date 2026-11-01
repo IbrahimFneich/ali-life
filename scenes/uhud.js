@@ -18,19 +18,24 @@ const sprite = (stops, n = 64) => { const c = mk(n, n), g = c.getContext('2d'), 
 // ---------- the land: the long dark mountain, its gullies, the small hill, the plain ----------
 const HILL = [170, 470, 74, 44, 15]; // the archers' hill: centre x, z, radii, height
 const ridgeZ = (x) => 1080 + 120 * Math.sin(x * .0021 + .5) + 60 * Math.sin(x * .0057 + 2);
-const ridged = (v) => 1 - Math.abs(Math.sin(v));
+const rr = (v, e) => 1 + e - Math.sqrt(Math.sin(v) ** 2 + e * e); // a ridge: 1 on rounded crests (width e), about e in the hollows
 function mountain(x, z) {
+  mountain.g = 1; mountain.v = 0; // the last call's ravine factor and height, for the shading
   if (z < 440) return 0; // the lowest foot of the mountain: the plain needs no trig
   const zr = ridgeZ(x), foot = zr - 460, k = (z - foot) / 460;
   if (k <= 0) return 0;
-  const top = 225 + 72 * Math.sin(x * .0026 + 1) + 34 * Math.sin(x * .0071 + 2) * Math.sin(x * .0017) + 26 * ridged(x * .0061 + Math.sin(x * .0023) * 2.4) ** 3 + 9 * ridged(x * .019 + 3) ** 2;
-  const prof = k < 1 ? smooth(k) ** 1.5 : 1 - .45 * smooth(c01((k - 1) / 1.6));
+  const w = x + 80 * Math.sin(x * .0037 + z * .0021); // the crest wanders
+  const top = 207 + 72 * Math.sin(x * .0026 + 1) + 34 * Math.sin(x * .0071 + 2) * Math.sin(x * .0017) + 26 * rr(w * .0061 + Math.sin(x * .0023) * 2.4, .3) + 12 * rr(w * .0143 + Math.sin(w * .0051) * 1.3 + 3, .35) + 5 * rr(w * .037 + 1, .4);
+  const s = smooth(Math.min(k, 1)), prof = k < 1 ? s * Math.sqrt(s) : 1 - .45 * smooth(c01((k - 1) / 1.6));
+  // spurs and ravines down the face, bending as they fall, in three sizes; fading out over the crest
   const ph = x * .021 + 3 * Math.sin(x * .0043 + 1) + Math.sin(z * .012 + x * .002) * 1.7;
-  const gul = ridged(ph) ** 1.6, fh = 26 * smooth(c01(k / .35)) * (1 - smooth(c01((k - .35) / .4))) * (.5 + .5 * Math.sin(x * .013 + 2)); // foothills
-  return top * prof * (1 - .2 * (1 - gul) * smooth(c01(k * 1.4)) * (k < 1.2 ? 1 : 0)) + fh;
+  const gul = .6 * rr(ph, .3) + .25 * rr(ph * 2.3 + z * .009, .45) + .15 * rr(ph * 5.1 + z * .03, .5); mountain.g = gul;
+  const fh = 26 * smooth(c01(k / .35)) * (1 - smooth(c01((k - .35) / .4))) * (.5 + .5 * Math.sin(x * .013 + 2)); // foothills
+  const knobs = 7 * Math.sin(x * .05 + z * .031) * Math.sin(z * .043 - x * .02) * s; // granite knobs and tors
+  return mountain.v = top * prof * (1 - .26 * (1 - gul) * smooth(c01(k * 1.4)) * (1 - smooth(c01((k - .95) / .35)))) + fh + knobs;
 }
 function height(x, z) {
-  let h = .5 * Math.sin(x * .021 + z * .013) * Math.sin(z * .017 - x * .008) + mountain(x, z);
+  let h = .5 * Math.sin(x * .021 + z * .013) * Math.sin(z * .017 - x * .008) + .6 * Math.sin(x * .061 + z * .047 + 2.2 * Math.sin(z * .011 + x * .004)) + mountain(x, z); // the plain's long low swells
   const dx = (x - HILL[0]) / HILL[2], dz = (z - HILL[1]) / HILL[3], r2 = dx * dx + dz * dz;
   if (r2 < 1) h += HILL[4] * (1 - r2) ** 1.6;
   return h;
@@ -63,11 +68,11 @@ function camAt(p) {
 }
 // ---------- light keys: p, sky top, sky mid, horizon, sun colour, ambient, haze, sun elevation (deg), sun azimuth (rad, from east through south), fog length ----------
 const LK = [
-  [-.06, [48, 66, 98], [132, 138, 148], [200, 186, 164], [255, 226, 186], [78, 86, 110], [168, 158, 146], 15, .35, 4200],
-  [.3, [52, 72, 104], [140, 144, 152], [206, 194, 174], [255, 236, 206], [86, 92, 112], [176, 166, 152], 34, .9, 3800],
-  [.46, [58, 78, 108], [150, 150, 152], [208, 196, 176], [255, 238, 210], [96, 100, 116], [178, 166, 150], 50, 1.6, 2600],
-  [.6, [50, 62, 92], [150, 132, 128], [222, 176, 140], [255, 206, 150], [86, 86, 104], [184, 150, 130], 20, 2.4, 3200],
-  [.69, [28, 32, 58], [118, 76, 78], [232, 128, 80], [255, 150, 90], [56, 54, 76], [150, 96, 84], 2, 2.75, 2600],
+  [-.06, [58, 80, 112], [168, 160, 148], [232, 208, 168], [255, 226, 186], [84, 90, 112], [200, 186, 166], 15, .35, 4200],
+  [.3, [60, 86, 120], [172, 168, 158], [230, 212, 180], [255, 236, 206], [90, 94, 112], [204, 192, 174], 34, .9, 3800],
+  [.46, [66, 90, 122], [178, 172, 160], [230, 214, 186], [255, 238, 210], [98, 100, 114], [206, 192, 172], 50, 1.6, 2600],
+  [.6, [58, 70, 100], [184, 152, 128], [240, 192, 146], [255, 206, 150], [88, 86, 102], [206, 166, 136], 20, 2.4, 3200],
+  [.69, [32, 34, 60], [130, 80, 78], [240, 136, 84], [255, 150, 90], [58, 54, 76], [170, 106, 86], 2, 2.75, 2600],
   [.76, [12, 16, 34], [40, 36, 58], [112, 62, 56], [255, 120, 80], [26, 28, 46], [36, 28, 38], -4, 2.85, 3000],
   [.85, [6, 9, 20], [14, 18, 34], [32, 30, 46], [255, 120, 80], [14, 16, 30], [12, 12, 20], -12, 2.9, 3200],
   [1.06, [5, 8, 18], [12, 16, 30], [26, 26, 40], [255, 120, 80], [12, 14, 28], [10, 10, 18], -14, 2.9, 3200],
@@ -106,21 +111,15 @@ S.uhud = {
     st.tints = {};
     const R = rng(625);
     const gs = () => (R() + R() + R() - 1.5) / 1.5;
-    st.NS = 62; st.NK = 72;
+    st.NS = 66; st.NK = 84;
     st.TX = new Float32Array(st.NS * (st.NK + 1)); st.TY = new Float32Array(st.NS * (st.NK + 1));
-    st.TC = new Array(st.NS * (st.NK / 2 + 1));
-    st.ridges = [0, 1].map((L) => { const a = []; let h = .02; for (let i = 0; i <= 360; i++) { h = mix(h, (L ? .02 : .032) + .02 * Math.sin(i * .05 + L * 2) ** 2 + R() * .01, .3); a.push(h); } return a; });
+    st.TC = new Float32Array(st.NS * (st.NK / 2 + 1) * 3);
+    st.ridges = [0, 1].map((L) => { const a = []; let h = .02; for (let i = 0; i <= 360; i++) { h = mix(h, (L ? .02 : .032) + .02 * Math.sin(i * .05 + L * 2) ** 2 + R() * .01, .12); a.push(h); } return a; });
     st.stars = Array.from({ length: 320 }, () => [R() * TAU, .03 + R() ** .8 * 1.2, R()]);
     st.clouds = Array.from({ length: 14 }, () => [-1.4 + R() * 3.2, .12 + R() * .3, .5 + R() * 1.2, .02 + R() * .03, .2 + R() * .4]);
     st.marks = Array.from({ length: 2400 }, () => [(R() - .5) * 900, -200 + R() * 900, R(), R()]);
     st.rocks = []; for (let i = 0; i < 260; i++) { const x = (R() - .5) * 1400, z = -300 + R() * 1000; if (Math.abs(x) < 360 && z > -60 && z < 640) continue; st.rocks.push([x, z, .4 + R() * 1.4, R(), height(x, z)]); }
-    // gullies: lines that run down the mountain face from its crest
-    st.gul = [];
-    for (let x0 = -1500; x0 < 1500; x0 += 26 + R() * 30) {
-      let x = x0, z = ridgeZ(x0) - 20; const pts = [];
-      for (let k = 0; k < 16; k++) { const h = height(x, z); pts.push([x, h, z]); const e = 2, gx = (height(x + e, z) - h) / e, gz = (height(x, z + e) - h) / e, g = Math.hypot(gx, gz) || 1; x -= gx / g * 22; z -= gz / g * 22; if (h < 4) break; }
-      if (pts.length > 4) st.gul.push(pts);
-    }
+    for (let x0 = -1500; x0 < 1500; x0 += 26 + R() * 30); // the draws the old gully strokes took: the people keep their places
     // ---- the people ----
     const F = [], add = (o) => { o.hs = o.hs || .92 + R() * .16; F.push(o); return o; };
     // Muslims: about seven hundred, the mountain at their backs, facing south
@@ -212,8 +211,9 @@ S.uhud = {
       if (x < -rw || x > W + rw || y > hy) return;
       c.save(); c.translate(x, y); c.scale(rw, rh); const g = c.createRadialGradient(0, 0, 0, 0, 0, 1); g.addColorStop(0, rgb(cl, a * .45 * (.3 + .7 * day))); g.addColorStop(1, rgb(cl, 0)); c.fillStyle = g; c.fillRect(-1, -1, 2, 2); c.restore();
     });
+    // far ranges: pale and cool, almost the sky
     st.ridges.forEach((rg, L) => {
-      const col = lerp(lerp(haze0, skH, L ? .35 : .55), [60, 54, 62], L ? .25 : .12);
+      const col = lerp(lerp(skH, haze0, L ? .45 : .2), skT, L ? .16 : .1);
       c.fillStyle = rgb(col); c.beginPath(); c.moveTo(-2, hy + 4);
       for (let x = -2; x <= W + 22; x += 22) { const az = az0 + Math.atan((x - cx) / F); const ii = ((az / TAU * 720) % 360 + 360) % 360, i0 = Math.floor(ii), h = mix(rg[i0], rg[(i0 + 1) % 361], ii - i0); c.lineTo(x, hy - F * Math.tan(h) * (L ? .6 : .4)); }
       c.lineTo(W + 22, hy + 4); c.closePath(); c.fill();
@@ -223,45 +223,36 @@ S.uhud = {
     const hf = norm([f0, 0, f2]), hr = [hf[2], 0, -hf[0]], cp = Math.cos(pitch), sp = Math.sin(pitch);
     const by = (H - cy) / F, dyb = sp - by * cp, dhb = cp + by * sp;
     const dMin = dyb < -.01 ? Math.max(1.5, E1 / -dyb * dhb * .8) : 4, dMax = 5200;
-    const plainA = [140, 114, 90], rockA = [64, 42, 38], lavaA = [50, 44, 46];
+    const gravel = [146, 112, 84], sand = [198, 164, 120], rockA = [128, 78, 54], rockB = [100, 64, 52], lavaA = [56, 48, 48];
+    const colW = W * 1.12 / NK / F * 2, rowK = (dMax / dMin) ** (1 / (NS - 1)) - 1, aerL = fogL * .7; // a colour sample's width per metre of depth; the band spacing
     for (let i = 0; i < NS; i++) {
       const d = dMin * (dMax / dMin) ** (1 - i / (NS - 1));
-      const zc0 = Math.max(.6, d * cp - E1 * sp), fogK = 1 - Math.exp(-d / fogL);
+      const zc0 = Math.max(.6, d * cp - E1 * sp), aer = 1 - Math.exp(-d / aerL), eR = Math.max(.6, zc0 * colW), eF = Math.max(.6, d * rowK);
       for (let k = 0; k <= NK; k++) {
         const sx = -W * .06 + k * (W * 1.12 / NK), u = (sx - cx) / F * zc0;
         const x = E0 + hf[0] * d + hr[0] * u, z = E2 + hf[2] * d + hr[2] * u, h = height(x, z);
         const o = i * (NK + 1) + k;
         if (pj(x, h, z)) { TX[o] = PX; TY[o] = Math.max(-H, Math.min(H * 3, PY)); } else { TX[o] = sx; TY[o] = H * 3; }
         if (k % 2 === 0) {
-          const e = Math.max(.6, d * .004), hx = (height(x + e, z) - h) / e, hz = (height(x, z + e) - h) / e, nl = Math.hypot(hx, 1, hz);
-          let lam = Math.max(0, (-hx * sun[0] + sun[1] - hz * sun[2]) / nl); const sky = .55 + .45 / nl;
-          if (lam > 0 && sun[1] > 0 && sun[1] < .5) { let sh = 1; for (let m = 0, L = 10; m < 4; m++, L *= 2.8) { const q = height(x + sun[0] * L, z + sun[2] * L) - (h + .5 + sun[1] * L); if (q > 0) { sh = Math.min(sh, 1 - c01(q / 6)); if (sh <= 0) break; } } lam *= sh; }
-          const mt = mountain(x, z), lava = smooth(c01((Math.sin(x * .006 + 1) * Math.sin(z * .0071 - 2) + .1 * Math.sin(x * .03 + z * .02) - .25) / .2)) * c01((Math.abs(x) - 300) / 200 + c01((-z - 60) / 200));
-          const al = lerp(lerp(plainA, lavaA, lava), lerp(rockA, [44, 32, 30], c01(mt / 260)), c01(mt / 25));
-          const lit = [0, 1, 2].map((j) => al[j] / 255 * (amb[j] * sky * .85 + sunC[j] * lam * 1.2 * direct));
-          TC[i * NC + k / 2] = rgb(lerp(lit, hazeAt(x - E0, z - E2), Math.min(.95, fogK * (1 - .3 * c01(h / 200)))));
+          const mt = mountain.v, gl = mountain.g; // from the height() just above
+          // slope over the sample's own footprint (across a colour sample, toward the next band), so detail finer than that cannot stripe
+          const gR = (height(x + hr[0] * eR, z + hr[2] * eR) - h) / eR, gF = (height(x + hf[0] * eF, z + hf[2] * eF) - h) / eF;
+          const hx = gR * hr[0] + gF * hf[0], hz = gR * hr[2] + gF * hf[2], nl = Math.hypot(hx, 1, hz);
+          let lam = Math.max(0, (-hx * sun[0] + sun[1] - hz * sun[2]) / nl); const sky = .5 + .5 / nl;
+          // the sun stays south of the mountain, so out on the plain only the archers' hill can shade a point
+          if (lam > 0 && sun[1] > 0 && sun[1] < .5 && (mt > 0 || (Math.abs(x - HILL[0]) < 160 && z > HILL[1] - 60 && z < HILL[1] + 240))) { let sh = 1; for (let m = 0, L = 10; m < 4; m++, L *= 2.8) { const q = height(x + sun[0] * L, z + sun[2] * L) - (h + .5 + sun[1] * L); if (q > 0) { sh = Math.min(sh, 1 - c01(q / 6)); if (sh <= 0) break; } } lam *= sh; }
+          const lava = smooth(c01((Math.sin(x * .006 + 1) * Math.sin(z * .0071 - 2) + .1 * Math.sin(x * .03 + z * .02) - .25) / .2)) * c01((Math.abs(x) - 300) / 200 + c01((-z - 60) / 200));
+          const drift = c01(.5 + .45 * Math.sin(x * .0093 + Math.sin(z * .0061) * 2.2) * Math.sin(z * .0117 - x * .0041 + 1) + .3 * Math.sin(x * .031 + z * .022 + Math.sin(z * .019) * 1.5) * Math.sin(z * .027 - x * .013)); // pale drifted sand over darker gravel
+          const al = lerp(lerp(lerp(gravel, sand, drift), lavaA, lava), lerp(rockA, rockB, c01(mt / 240)).map((v) => v * (.62 + .55 * gl) * (.9 + .1 * Math.sin(x * .0042 + z * .003))), c01(mt / 25));
+          const lit = [0, 1, 2].map((j) => al[j] / 255 * (amb[j] * sky * .75 + sunC[j] * lam * 1.45 * direct));
+          const hz2 = lerp(hazeAt(x - E0, z - E2), skH, .3), fa = Math.min(.96, aer * (1 - .12 * c01(h / 250))), n = (i * NC + k / 2) * 3;
+          TC[n] = mix(lit[0], hz2[0], fa); TC[n + 1] = mix(lit[1], hz2[1], fa); TC[n + 2] = mix(lit[2], hz2[2], fa);
         }
       }
     }
-    for (let i = 0; i < NS; i++) {
-      const o = i * (NK + 1), last = i === NS - 1;
-      c.beginPath(); c.moveTo(TX[o], TY[o]);
-      for (let k = 1; k <= NK; k++) c.lineTo(TX[o + k], TY[o + k]);
-      for (let k = NK; k >= 0; k--) c.lineTo(last ? TX[o + k] : TX[o + NK + 1 + k], last ? H + 4 : Math.max(TY[o + k], TY[o + NK + 1 + k]) + 1.2); // the nearer band's own x: no seams on steep faces
-      c.closePath();
-      const g = c.createLinearGradient(TX[o], 0, TX[o + NK], 0);
-      for (let k = 0; k < NC; k++) g.addColorStop(k / (NC - 1), TC[i * NC + k]);
-      c.fillStyle = g; c.fill();
-    }
-    const sandLit = plainA.map((v, j) => v / 255 * (amb[j] * .8 + sunC[j] * Math.max(0, sun[1]) * 1.2 * day));
-    // gullies on the mountain face: dark seams with a lit lip
+    terrainRaster(st, c, W, H, NS, NK, 2, TX, TY, TC, .12);
+    const sandLit = [140, 114, 90].map((v, j) => v / 255 * (amb[j] * .8 + sunC[j] * Math.max(0, sun[1]) * 1.2 * day));
     c.lineJoin = 'round'; c.lineCap = 'round';
-    const gulA = .26 * (1 - smooth(seg(p, .66, .73)));
-    if (gulA > .02) {
-      const gp = new Path2D();
-      st.gul.forEach((pts) => { let first = true; pts.forEach(([x, y, z]) => { if (!pj(x, y, z) || PX < -50 || PX > W + 50) { first = true; return; } first ? gp.moveTo(PX, PY) : gp.lineTo(PX, PY); first = false; }); });
-      c.strokeStyle = rgb(lerp([22, 14, 14], haze0, .35), gulA); c.lineWidth = Math.max(1, F / 900); c.stroke(gp);
-    }
     // ground: gravel and stones near the camera; black lava stones out on the flanks
     c.lineWidth = 1;
     [0, 1].forEach((pass) => {

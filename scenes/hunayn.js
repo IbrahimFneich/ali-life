@@ -19,7 +19,7 @@ const sprite = (stops, n = 64) => { const c = mk(n, n), g = c.getContext('2d'), 
 const hash = (i, s = 0) => { const v = Math.sin(i * 127.1 + s * 311.7) * 43758.5453; return v - Math.floor(v); };
 
 // ---------- the land: a wadi between steep rocky walls, its floor falling gently toward the east ----------
-const ridged = (v) => 1 - Math.abs(Math.sin(v));
+const rr = (v, e) => 1 + e - Math.sqrt(Math.sin(v) ** 2 + e * e); // a ridge: 1 on rounded crests (width e), about e in the hollows
 const cxv = (z) => 46 * Math.sin(z * .0016 + .3) + 18 * Math.sin(z * .0043 + 1);
 const yf = (z) => -.05 * z;
 const hwv = (z) => 54 + 20 * Math.sin(z * .0027 + 2.2) - 18 * Math.exp(-(((z - 600) / 170) ** 2));
@@ -29,8 +29,8 @@ function height(x, z) {
   let h = yf(z) + .5 * Math.sin(x * .05 + z * .03) * Math.sin(z * .021);
   if (d > 0) {
     const Hs = 160 + 50 * Math.sin(z * .0021 + side * 1.7) + 28 * Math.sin(z * .0067 + side), k = d / runOf(z, side);
-    const gul = ridged(z * .013 + side * 1.3 + Math.sin(z * .003) * 2) ** 3;
-    h += Hs * (1 - Math.exp(-(k ** 1.7))) * (1 - .2 * gul * c01(1 - k / 3)) + 16 * ridged(x * .031 + z * .017) ** 2 * c01(k) + 9 * ridged(x * .093 + z * .061) ** 3 * c01(k) + 5 * Math.sin(x * .13 + z * .07) * c01(k * 2);
+    const gul = rr(z * .013 + side * 1.3 + Math.sin(z * .003) * 2, .3) ** 2;
+    h += Hs * (1 - Math.exp(-(k ** 1.7))) * (1 - .2 * gul * c01(1 - k / 3)) + 14 * rr(x * .031 + z * .017 + Math.sin(z * .011) * 1.2, .35) ** 2 * c01(k) + 7 * rr(x * .093 + z * .061, .45) ** 2 * c01(k) + 5 * Math.sin(x * .13 + z * .07) * c01(k * 2);
   }
   return h;
 }
@@ -98,9 +98,9 @@ S.hunayn = {
     const gs = () => (R() + R() + R() - 1.5) / 1.5;
     st.noise = mk(160, 160);
     { const ng = st.noise.getContext('2d'), id = ng.createImageData(160, 160); for (let i = 0; i < id.data.length; i += 4) { const v = R() * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = v; id.data[i + 3] = 22; } ng.putImageData(id, 0, 0); }
-    st.NS = 58; st.NK = 72;
+    st.NS = 64; st.NK = 84;
     st.TX = new Float32Array(st.NS * (st.NK + 1)); st.TY = new Float32Array(st.NS * (st.NK + 1));
-    st.TC = new Array(st.NS * (st.NK / 2 + 1));
+    st.TC = new Float32Array(st.NS * (st.NK / 2 + 1) * 3);
     st.stars = Array.from({ length: 260 }, () => [(R() - .5) * 3.2, .04 + R() ** .8 * 1.1, R()]);
     st.clouds = Array.from({ length: 16 }, () => [-1.2 + R() * 2.4, .05 + R() * .3, .3 + R() * .8, .015 + R() * .03, .2 + R() * .35]);
     // the wadi bed: pale gravel channels and dark acacia
@@ -201,35 +201,30 @@ S.hunayn = {
     const hFloor = height(E0, E2);
     const dMin = dyb < -.01 ? Math.max(1.5, (E1 - hFloor) / -dyb * dhb * .8) : 4, dMax = 6000;
     const bedA = [158, 148, 132], rockA = [98, 86, 80], rockB = [70, 63, 64];
+    const colW = W * 1.12 / NK / F * 2, rowK = (dMax / dMin) ** (1 / (NS - 1)) - 1; // a colour sample's width per metre of depth; the band spacing
     for (let i = 0; i < NS; i++) {
       const d = dMin * (dMax / dMin) ** (1 - i / (NS - 1));
-      const zc0 = Math.max(.6, d * cp - (E1 - hFloor) * sp), fogK = fogOf(d);
+      const zc0 = Math.max(.6, d * cp - (E1 - hFloor) * sp), fogK = fogOf(d), eR = Math.max(.8, zc0 * colW), eF = Math.max(.8, d * rowK);
       for (let k = 0; k <= NK; k++) {
         const sx = -W * .06 + k * (W * 1.12 / NK), u = (sx - cx) / F * zc0;
         const x = E0 + hf[0] * d + hr[0] * u, z = E2 + hf[2] * d + hr[2] * u, h = height(x, z);
         const o = i * (NK + 1) + k;
         if (pj(x, h, z)) { TX[o] = PX; TY[o] = Math.max(-H, Math.min(H * 3, PY)); } else { TX[o] = sx; TY[o] = H * 3; }
         if (k % 2 === 0) {
-          const e = Math.max(.8, d * .004), hx = (height(x + e, z) - h) / e, hz = (height(x, z + e) - h) / e, nl = Math.hypot(hx, 1, hz);
+          // slope over the sample's own footprint (across a colour sample, toward the next band), so finer detail cannot stripe
+          const gR = (height(x + hr[0] * eR, z + hr[2] * eR) - h) / eR, gF = (height(x + hf[0] * eF, z + hf[2] * eF) - h) / eF;
+          const hx = gR * hr[0] + gF * hf[0], hz = gR * hr[2] + gF * hf[2], nl = Math.hypot(hx, 1, hz);
           let lam = Math.max(0, (-hx * sun[0] + sun[1] - hz * sun[2]) / nl);
           if (lam > 0 && direct > 0) { let sh = 1; for (let m = 0, L = 14; m < 5; m++, L *= 2.6) { const q = height(x + sun[0] * L, z + sun[2] * L) - (h + .5 + sun[1] * L); if (q > 0) { sh = Math.min(sh, 1 - c01(q / 8)); if (sh <= 0) break; } } lam *= sh; }
           const sky = .55 + .45 / nl, rel = h - yf(z), steep = c01((nl - 1.05) / .6);
           const al = lerp(lerp(bedA, rockA, c01(rel / 14)), rockB, steep * .6 + .2 * c01(rel / 150)).map((v) => v * (rel > 14 ? .86 + .14 * Math.sin(rel * .3 + x * .012) * Math.sin(rel * .07 + z * .01) : 1));
           const lit = [0, 1, 2].map((j) => al[j] / 255 * (amb[j] * sky * .95 + sunC[j] * lam * 1.4 * direct));
-          TC[i * NC + k / 2] = rgb(lerp(lit, hazeAt(x - E0, z - E2), fogK * (1 - .35 * c01(rel / 220))));
+          const hz2 = hazeAt(x - E0, z - E2), fa = fogK * (1 - .35 * c01(rel / 220)), n = (i * NC + k / 2) * 3;
+          TC[n] = mix(lit[0], hz2[0], fa); TC[n + 1] = mix(lit[1], hz2[1], fa); TC[n + 2] = mix(lit[2], hz2[2], fa);
         }
       }
     }
-    for (let i = 0; i < NS; i++) {
-      const o = i * (NK + 1), last = i === NS - 1;
-      c.beginPath(); c.moveTo(TX[o], TY[o]);
-      for (let k = 1; k <= NK; k++) c.lineTo(TX[o + k], TY[o + k]);
-      for (let k = NK; k >= 0; k--) c.lineTo(last ? TX[o + k] : TX[o + NK + 1 + k], last ? H + 4 : Math.max(TY[o + k], TY[o + NK + 1 + k]) + 1.2);
-      c.closePath();
-      const g = c.createLinearGradient(TX[o], 0, TX[o + NK], 0);
-      for (let k = 0; k < NC; k++) g.addColorStop(k / (NC - 1), TC[i * NC + k]);
-      c.fillStyle = g; c.fill();
-    }
+    terrainRaster(st, c, W, H, NS, NK, 2, TX, TY, TC);
     // ----- the wadi bed: gravel channels, acacia, boulders on the slopes -----
     const bedLit = bedA.map((v, j) => v / 255 * amb[j]);
     c.lineWidth = 1;

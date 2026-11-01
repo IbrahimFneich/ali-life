@@ -16,6 +16,8 @@ for sub in ('audio/n', 'audio/q'):  # narration sprites and Qur'an recitations f
 if (root / 'audio/narr.json').exists(): shutil.copy(root / 'audio/narr.json', out / 'audio/narr.json')
 for f in (root / 'scenes').iterdir():
     if f.suffix in ('.js', '.css'): shutil.copy(f, out / 'scenes' / f.name)  # .html snippets are already pasted into the page
+(out / 'proto').mkdir(exist_ok=True)
+for f in (root / 'proto').glob('hero-*.html'): shutil.copy(f, out / 'proto' / f.name)  # cover art, shuffled in iframes
 print('\n'.join(sorted(str(p.relative_to(out)) for p in out.rglob('*') if p.is_file())))
 
 # FILES_JSON: the exact `files` list for the Artifact publish call

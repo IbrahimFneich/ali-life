@@ -237,8 +237,37 @@ const measure = () => {
   kick();
 };
 addEventListener('scroll', kick, { passive: true });
+// to-top button: shows after the first screen; jumps instantly while Play runs (a smooth scroll would be cut by the tour's own scrollTo)
+const scrolled = () => document.documentElement.classList.toggle('scrolled', scrollY > innerHeight);
+addEventListener('scroll', scrolled, { passive: true }); scrolled();
+$('#top-btn')?.addEventListener('click', () => scrollTo({ top: 0, behavior: window.Play?.on || !fx ? 'auto' : 'smooth' }));
 addEventListener('resize', measure);
 new ResizeObserver(measure).observe($('main'));
+// Pinned scene text stays clear of the fixed chrome (menu + HUD top-right, dock bottom-right): captions near a
+// stage's top slide below the menu, captions near its bottom lift above the dock. One shift per group keeps
+// each scene's own spacing. Uses `translate`, so the data-fx transforms still compose on top.
+const clearChrome = () => {
+  $$('[data-chrome]').forEach((e) => { e.style.translate = ''; delete e.dataset.chrome; });
+  if (!fx) return;
+  const top = $('.menu-btn').getBoundingClientRect().bottom + 10, bot = innerHeight - $('.dock').getBoundingClientRect().top + 10;
+  $$('.scene .stage').forEach((st) => {
+    const H = st.clientHeight, els = [];
+    $$('*', st).forEach((e) => {
+      if (els.some(([a]) => a.contains(e)) || e.closest('[aria-hidden="true"], svg') || !e.textContent.trim()) return;
+      const cs = getComputedStyle(e);
+      if (cs.position !== 'absolute' || cs.translate !== 'none' || e.offsetHeight > H * .7) return;
+      let y = 0, n = e;
+      while (n && n !== st) { y += n.offsetTop; n = n.offsetParent; }
+      if (n === st) els.push([e, y, y + e.offsetHeight]);
+    });
+    const hi = els.filter(([, y]) => y < H * .4), lo = els.filter(([, y, b]) => y >= H * .4 && b > H * .6);
+    const up = Math.min(...hi.map(([, y]) => y)), down = Math.max(...lo.map(([, , b]) => b));
+    if (up < top) hi.forEach(([e]) => { e.style.translate = `0 ${Math.round(top - up)}px`; e.dataset.chrome = ''; });
+    if (down > H - bot) lo.forEach(([e]) => { e.style.translate = `0 ${Math.round(H - bot - down)}px`; e.dataset.chrome = ''; });
+  });
+};
+document.fonts.ready.then(clearChrome);
+addEventListener('resize', clearChrome);
 // Dev: ?at=SELECTOR@p jumps to progress p of that element (used for headless screenshots).
 const jump = () => {
   const at = new URLSearchParams(location.search).get('at');
