@@ -1,10 +1,12 @@
 (() => {
 // radd: the sun returned for Ali, twice (al-Irshad 1:345-347).
-// Part one, in the Prophet's lifetime: a Medina house at golden afternoon. Two calm lights rest in the shade of the
-// portico, the larger (the Prophet) against the smaller (Ali). The sun goes down through the west door, dusk comes,
-// then the sun climbs back to its Asr place, the light floods in, and Ali's light stands in prayer. Then it sets.
+// Part one, in the Prophet's lifetime: a Medina house at golden afternoon. In the shade of the portico the Prophet
+// lies with his head on Ali's lap while the revelation comes; Ali sits. The sun goes down through the west door, dusk
+// comes, the Prophet lifts his head and sits up, then the sun climbs back to its Asr place, the light floods in, and
+// Ali stands and prays: standing, bowing, prostrate, facing the qibla. Then he sits again and the sun sets.
 // Part two, after the Prophet: Babil, the Euphrates crossing at dusk, the ruins on the far bank. The same return,
-// shorter. People are never figures here except small faceless waders; the Prophet and Ali are lights only.
+// shorter: Ali waits seated on the near bank, then stands and prays. The Prophet and Ali are veiled figures with a
+// gold disc behind the head (scenes/holy.js); no face is ever drawn. Everyone else is a small faceless wader.
 // World units are metres: x to the right (north), y up, z away from the camera (west, toward the sunset).
 // One scene clock per part runs forward, back and forward again: the sun, the shadows, the birds and the dust
 // follow it, so the return reads as the day itself running back.
@@ -36,6 +38,18 @@ const T1 = [[-.06, 0], [.02, 0], [.28, 1], [.33, 1.1], [.42, -.06], [.53, .01], 
 const T2 = [[-.06, .56], [.64, .56], [.77, 1], [.855, .1], [.915, .15], [1, .9], [1.06, .95]];
 const clock = (K, p) => { let i = 1; while (i < K.length - 1 && p > K[i][0]) i++; const A = K[i - 1], B = K[i]; return mix(A[1], B[1], smooth(c01((p - A[0]) / (B[0] - A[0])))); };
 const camAt = (K, p) => { let i = 0; while (i < K.length - 2 && p > K[i + 1][0]) i++; const u = i + smooth(c01((p - K[i][0]) / (K[i + 1][0] - K[i][0]))); return { eye: crv(K.map((k) => k[1]), u), look: crv(K.map((k) => k[2]), u) }; };
+
+// Ali's postures over p: [p where each begins, pose, cross-fade length]. Returns [[pose, alpha], ...] for this p.
+const posture = (K, p) => {
+  let i = 0; while (i < K.length - 1 && p >= K[i + 1][0]) i++;
+  const k = i > 0 ? smooth(seg(p, K[i][0], K[i][0] + K[i][2])) : 1;
+  return k < 1 ? [[K[i - 1][1], 1 - k], [K[i][1], k]] : [[K[i][1], 1]];
+};
+// part one: the reduced-motion still (p .48) shows him standing in prayer, so the ruku starts just after it
+const PRAY1 = [[-1, 'sit', 0], [.415, 'stand', .008], [.482, 'ruku', .006], [.497, 'stand', .006], [.505, 'sujud', .006], [.52, 'sit', .006], [.528, 'sujud', .006], [.543, 'stand', .006], [.612, 'sit', .008]];
+const PRAY2 = [[-1, 'sit', 0], [.84, 'stand', .01], [.875, 'ruku', .005], [.89, 'stand', .005], [.9, 'sujud', .005], [.915, 'sit', .005], [.922, 'sujud', .005], [.937, 'stand', .005]];
+// cloth light from the sun's elevation (degrees)
+const ambAt = (e) => mix(.3, .9, c01((e + 4) / 14));
 
 // ---------- part one: the house ----------
 const XW = 7, ZE = -3, ZW = 16, HS = 4.4, HWW = 2.8; // courtyard half width, east and west ends, side-wall and west-wall heights
@@ -261,23 +275,18 @@ S.radd = {
     if (rim) { c.strokeStyle = rim; c.lineWidth = Math.max(.5, .1 * s); c.beginPath(); c.moveTo(bx + .1 * s, by); c.quadraticCurveTo((bx + tx) / 2 + lean * s * 1.2 + .1 * s, (by + ty) / 2, tx + .1 * s, ty); c.stroke(); }
   },
 
-  // a calm light: a pool on the ground, a halo, a bright core. k is its strength, size its radius in metres.
-  light(c, V, bc, st, x, y, z, size, k, col, gy = 0) {
-    if (k <= 0) return;
-    c.globalCompositeOperation = 'lighter';
-    if (V.pj(x, gy + .02, z)) {
-      const s = V.F / V.z, gx = V.x, gyy = V.y, rr = size * 3.2 * s;
-      c.save(); c.translate(gx, gyy); c.scale(1, .32);
-      const g = c.createRadialGradient(0, 0, 0, 0, 0, rr); g.addColorStop(0, rgb(col, .32 * k)); g.addColorStop(1, rgb(col, 0));
-      c.fillStyle = g; c.fillRect(-rr, -rr, rr * 2, rr * 2); c.restore();
-    }
-    if (!V.pj(x, y, z)) { c.globalCompositeOperation = 'source-over'; return; }
-    const s = V.F / V.z, X = V.x, Y = V.y, R = Math.min(V.H * .1 * size, Math.max(2.2, size * s));
-    c.globalAlpha = Math.min(1, .38 * k); c.drawImage(S.radd.tint(st, rgb(col)), X - R * 7, Y - R * 7, R * 14, R * 14);
-    c.globalAlpha = Math.min(1, .7 * k); c.drawImage(S.radd.tint(st, rgb(lerp(col, [255, 255, 250], .5))), X - R * 1.5, Y - R * 1.5, R * 3, R * 3);
-    c.globalAlpha = Math.min(1, k); c.fillStyle = 'rgba(255,252,242,1)'; c.beginPath(); c.arc(X, Y, R * .24, 0, TAU); c.fill();
-    c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
-    bc.fillStyle = rgb(col, Math.min(1, .45 * k)); bc.beginPath(); bc.arc(X, Y, R * 2.4, 0, TAU); bc.fill();
+  // a soft warm bloom at each veiled figure's disc, stronger at dusk
+  discs(c, bc, heads, dusk) {
+    heads.forEach(([hd, k]) => {
+      if (!hd) return;
+      const R = Math.max(6, hd.r * 3.2) * k;
+      c.globalCompositeOperation = 'lighter';
+      const g = c.createRadialGradient(hd.x, hd.y, 0, hd.x, hd.y, R * 3);
+      g.addColorStop(0, `rgba(255,222,160,${.12 + .2 * dusk})`); g.addColorStop(1, 'rgba(255,222,160,0)');
+      c.fillStyle = g; c.fillRect(hd.x - R * 3, hd.y - R * 3, R * 6, R * 6);
+      c.globalCompositeOperation = 'source-over';
+      bc.fillStyle = `rgba(255,222,160,${.15 + .3 * dusk})`; bc.beginPath(); bc.arc(hd.x, hd.y, R * 1.4, 0, TAU); bc.fill();
+    });
   },
 
   birds(c, V, list, tau, t, alpha, col, C = [[-4, 18], [6, 26]], rs = 1) {
@@ -469,9 +478,32 @@ S.radd = {
     }
     if (E1 > PY0 + .2) { const tp = new Path2D(); if (V.poly([[PX0 - .2, PY0 + .2, ZE], [XW, PY0 + .2, ZE], [XW, PY0 + .2, ZW], [PX0 - .2, PY0 + .2, ZW]], tp)) { c.fillStyle = rgb(litOf([110, 92, 60], .3 + 1.1 * Math.max(0, sy) * direct)); c.fill(tp); const fr = new Path2D(); for (let z = ZE; z < ZW; z += .35) { if (V.pj(PX0 - .2, PY0 + .21, z)) { const ax = V.x, ay = V.y; if (V.pj(XW, PY0 + .21, z + .5)) { fr.moveTo(ax, ay); fr.lineTo(V.x, V.y); } } } c.strokeStyle = rgb([40, 30, 18], .35); c.lineWidth = 1; c.stroke(fr); } }
     const front = new Path2D(); if (V.poly([[PX0 - .2, PY0, ZE], [PX0 - .2, PY0 + .2, ZE], [PX0 - .2, PY0 + .2, ZW], [PX0 - .2, PY0, ZW]], front)) { c.fillStyle = rgb(lerp(roofCol, sunC, .1 * direct)); c.fill(front); }
-    // jar and columns, far to near; the lights go after them
-    const colsSorted = COLS.map((z) => [z, Math.hypot(PX0 - E0, z - E2)]).sort((a, b) => b[1] - a[1]);
-    colsSorted.forEach(([z]) => {
+    // ----- the Prophet and Ali: veiled figures (scenes/holy.js), sorted with the columns -----
+    const lift = smooth(seg(p, .235, .27)), stand = smooth(seg(p, .415, .45)), sitBack = smooth(seg(p, .585, .62));
+    const fam = ambAt(e), heads = [], dist = (q) => Math.hypot(q[0] - E0, q[2] - E2);
+    const gnd = (q) => (V.pj(q[0], 0, q[2]) ? [V.x, V.y, V.z] : null);
+    const al = lerp(lerp(ALI1, ALI1P, stand), ALI1, sitBack), dir = norm([PRO[0] - ALI1[0], 0, PRO[2] - ALI1[2]]);
+    const figs = [];
+    { // Ali: seated; at the sun's return he stands and prays toward the qibla (south, -x), then sits again
+      const g = gnd(al);
+      if (g) {
+        const h = Math.max(20, 1.8 * F / g[2]), flip = V.pj(al[0] - .5, 0, al[2]) && V.x < g[0];
+        figs.push([dist(al), () => posture(PRAY1, p).forEach(([pose, a]) => { c.globalAlpha = 1; const hd = Holy.draw(c, { who: 'ali', pose, flip, x: g[0], y: g[1], h, t, amb: fam, alpha: a }); if (a > .5) heads.push([hd, .8]); })]);
+      }
+    }
+    { // the Prophet: his head on Ali's lap while the revelation comes; at sunset he lifts it and sits up beside him
+      const L = gnd([ALI1[0] + dir[0] * .28, 0, ALI1[2] + dir[2] * .28]), B = gnd([ALI1[0] + dir[0] * 1.05, 0, ALI1[2] + dir[2] * 1.05]), A0 = gnd(ALI1), Q = gnd(PRO);
+      const up = smooth(seg(p, .262, .27)); // sits up once his head has lifted
+      if (L && B && A0 && up < 1) {
+        const h = Math.max(21, 1.85 * F / B[2]), hA = Math.max(20, 1.8 * F / A0[2]), flip = B[0] < L[0];
+        const x = L[0] + (flip ? -1 : 1) * (.475 - .072 * 1.3) * h, y = L[1] - .06 * hA + (.072 * 1.15 + .35 * .14) * h; // the head lands on the lap
+        figs.push([Math.min(dist(PRO), dist(ALI1) - .01), () => { c.globalAlpha = 1; const hd = Holy.draw(c, { who: 'prophet', pose: 'lie', raise: mix(.35, 1, lift), flip, x, y, h, t, amb: fam, alpha: 1 - up }); if (up < .5) heads.push([hd, 1]); }]);
+      }
+      if (Q && up > 0) figs.push([dist(PRO), () => { c.globalAlpha = 1; const hd = Holy.draw(c, { who: 'prophet', pose: 'sit', x: Q[0], y: Q[1], h: Math.max(21, 1.85 * F / Q[2]), t, amb: fam, alpha: up }); if (up >= .5) heads.push([hd, 1]); }]);
+    }
+    // jar and columns, far to near, with the figures among them
+    COLS.map((z) => [Math.hypot(PX0 - E0, z - E2), z]).concat(figs).sort((a, b) => b[0] - a[0]).forEach(([, z]) => {
+      if (typeof z === 'function') { z(); return; }
       if (!V.pj(PX0, 0, z)) return; const bx = V.x, by = V.y, s = F / V.z; if (!V.pj(PX0, PY0, z)) return; const tx = V.x, ty = V.y;
       const w = Math.max(1.2, .3 * s);
       const g = c.createLinearGradient(bx - w / 2, 0, bx + w / 2, 0);
@@ -510,19 +542,8 @@ S.radd = {
     }
     if (any) { c.globalCompositeOperation = 'lighter'; [.22, .45, .85].forEach((a, j) => { c.fillStyle = rgb(lerp(sunC, [255, 246, 220], .4), a * direct); c.fill(paths[j]); }); c.globalCompositeOperation = 'source-over'; }
     void vf;
-    // ----- the two lights -----
-    const lift = smooth(seg(p, .235, .27)), stand = smooth(seg(p, .415, .45)), sitBack = smooth(seg(p, .585, .62));
-    const prayer = seg(p, .45, .55) > 0 && p < .56 ? 1 : 0;
-    const breath = 1 + .12 * Math.sin((p - .45) * TAU * 5) * prayer * smooth(seg(p, .44, .47)) * (1 - smooth(seg(p, .54, .56)));
-    const inSun = (z, x) => (z < zT && x < xR && x > xL ? direct : 0);
-    const proC = [255, 236, 196], aliC = [255, 214, 150];
-    const pr = [PRO[0], PRO[1] + .14 * lift, PRO[2]];
-    const al = lerp(lerp(ALI1, ALI1P, stand), ALI1, sitBack);
-    S.radd.light(c, V, bc, st, pr[0], pr[1], pr[2], .2, 1.05 + .15 * inSun(pr[2], pr[0]), proC);
-    S.radd.light(c, V, bc, st, al[0], al[1], al[2], .15, (.92 + .25 * inSun(al[2], al[0]) + .25 * stand * (1 - sitBack)) * breath, aliC);
-    if (stand > 0 && sitBack < 1) { // a faint column of light while he prays
-      if (V.pj(al[0], .05, al[2])) { const s = F / V.z, x = V.x, y0 = V.y; if (V.pj(al[0], al[1] + 1.2, al[2])) { const y1 = V.y, g = c.createLinearGradient(0, y0, 0, y1); const a = .22 * stand * (1 - sitBack) * breath; g.addColorStop(0, rgb(aliC, 0)); g.addColorStop(.45, rgb(aliC, a)); g.addColorStop(1, rgb(aliC, 0)); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(x - .09 * s, y1, .18 * s, y0 - y1); c.globalCompositeOperation = 'source-over'; } }
-    }
+    // the discs: a soft warm bloom, more as the light goes
+    S.radd.discs(c, bc, heads, dusk);
     // dusk: the house darkens toward blue
     if (dusk > 0) { c.fillStyle = `rgba(10,14,34,${.16 * dusk})`; c.fillRect(0, 0, W, H); }
   },
@@ -679,13 +700,13 @@ S.radd = {
       }
       c.globalCompositeOperation = 'lighter'; c.fillStyle = rgb(lerp(sunC, [255, 246, 220], .4), .45 * direct); c.fill(pa); c.globalCompositeOperation = 'source-over';
     }
-    // ----- Ali's light at the water's edge -----
-    const stand = smooth(seg(p, .835, .86)), pray = smooth(seg(p, .85, .87)) * (1 - smooth(seg(p, .93, .95)));
-    const breath = 1 + .12 * Math.sin((p - .86) * TAU * 6) * pray;
-    const aliC = [255, 214, 150];
-    S.radd.light(c, V, bc, st, ALI2[0], ALI2[1] - .35 * (1 - stand), ALI2[2], .16, (1 + .3 * pray) * breath, aliC, .3);
-    if (V.pj(ALI2[0], -ALI2[1], ALI2[2] + 4)) { /* reflection only shows where the water is */ }
-    if (pray > 0 && V.pj(ALI2[0], .35, ALI2[2])) { const s = F / V.z, x = V.x, y0 = V.y; if (V.pj(ALI2[0], ALI2[1] + 1.3, ALI2[2])) { const y1 = V.y, g = c.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, rgb(aliC, 0)); g.addColorStop(.45, rgb(aliC, .22 * pray * breath)); g.addColorStop(1, rgb(aliC, 0)); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(x - .09 * s, y1, .18 * s, y0 - y1); c.globalCompositeOperation = 'source-over'; } }
+    // ----- Ali at the water's edge: seated while they cross; at the sun's return he stands and prays toward the qibla -----
+    if (V.pj(ALI2[0], .3, ALI2[2])) {
+      const gx = V.x, gy = V.y, h = Math.max(20, 1.8 * F / V.z), heads = [];
+      const flip = V.pj(ALI2[0] - .35, .3, ALI2[2] + .35) && V.x < gx; // south-west from Babil
+      posture(PRAY2, p).forEach(([pose, a]) => { c.globalAlpha = 1; const hd = Holy.draw(c, { who: 'ali', pose, flip, x: gx, y: gy, h, t, amb: ambAt(e), alpha: a }); if (a > .5) heads.push([hd, .8]); });
+      S.radd.discs(c, bc, heads, dusk);
+    }
     if (dusk > 0) { c.fillStyle = `rgba(10,14,34,${.25 * dusk})`; c.fillRect(0, 0, W, H); }
   },
 };

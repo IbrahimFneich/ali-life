@@ -1,6 +1,7 @@
 // Ghadir Khumm, 18 Dhu al-Hijja 10 AH. A top-down map of the desert near al-Juhfa at noon: the caravans come up
 // the road from Mecca, the front reaches the fork, the halt, the gathering at the pond, the ring around the pulpit
-// of saddles, the two lights, the wave of the pledge, and the gold carried out along every road.
+// of saddles, the Prophet and Ali on it, the wave of the pledge, and the gold carried out along every road. The Prophet and
+// Ali are veiled figures with a gold disc behind the head (scenes/holy.js); no face is ever drawn. The crowd are dots.
 // World units: x east, y south; the fork is at (0, 0), the pulpit at C. Heights (h) are in the same units.
 (() => {
   const C = [0, 210];
@@ -446,41 +447,40 @@
       for (let i = 0; i < N; i++) { if (G[i] < .5) continue; const x = SX(X[i]), y = SY(Y[i]); if (x < 0 || y < 0 || x > W || y > H) continue; bc.rect(x - 2.5 * k, y - 2.5 * k, 5 * k, 5 * k); }
       bc.fill();
 
-      // ---------- the two lights ----------
-      let ux = 0, uy = 0;
-      const lights = [];
+      // ---------- the Prophet and Ali: veiled figures on the map, upright on their shadows (scenes/holy.js) ----------
+      // They come up the road with the caravans, walk to the pulpit and climb it. At the declaration the Prophet takes
+      // Ali's hand and raises it with his own, side by side; the hands come down as the pledge spreads.
+      const HU = 26; // a man's height in map units, against a saddle 18 long
+      const figs = [];
       {
         const u = st.uC[0] - 300 * (1 - ease.out(seg(p, 0, .2))) - 18;
         at(st.R[0], u, -3); const px0 = O[0], py0 = O[1];
         at(st.R[0], u - 12, 7); const ax0 = O[0], ay0 = O[1];
-        const m = ease.io(seg(p, .44, .53)), climb = ease.io(seg(p, .52, .58)), raise = ease.io(seg(p, .63, .72));
-        const px = mix(px0, C[0] - 5, m), py = mix(py0, C[1], m), ax = mix(ax0, C[0] + 5, m) - raise * 2, ay = mix(ay0, C[1] + 1, m);
-        lights.push([px, py, climb * top + raise * 1.5, 1, [255, 246, 222], [243, 217, 143], 1.25]);
-        lights.push([ax, ay, climb * top + raise * 10, 1 + raise * 1.1, [243, 217, 143], [121, 201, 162], 1]);
-        ux = ax; uy = ay;
+        const m = ease.io(seg(p, .44, .53)), climb = ease.io(seg(p, .52, .58)), hgt = climb * top;
+        const hP = Math.max(27 * k, HU * 1.04 * z), hA = Math.max(26 * k, HU * z);
+        let Px = SX(mix(px0, C[0] - 7, m)), Py = SY(mix(py0, C[1], m), hgt), Ax = SX(mix(ax0, C[0] + 7, m)), Ay = SY(mix(ay0, C[1] + 1, m), hgt);
+        // never closer than about half a figure on screen, so the two read apart when the map is wide
+        const dx = Ax - Px, dy = Ay - Py, d = Math.hypot(dx, dy), need = .54 * hA;
+        if (d < need) { const ux = d > 1e-3 ? dx / d : 1, uy = d > 1e-3 ? dy / d : 0, e = (need - d) / 2; Px -= ux * e; Py -= uy * e; Ax += ux * e; Ay += uy * e; }
+        // the joined hands: held low as he takes it (.62), raised high (.63-.72), held, then lowered (.84-.92)
+        const hold = seg(p, .615, .63) * (1 - seg(p, .88, .92)), raise = ease.io(seg(p, .63, .72)) * (1 - ease.io(seg(p, .84, .9)));
+        const amb = 1 - .5 * dim, mx = (Px + Ax) / 2, hy = mix(-.48, -1.08, raise);
+        const armsP = hold > 0 ? [[mix(.18, (mx - Px) / hP, hold), mix(-.42, hy, hold)]] : undefined;
+        const armsA = hold > 0 ? [[mix(-.18, (mx - Ax) / hA, hold), mix(-.42, hy * hP / hA, hold)]] : undefined;
+        figs.push([Py, { who: 'prophet', pose: 'above', x: Px, y: Py, h: hP, t, amb, arms: armsP }, 1.25]);
+        figs.push([Ay, { who: 'ali', pose: 'above', x: Ax, y: Ay, h: hA, t, amb, arms: armsA }, 1]);
       }
-      const breathe = 1 + .05 * Math.sin(t * 1.3);
+      c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
+      const heads = figs.sort((a, b) => a[0] - b[0]).map(([, o, sz]) => [Holy.draw(c, o), sz]);
+      // the discs light the dimmed world around the pulpit a little
       c.globalCompositeOperation = 'lighter';
-      lights.forEach(([x, y, h, I, core, halo, sz]) => {
-        const X0 = SX(x), Y0 = SY(y, h), r = Math.max(1.8 * k, Math.min(8 * k, 1.5 * z)) * sz * breathe * Math.sqrt(I);
-        const g1 = c.createRadialGradient(X0, Y0, 0, X0, Y0, r * 14);
-        g1.addColorStop(0, `rgba(${halo},${.42 * I})`); g1.addColorStop(.18, `rgba(${halo},${.15 * I})`); g1.addColorStop(.5, `rgba(${halo},${.045 * I})`); g1.addColorStop(1, `rgba(${halo},0)`);
-        c.fillStyle = g1; c.fillRect(X0 - r * 14, Y0 - r * 14, r * 28, r * 28);
-        const g0 = c.createRadialGradient(X0, Y0, 0, X0, Y0, r * 40);
-        g0.addColorStop(0, `rgba(${halo},${.1 * I * (.3 + dim)})`); g0.addColorStop(1, `rgba(${halo},0)`);
-        c.fillStyle = g0; c.fillRect(X0 - r * 40, Y0 - r * 40, r * 80, r * 80);
-        const g2 = c.createRadialGradient(X0, Y0, 0, X0, Y0, r * 1.6);
-        g2.addColorStop(0, `rgba(${core},1)`); g2.addColorStop(.45, `rgba(${core},.85)`); g2.addColorStop(1, `rgba(${core},0)`);
-        c.fillStyle = g2; c.fillRect(X0 - r * 2, Y0 - r * 2, r * 4, r * 4);
-        bc.fillStyle = `rgba(${halo},.5)`; bc.beginPath(); bc.arc(X0, Y0, r * 1.6, 0, TAU); bc.fill();
+      heads.forEach(([hd, sz]) => {
+        if (!hd) return;
+        const R = Math.max(14 * k, hd.r * 9) * sz, g1 = c.createRadialGradient(hd.x, hd.y, 0, hd.x, hd.y, R);
+        g1.addColorStop(0, `rgba(243,217,143,${.22 * (.4 + dim)})`); g1.addColorStop(1, 'rgba(243,217,143,0)');
+        c.fillStyle = g1; c.fillRect(hd.x - R, hd.y - R, R * 2, R * 2);
+        bc.fillStyle = `rgba(243,217,143,${.3 + .3 * dim})`; bc.beginPath(); bc.arc(hd.x, hd.y, Math.max(3 * k, hd.r * 3), 0, TAU); bc.fill();
       });
-      const rz = seg(p, .62, .7) * (1 - seg(p, .84, .92));
-      if (rz > 0) {
-        const [a, b] = lights, ax = SX(a[0]), ay = SY(a[1], a[2]), bx = SX(b[0]), by = SY(b[1], b[2]);
-        const lg = c.createLinearGradient(ax, ay, bx, by);
-        lg.addColorStop(0, `rgba(255,246,222,${.5 * rz})`); lg.addColorStop(1, `rgba(243,217,143,${.5 * rz})`);
-        c.strokeStyle = lg; c.lineWidth = Math.max(1.2 * k, .8 * z); c.beginPath(); c.moveTo(ax, ay); c.lineTo(bx, by); c.stroke();
-      }
       const pool = seg(p, .55, .64) * (1 - seg(p, .88, 1));
       if (pool > 0) {
         const X0 = SX(C[0]), Y0 = SY(C[1]), R = 90 * z;
@@ -488,14 +488,6 @@
         const pg2 = c.createRadialGradient(0, 0, 0, 0, 0, R);
         pg2.addColorStop(0, `rgba(255,226,160,${.22 * pool})`); pg2.addColorStop(.4, `rgba(243,200,120,${.08 * pool})`); pg2.addColorStop(1, 'rgba(243,200,120,0)');
         c.fillStyle = pg2; c.fillRect(-R, -R, 2 * R, 2 * R); c.restore();
-      }
-      // the raised light throws a column of soft light down to the pulpit
-      const rs = seg(p, .63, .72) * (1 - seg(p, .9, 1));
-      if (rs > 0) {
-        const X0 = SX(ux), Y0 = SY(uy, top + 10), Y1 = SY(uy, 0);
-        const cg = c.createLinearGradient(0, Y0, 0, Y1);
-        cg.addColorStop(0, `rgba(243,217,143,${.22 * rs})`); cg.addColorStop(1, 'rgba(243,217,143,0)');
-        c.fillStyle = cg; c.fillRect(X0 - 2.5 * z, Y0, 5 * z, Y1 - Y0);
       }
       // bloom
       c.globalAlpha = .8; c.drawImage(st.bloom, 0, 0, W, H); c.globalAlpha = 1;

@@ -3,7 +3,7 @@
 // x to the east, y up, z to the north (toward the mountain). The Muslims stand with the mountain at their backs, the
 // archers on the small hill on their left flank, Quraysh across the plain with their horse on the right wing.
 // Terrain is a heightfield drawn as camera-facing depth bands, far to near. People are faceless silhouettes;
-// the Prophet and Ali are never figures: they are calm lights.
+// the Prophet and Ali are veiled figures with a gold disc behind the head (scenes/holy.js); no face is ever drawn.
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 const norm = (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
@@ -407,17 +407,21 @@ S.uhud = {
       }
       c.fill(); c.globalCompositeOperation = 'source-over';
     }
-    // ----- lights -----
+    // ----- the Prophet and Ali: veiled figures, the gold disc behind the head (scenes/holy.js) -----
+    const dusk = smooth(seg(p, .68, .8)), famb = mix(1, .3, dusk), vs = 1 - Math.abs(sp) * .5;
+    const place = (x, z, m, min) => { const y0 = height(x, z); if (!pj(x, y0, z)) return null; return { x: PX, y: PY, z: PZ, h: Math.max(min, m * F / Math.max(PZ, 6) * vs) }; };
+    const fP = place(PR[0], PR[2], 1.85, 24), fA = place(A[0], A[2], 1.8, 22), heads = [];
+    const figs = [];
+    if (fA) { // Ali fights with Dhul-Fiqar while the battle lasts, facing away from the Prophet; then stands with it at his side
+      const out = fP ? Math.sign(fA.x - fP.x) || 1 : 1, fighting = fight > .2 && p < .64;
+      figs.push([fA.z, () => heads.push([Holy.draw(c, { who: 'ali', pose: fighting ? 'fight' : 'stand', sword: true, phase: (t * (.6 + .5 * press)) % 1, flip: out < 0, x: fA.x, y: fA.y, h: fA.h, t, amb: famb }), .8])]);
+    }
+    if (fP) figs.push([fP.z, () => heads.push([Holy.draw(c, { who: 'prophet', pose: 'stand', x: fP.x, y: fP.y, h: fP.h, t, amb: famb }), 1])]);
+    figs.sort((u, v) => v[0] - u[0]).forEach(([, f]) => f());
     const gl = (x, y, z, r, col, a, min = 0, max = 1e4) => { if (!pj(x, y, z)) return false; const rr = Math.min(max, Math.max(min, r * F / Math.max(PZ, 6))); c.globalAlpha = Math.min(1, a); c.drawImage(tint(col), PX - rr, PY - rr, rr * 2, rr * 2); c.globalAlpha = 1; return true; };
     c.globalCompositeOperation = 'lighter';
-    const dusk = smooth(seg(p, .68, .8)), litA = 1 - .55 * smooth(seg(p, .76, .84));
-    // the Prophet: the largest, stillest light; the few hold close around it
-    const py0 = height(PR[0], PR[2]) + 1.35;
-    if (gl(PR[0], py0, PR[2], 16, '#ffe6bc', (.42 + .2 * dusk) * litA, 52, 380)) { gl(PR[0], py0, PR[2], 4.4, '#fff4dc', .85 * litA, 26, 120); gl(PR[0], py0, PR[2], 1.1, '#ffffff', litA, 5, 26); bc.fillStyle = `rgba(255,240,210,${.55 * litA})`; bc.beginPath(); bc.arc(PX, PY, 26, 0, TAU); bc.fill(); }
-    // Ali: warm and calm, at the edge of the few; it surges a little toward each rush
-    const br = (.94 + .06 * Math.sin(t * 1.3)) * (1 + .25 * press * knotOn) * litA, ay = height(A[0], A[2]);
-    if (pj(A[0], ay + .05, A[2])) { const rr = Math.min(260, Math.max(12, 6 * F / Math.max(PZ, 6))); c.save(); c.translate(PX, PY); c.scale(1, .26); c.globalAlpha = .38 * litA; c.drawImage(tint('#ffc880'), -rr, -rr, rr * 2, rr * 2); c.restore(); c.globalAlpha = 1; }
-    if (gl(A[0], ay + A[1], A[2], 4.5, '#ffb468', .34 * br, 14, 120)) { gl(A[0], ay + A[1], A[2], 1.4, '#ffd896', .8 * br, 5, 36); gl(A[0], ay + A[1], A[2], .35, '#fff6e6', Math.min(1, br), 2.2, 9); bc.fillStyle = `rgba(255,210,150,${.7 * litA})`; bc.beginPath(); bc.arc(PX, PY, 22, 0, TAU); bc.fill(); }
+    // the discs carry a little light into the dust; more as night comes
+    heads.forEach(([hd, k]) => { if (!hd) return; bc.fillStyle = `rgba(255,226,170,${k * (.22 + .45 * dusk)})`; bc.beginPath(); bc.arc(hd.x, hd.y, Math.max(8, hd.r * 4), 0, TAU); bc.fill(); });
     // each rush is turned with one small soft flash at the edge
     rush.forEach(([a, b, g]) => { const f = Math.max(0, 1 - Math.abs(p - (a + .014)) / .008); if (f > 0) gl(PR[0] + Math.cos(GA[g]) * 10, 1.4 + height(PR[0], PR[2]), PR[2] + Math.sin(GA[g]) * 10, 3, '#fff0d2', .6 * f, 14, 120); });
     c.globalAlpha = .7; c.drawImage(st.bloom, 0, 0, W, H); c.globalAlpha = 1;

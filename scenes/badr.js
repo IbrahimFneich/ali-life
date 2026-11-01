@@ -2,7 +2,8 @@
 // badr: the valley of the wells on 17 Ramadan 2 AH, from first light to mid-morning. A pinhole camera over a small
 // world in metres: x to the west, y up, z to the south (the Quraysh side). The sun rises in the east (-x).
 // Terrain is a heightfield drawn as camera-facing depth bands, far to near, with a low sun and haze; the armies stand
-// on the flat valley floor as faceless silhouettes. The Prophet and Ali are never figures: they are calm lights.
+// on the flat valley floor as faceless silhouettes. The Prophet and Ali are veiled figures with a gold disc behind the
+// head (scenes/holy.js); no face is ever drawn.
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 const norm = (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
@@ -153,7 +154,7 @@ S.badr = {
     for (let i = 0; i < 260; i++) { const x0 = (R() - .5) * 300, z0 = 236 + R() * 110; add({ side: 1, kind: R() < .65 ? 4 : 3, x0, z0, x1: x0, z1: z0, x2: x0, z2: z0, d: 0, ph: R() * TAU, ft: 9, fix: 1, dir: R() < .5 ? 1 : -1 }); }
     for (let i = 0; i < 26; i++) { const x0 = (R() - .5) * 280, z0 = 240 + R() * 110; add({ side: 1, kind: 5, x0, z0, x1: x0, z1: z0, x2: x0, z2: z0, d: 0, ph: 0, ft: 9, fix: 1, dir: 1, hs: 1 }); }
     st.F = F;
-    // champions: [x, side, which of the fallen]; the Muslim two are silhouettes, Ali is the light between them
+    // champions: [x, side, which of the fallen]; the Muslim two are silhouettes, Ali is the veiled figure between them
     st.champ = [[-9, 0, -1], [9, 0, -1], [-9, 1, 1], [0, 1, 0], [9, 1, 2]];
     st.ban = [[-52, -15, [226, 214, 186], 0], [-6, -15, [226, 214, 186], 0], [30, -15, [62, 116, 88], 0]];
     for (let i = 0; i < 12; i++) st.ban.push([(R() - .5) * 220, 120 + R() * 70, i % 3 ? [112, 36, 30] : [30, 25, 24], 1, .56 + R() * .07]);
@@ -283,7 +284,7 @@ S.badr = {
       c.fillStyle = wg; path(inn); c.fill();
       c.strokeStyle = rgb(lerp(sunC, haze0, fz), .5); c.lineWidth = 1; path(out); c.stroke();
     });
-    // the shelter on the rise behind the lines, where the Prophet's light rests
+    // the shelter on the rise behind the lines, where the Prophet stands and prays
     const ah = height(ARISH[0], ARISH[2]);
     {
       const top = [], fz0 = pj(ARISH[0], ah, ARISH[2]) ? fogOf(PZ) : 1;
@@ -346,7 +347,7 @@ S.badr = {
       }
       draw(o.side, o.kind, x, z, dir, o.ph + p * 260, moving, o.hs);
     }
-    // the champions: three of Quraysh step out; Hamza and Ubayda beside Ali's light. Al-Walid goes down first.
+    // the champions: three of Quraysh step out; Hamza and Ubayda beside Ali. Al-Walid goes down first.
     if (p > .1 && p < .5) {
       const out = smooth(seg(p, .12, .205)), back = smooth(seg(p, .34, .42));
       st.champ.forEach(([x0, side, fi], j) => {
@@ -423,15 +424,36 @@ S.badr = {
       });
       c.fill(); c.globalCompositeOperation = 'source-over';
     }
-    // ----- lights -----
+    // ----- the Prophet and Ali: veiled figures, the gold disc behind the head (scenes/holy.js) -----
+    const dim = 1 - smooth(c01((elev + 4) / 9)), famb = 1 - .7 * dim, vs = 1 - Math.abs(sp) * .5, heads = [];
+    const place = (x, y, z, m, min) => (pj(x, y, z) ? { x: PX, y: PY, z: PZ, h: Math.max(min, m * F / PZ * vs) } : null);
+    const flipTo = (x, z, dx, dz) => { if (!pj(x, 0, z)) return false; const x0 = PX; return pj(x + dx, 0, z + dz) && PX < x0; }; // does (dx, dz) run to screen-left?
+    const figs = [];
+    // the Prophet in the shelter: he stands, and while the battle lasts he is bowed down in prostration, facing south
+    const fP = place(ARISH[0], ah, ARISH[2], 1.85, 24);
+    if (fP) {
+      const pose = p > .43 && p < .6 ? (p < .445 ? 'ruku' : 'sujud') : 'stand';
+      figs.push([fP.z, () => heads.push([Holy.draw(c, { who: 'prophet', pose, flip: flipTo(ARISH[0], ARISH[2], 0, 5), x: fP.x, y: fP.y, h: fP.h, t, amb: famb }), 1])]);
+    }
+    // Ali: out between Hamza and Ubayda, the strike at al-Walid, then his way through the ranks, a stroke at every few paces
+    const fA = place(A[0], 0, A[2], 1.8, 22);
+    if (fA) {
+      let pose = 'stand', phase = 0, fl = flipTo(A[0], A[2], 0, 5);
+      if (p >= .12 && p < .205) { pose = 'walk'; phase = 53 * smooth(seg(p, .12, .205)) / 1.5; }
+      else if (p >= .268 && p < .3) { pose = 'fight'; phase = .5 * ease.io(seg(p, .268, .283)); }
+      else if (p >= .4 && p < .465) { pose = 'walk'; phase = 6.2 * smooth(seg(p, .4, .465)) / 1.5; }
+      else if (p >= .465 && p < .6) {
+        const u = aliU(p), q = pathAt(Math.min(1, u + .01)), cyc = u * 24, f = cyc % 1;
+        fl = flipTo(A[0], A[2], q[0] - A[0], q[1] - A[2]) || (Math.abs(q[0] - A[0]) + Math.abs(q[1] - A[2]) < .01 && fl);
+        if (f < .45) { pose = 'walk'; phase = (Math.floor(cyc) + f / .45) * .5; } else { pose = 'fight'; phase = (f - .45) / .55; }
+      } else if (p >= .6) { const q = pathAt(.99); fl = flipTo(A[0], A[2], A[0] - q[0], A[2] - q[1]); }
+      figs.push([fA.z, () => heads.push([Holy.draw(c, { who: 'ali', pose, phase, sword: true, flip: fl, x: fA.x, y: fA.y, h: fA.h, t, amb: famb }), .8])]);
+    }
+    figs.sort((u, v) => v[0] - u[0]).forEach(([, f]) => f());
+    // the discs carry a little light into the dawn haze
+    heads.forEach(([hd, k]) => { if (!hd) return; bc.fillStyle = `rgba(255,226,170,${k * (.22 + .45 * dim)})`; bc.beginPath(); bc.arc(hd.x, hd.y, Math.max(8, hd.r * 4), 0, TAU); bc.fill(); });
     const gl = (x, y, z, r, col, a, min = 0, max = 1e4) => { if (!pj(x, y, z)) return false; const rr = Math.min(max, Math.max(min, r * F / Math.max(PZ, 6))); c.globalAlpha = Math.min(1, a); c.drawImage(tint(col), PX - rr, PY - rr, rr * 2, rr * 2); c.globalAlpha = 1; return true; };
     c.globalCompositeOperation = 'lighter';
-    // the Prophet: the largest and stillest light, at the shelter
-    if (gl(ARISH[0], ah + 1.3, ARISH[2], 14, '#ffe6bc', .42, 44, 260)) { gl(ARISH[0], ah + 1.3, ARISH[2], 3.6, '#fff4dc', .8, 14, 80); gl(ARISH[0], ah + 1.3, ARISH[2], .9, '#ffffff', 1, 4, 20); bc.fillStyle = 'rgba(255,240,210,.55)'; bc.beginPath(); bc.arc(PX, PY, 26, 0, TAU); bc.fill(); }
-    // Ali: a calm, warm light, larger than all around it, with a pool on the sand
-    const br = .94 + .06 * Math.sin(t * 1.3);
-    if (pj(A[0], .05, A[2])) { const rr = Math.min(260, Math.max(12, 6 * F / Math.max(PZ, 6))); c.save(); c.translate(PX, PY); c.scale(1, .26); c.globalAlpha = .4; c.drawImage(tint('#ffc880'), -rr, -rr, rr * 2, rr * 2); c.restore(); c.globalAlpha = 1; }
-    if (gl(A[0], A[1], A[2], 6, '#ffbe78', .36 * br, 16, 170)) { gl(A[0], A[1], A[2], 1.8, '#ffe0a8', .8 * br, 6, 48); gl(A[0], A[1], A[2], .45, '#fffaf0', 1, 2.6, 12); bc.fillStyle = 'rgba(255,210,150,.7)'; bc.beginPath(); bc.arc(PX, PY, 22, 0, TAU); bc.fill(); }
     // al-Walid's fall: one soft bloom, no rays
     const fl = Math.max(0, 1 - Math.abs(p - .283) / .01);
     if (fl > 0) { gl(MEET[0], 1.3, MEET[2] + 1.4, 5, '#fff0d2', .8 * fl, 20, 220); c.fillStyle = `rgba(255,226,180,${.05 * fl})`; c.fillRect(0, 0, W, H); }

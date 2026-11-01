@@ -2,14 +2,15 @@
 // muttaqin: Nahj al-Balagha, sermon 193, the description of the God-fearing. One place and one camera: Kufa, from a
 // late afternoon to the next morning, keyed to the 26 clauses in the column on the right.
 //  0–4   the square before the mosque's north gate: a few slow, bowed, plainly dressed figures cross a hurrying,
-//        laden crowd to a ring of listeners round a calm warm light in the shade of the gate.
+//        laden crowd to a ring of listeners round Ali, who stands among them in the shade of the gate.
 //  5–9   the camera lifts until the sky is vast and the town small; sunset; a cool green light over the river
 //        groves in the east, then, after the afterglow has gone, a far ember on the rim of the west.
 //  10–18 dusk in the market street: lamps are lit, the stalls glitter; the glitter reaches for three figures and
 //        falls away from them, closes round one of them and drops; they leave the market light for the gate.
 //  19–21 night in the courtyard: rows form and stand, a faint light rising from the recitation in front of each.
 //  22–25 dawn from the east: first light on the rows, the rows disperse into the town, morning over Kufa.
-// People are faceless silhouettes. Ali is only the warm light in the gate. No text is drawn.
+// People are faceless silhouettes. Ali, standing among them in the gate, is a veiled figure with the gold disc behind
+// the head (scenes/holy.js; no face is ever drawn), and carries the warm light. No text is drawn.
 // World: metres, x right (west), y up, z away from the camera (south, toward the qibla). Zero-pitch camera with a
 // shift lens, as in kufa and mabit: the horizon row moves instead of the camera tilting.
 
@@ -41,7 +42,7 @@ const A = (() => { const sum = WGT.reduce((a, b) => a + b, 0); let acc = 0; retu
 // ---------- the world ----------
 const MW = 36, MN = 40, MQ = 112, WT = 1.2, WH = 7.2, HZ = 88, RF = 7, GW = 2.3, SGZ = 60; // the mosque
 const STR = 4.4, ST0 = -150, ST1 = -8; // the market street: half-width, extent in z
-const ALI = [0, .95, 38.2]; // the light in the shade of the gate
+const ALI = [0, .95, 38.2]; // where he stands in the shade of the gate (x, z), and the height of the warmth he carries
 const ROWZ = [70.5, 69, 67.5, 66, 64.5, 63]; // the rows, front (qibla side) first
 const COLX = [-33, -27, -21, -15, -9, -3, 3, 9, 15, 21, 27, 33];
 const BAYX = [-30, -24, -18, -12, -6, 0, 6, 12, 18, 24, 30];
@@ -287,7 +288,7 @@ S.muttaqin = {
     const mkt = bump(p, .36, .42, .69, .72);               // the market crowd
     const night = smooth(seg(p, .64, .69));                // inside the courtyard
     const ringOn = 1 - smooth(seg(p, .3, .36));             // the listeners in the gate
-    const aliK = (.55 + .45 * smooth(seg(p, A[4] - .01, A[4] + .015))) * ringOn; // his light, brighter as the few arrive
+    const aliK = (.55 + .45 * smooth(seg(p, A[4] - .01, A[4] + .015))) * ringOn; // the warmth he carries, brighter as the few arrive
     const lampK = keys(LAMPK, p);
     const starK = keys(STARK, p);
     const greenK = bump(p, A[8] - .005, A[8] + .02, A[9] - .006, A[9] + .012);
@@ -569,7 +570,8 @@ S.muttaqin = {
         if (sit < .5) people.push({ x, z, o: { base: MAN, alb: [120, 108, 88], thin: .86, dir: -1, bow: bowed, bowMax: .55, sway: u > 0 && u < 1 ? Math.sin(x * 3) * .6 : 0, bob: u > 0 && u < 1 ? Math.abs(Math.sin(x * 3)) * .02 : 0, a: 1, few: 1 } });
         else people.push({ x: m.x1, z: m.z1, o: { base: KNEEL, alb: [120, 108, 88], dir: m.x1 < 0 ? 1 : -1, a: 1, few: 1 } });
       });
-      if (ringOn > 0) st.ring.forEach((r) => people.push({ x: r.x, z: r.z, o: { base: KNEEL, alb: r.alb, dir: r.dir, a: ringOn } }));
+      if (ringOn > 0) st.ring.forEach((r) => { if (Math.abs(r.x - ALI[0]) > .5) people.push({ x: r.x, z: r.z, o: { base: KNEEL, alb: r.alb, dir: r.dir, a: ringOn } }); }); // the ring stays open toward us
+      if (ringOn > 0) people.push({ x: ALI[0], z: ALI[2], o: { holy: 1, a: ringOn } }); // Ali, standing, speaking to the ring
     }
     // the market
     if (mkt > 0) {
@@ -782,6 +784,11 @@ S.muttaqin = {
     // one person
     const figure = (x, z, o) => {
       const d = z - cz; if (d < .9 || o.a <= .01) return;
+      if (o.holy) { // Ali: a veiled figure (scenes/holy.js), 1.8 m, never under 20 css px, sorted with the ring
+        const h = Math.max(20 * k, 1.8 * F / d);
+        st._aliHead = Holy.draw(c, { who: 'ali', pose: 'stand', x: X(x, z), y: Y(0, z), h, t, amb: mix(.45, .85, sunVis), alpha: o.a });
+        return;
+      }
       const s = F / d * (o.h || 1), bx = X(x, z), by = Y(0, z) - (o.bob || 0) * s;
       if (bx < -s || bx > W + s || by < 0 || by - 2.1 * s > H) return;
       const fo = fogOf(d), L = lit(x, 1.2, z);
@@ -832,13 +839,14 @@ S.muttaqin = {
 
     // ================= lights in the air =================
     c.globalCompositeOperation = 'lighter';
-    // Ali: calm, warm, larger than every other light, in the shade of the gate
-    if (aliK > 0 && ALI[2] - cz > 1) {
-      const d = ALI[2] - cz, s = F / d, x = X(ALI[0], ALI[2]), y = Y(ALI[1], ALI[2]), br = .94 + .06 * Math.sin(t * 1.1);
-      glow(x, y, Math.min(W * .5, s * 5.5), st.ali, .3 * aliK * br);
-      glow(x, y, Math.max(3, s * 1.4), st.ali, .65 * aliK * br);
-      glow(x, y, Math.max(2, s * .34), st.core, .95 * aliK);
+    // the warmth Ali carries, larger than every other light, in the shade of the gate; a soft bloom at the disc
+    const hd = aliK > 0 && ALI[2] - cz > 1 ? st._aliHead : null;
+    if (hd) {
+      const s = F / (ALI[2] - cz), br = .94 + .06 * Math.sin(t * 1.1);
+      glow(hd.x, hd.y, Math.min(W * .5, s * 5.5), st.ali, .24 * aliK * br);
+      glow(hd.x, hd.y, Math.max(6 * k, hd.r * 5), st.ali, .3 * aliK * br);
     }
+    st._aliHead = null;
     if (gateK > 0 && MN - .4 - cz > 1) { const d = MN - .4 - cz, ss = F / d, x = X(0, MN - .4), y = Y(3.6, MN - .4), fl = .9 + .1 * Math.sin(t * 6.1); glow(x, y, ss * 3, st.warm, .35 * gateK * fl); glow(x, y, ss * .45, st.warm, .6 * gateK * fl); glow(x, y, Math.max(1.5, ss * .1), st.core, gateK); }
     // stall lamps
     if (mkt > 0) st.stalls.forEach((s, j) => {

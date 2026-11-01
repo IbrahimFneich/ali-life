@@ -1,12 +1,14 @@
 // الوداع: the night of 28 Safar 11 AH in Medina. The mosque's courtyard under the stars, the palm portico on the
 // qibla side, and in the east wall the doors of the Prophet's rooms; one of them is lit. The camera crosses the
 // courtyard and goes in. A low room of mud brick under a roof of palm trunks and fronds; a small clay lamp in a niche.
-// The Prophet ﷺ is a calm, large, warm light resting on the mat; Ali is a smaller light close at its head, holding
-// it. The lamp burns lower as the words come. At «سالت نفسه في كفّي» the great light rises, softly, and goes up
-// through the roof as a column and is gone. The room dims; Ali's light stays. The camera draws back out through the
-// door: the courtyard has filled with small lights, people come in the night. A thin old moon is rising in the east.
+// The Prophet ﷺ and Ali are veiled figures with the gold disc behind the head (scenes/holy.js); no face is ever
+// drawn. The Prophet lies on the bed, his head raised and held by Ali, who sits at his head. The lamp burns lower as
+// the words come. At «سالت نفسه في كفّي» a column of light rises from where he lies, softly, up through the roof,
+// and his figure fades from the bed as it goes; the body does not rise. The room dims; Ali stays seated. The camera
+// draws back out through the door: the courtyard has filled with small lights, people come in the night. A thin old
+// moon is rising in the east.
 // World in metres: x right (south, the qibla side), y up, z away from the camera (east). Zero-pitch camera with a
-// shift lens, as in mabit and kufa. No one is drawn: every person is a point of light.
+// shift lens, as in mabit and kufa. The people in the courtyard are points of light.
 (() => {
   const rgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
   const mixc = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
@@ -34,8 +36,9 @@
   const WALLH = 3.05; // the mosque's east wall, in which the doors stand
   const DOORS = [-8.4, -4.2, 4.2, 8.4]; // the other rooms' doors, curtained
   const BED = { x0: -1.45, x1: .5, z0: 2.9, z1: 3.78, y: .07 };
-  const PRO = [-.35, .42, 3.36]; // the Prophet's light, resting
-  const ALI = [-.8, .58, 3.26]; // Ali's light, at the head, holding him
+  const PRO = [-.35, .42, 3.36]; // the warmth over the Prophet's bed, and where the column rises
+  const ALI = [-.8, .58, 3.26]; // the warmth at his head, where Ali holds him
+  const PRO_AT = [-.494, 3.36], ALI_AT = [-1.45, 3.62]; // the figures' ground points [x, z]: his head on the pillow, Ali behind it
   const LAMP = [1.15, .98, RZ - .12];
   const T = [-.45, .4, 3.35]; // the camera's aim
   const CAM = [ // [p, x, height, z, focal, aim screen x, aim screen y]
@@ -251,18 +254,22 @@
         }
         // the woven mat and the low bed on it
         mat();
-        // the lights: the great one rests, then rises and goes; the smaller one holds it and stays
-        c.globalCompositeOperation = 'lighter';
-        if (proI > .01) {
-          const [sx, sy] = P(PRO[0], proY, PRO[2]), s = F / (PRO[2] - cz);
-          const ell = 1 - .65 * rise, melt = 1 - .85 * c01(col * 1.4); // elongated where it rests; it becomes the column as it rises
-          c.save(); c.translate(sx, sy); c.scale(1 + 1.2 * ell, 1); c.globalAlpha = 1;
-          halo(0, 0, Math.min(W * .3, 1.15 * s), st.warm, (.55 - .2 * rise) * proI * melt);
-          halo(0, 0, Math.min(W * .14, .42 * s), st.warm, (.75 - .3 * rise) * proI * melt);
-          halo(0, 0, Math.min(W * .05, .13 * s), st.glow, .95 * proI * melt);
-          c.restore();
-          halo(sx, sy, Math.min(W * .7, 3.2 * s), st.warm, .14 * proI * (.4 + .6 * melt));
+        // the Prophet and Ali, veiled figures: Ali sits behind his head with his sleeves to it; the Prophet lies with his
+        // head raised against him. At the passing his figure fades from the bed as the column rises (the body does not
+        // rise), and Ali's hands come back to his lap
+        const fig = (x, z, m) => { const d = z - cz; if (d < .3) return null; const [sx, sy] = P(x, BED.y, z); return { x: sx, y: sy, h: m * F / d }; };
+        const fA = fig(ALI_AT[0], ALI_AT[1], 1.8), fP = fig(PRO_AT[0], PRO_AT[1], 1.85);
+        const oP = fP && { who: 'prophet', pose: 'lie', raise: 1, x: fP.x, y: fP.y, h: fP.h, t, amb: .75, alpha: proI };
+        let hP = null, hA = null;
+        if (fA) {
+          const hd = oP ? Holy.head(oP) : null, k = hd ? gone : 1, tx = hd ? (hd.x - fA.x) / fA.h : 0, ty = hd ? (hd.y - fA.y) / fA.h : -.1;
+          const arms = [[mix(tx - .035, -.1, k), mix(ty + .015, -.1, k)], [mix(tx + .05, .1, k), mix(ty - .01, -.1, k)]];
+          hA = Holy.draw(c, { who: 'ali', pose: 'sit', x: fA.x, y: fA.y, h: fA.h, t, amb: .75, arms });
         }
+        if (oP && proI > .01) hP = Holy.draw(c, oP);
+        c.globalCompositeOperation = 'lighter';
+        if (hP) halo(hP.x, hP.y, Math.min(W * .3, hP.r * 7), st.warm, .3 * proI); // a soft warm bloom at each disc
+        if (hA) halo(hA.x, hA.y, Math.min(W * .25, hA.r * 6), st.warm, .22 * aliI);
         if (col > .01) { // the column: soft, from where he lay up through the roof
           const [bx, by] = P(PRO[0], .3, PRO[2]), [, ty2] = P(PRO[0], RH + 4, PRO[2]), s = F / (PRO[2] - cz), w = .55 * s;
           const top = Math.max(-H * .5, ty2), hh = by - top;
@@ -274,10 +281,6 @@
             const [mx, my] = P(x, y, z); halo(mx, my, Math.max(1.5, .025 * s), st.glow, .5 * col * Math.sin(Math.PI * u));
           }
         }
-        { const [sx, sy] = P(ALI[0], ALI[1], ALI[2]), s = F / (ALI[2] - cz);
-          halo(sx, sy, Math.min(W * .2, .75 * s), st.warm, .4 * aliI);
-          halo(sx, sy, Math.min(W * .06, .2 * s), st.warm, .7 * aliI);
-          halo(sx, sy, Math.min(W * .025, .06 * s), st.glow, .9); }
         c.globalCompositeOperation = 'source-over';
         if (!full) return;
         // the room going dim

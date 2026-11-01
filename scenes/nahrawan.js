@@ -1,7 +1,8 @@
 // Nahrawan, 38 AH. The flat alluvial land east of the Tigris: a canal between raised spoil banks, a brick bridge,
 // palms on the far bank. The Khawarij camp lies on the near bank beside the water; Ali's army comes across the plain;
 // the battle is fought on the near side and never crosses the water; a few flee along the bank, a few of Ali's
-// lights go down; at dusk a calm light walks slowly among the fallen.
+// lights go down; at dusk Ali walks slowly among the fallen and stops. Ali is a veiled figure with a gold disc behind
+// the head (scenes/holy.js); no face is ever drawn. Everyone else is a point of light or a faceless silhouette.
 // World units (about half a metre): x east (right), z north (away), y up. The canal runs across at z = ZC0..ZC1.
 // The camera has yaw but no pitch or roll, so the horizon stays level.
 (() => {
@@ -51,11 +52,21 @@
   const hash = (n) => { const v = Math.sin(n * 91.7) * 43758.5453; return v - Math.floor(v); };
   const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
   const sprite = (stops) => { const c = mk(64, 64), g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); stops.forEach(([o, s]) => gr.addColorStop(o, s)); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c; };
-  // the dusk search: the calm light walks among the fallen and stops
+  // the dusk search: Ali walks among the fallen and stops
   const SEARCH = [[40, 1340], [-40, 1396], [-140, 1428], [-206, 1470], [-130, 1500], [-10, 1468], [80, 1488], [36, 1522]];
+  const SLEN = SEARCH.slice(1).map((q, i) => Math.hypot(q[0] - SEARCH[i][0], q[1] - SEARCH[i][1]));
   const walkAt = (P, u) => {
     const n = P.length - 1, s = c01(u) * n, i = Math.min(n - 1, Math.floor(s)), k = smooth(s - i);
-    return [mix(P[i][0], P[i + 1][0], k), mix(P[i][1], P[i + 1][1], k)];
+    return [mix(P[i][0], P[i + 1][0], k), mix(P[i][1], P[i + 1][1], k), SLEN.slice(0, i).reduce((a, b) => a + b, 0) + k * SLEN[i]];
+  };
+  // Ali's ground point at p, and how far he has walked (it drives his steps, so he stops when the path stops)
+  const L1 = Math.hypot(30, ZF - 110), L2 = Math.hypot(SEARCH[0][0] + 90, SEARCH[0][1] - ZF + 54);
+  const aliAt = (p) => {
+    const press = smooth(seg(p, .47, .58));
+    if (p < .72) { const a = ease.io(seg(p, .17, .36)); return [mix(-60, -90, a), mix(40, ZF - 70, a) + press * 16, a * L1]; }
+    if (p < .76) { const a = smooth(seg(p, .72, .76)); return [mix(-90, SEARCH[0][0], a), mix(ZF - 70 + 16, SEARCH[0][1], a), L1 + a * L2]; }
+    const [x, z, d] = walkAt(SEARCH, ease.io(seg(p, .76, .9)));
+    return [x, z, L1 + L2 + d];
   };
 
   S.nahrawan = {
@@ -519,6 +530,15 @@
         });
         c.globalAlpha = 1;
       }
+      // ---------- Ali: a veiled figure, the gold disc behind the head (scenes/holy.js) ----------
+      // drawn over the battle dust so he stays easy to find. He marches with the army, stands behind the line with
+      // Dhul-Fiqar at his side, and at dusk walks the field and stops
+      const on = seg(p, .17, .22), [ax, az, ad] = aliAt(p), walking = aliAt(p + .004)[2] - ad > .5;
+      let aliHead = null;
+      if (on > 0 && pj(ax, 0, az)) {
+        c.globalAlpha = 1;
+        aliHead = Holy.draw(c, { who: 'ali', pose: walking ? 'walk' : 'stand', phase: ad / 6, sword: true, x: PX, y: PY, h: Math.max(22 * k, 4 * F / PZ), t, amb: 1 - .5 * dusk - .25 * night, alpha: on });
+      }
       if (fight > 0) {
         c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
         const dens = fight * .5;
@@ -550,31 +570,21 @@
         lg.addColorStop(0, `rgba(243,226,170,${.16 * I * c01(q * 3)})`); lg.addColorStop(1, 'rgba(243,226,170,0)');
         c.globalAlpha = 1; c.fillStyle = lg; c.fillRect(X0 - Math.max(.5, .3 * s), Y0 - 12 * s, Math.max(1, .6 * s), 12 * s);
       }
-      // ---------- Ali: a calm warm light, larger than the rest ----------
-      {
-        const on = seg(p, .17, .22);
-        let ax, az;
-        if (p < .72) { const a = ease.io(seg(p, .17, .36)); ax = mix(-60, -90, a); az = mix(40, ZF - 70, a) + press * 16; }
-        else { const u = ease.io(seg(p, .76, .9)); [ax, az] = walkAt(SEARCH, u); if (p < .76) { const a = smooth(seg(p, .72, .76)); ax = mix(-90, SEARCH[0][0], a); az = mix(ZF - 70 + 16, SEARCH[0][1], a); } }
-        const found = smooth(seg(p, .895, .93));
-        if (on > 0 && pj(ax, 2.4, az)) {
-          const s = F / PZ, X0 = PX, Y0 = PY, I = on * (1 + .25 * dusk + .35 * found * (1 - .3 * Math.sin(Math.PI * seg(p, .9, .99))));
-          const R = Math.max(5 * k, 3.4 * s);
-          c.globalAlpha = Math.min(1, .5 * I); c.drawImage(st.warm, X0 - R * 9, Y0 - R * 9, R * 18, R * 18);
-          c.globalAlpha = Math.min(1, .9 * I); c.drawImage(st.warm, X0 - R * 2.4, Y0 - R * 2.4, R * 4.8, R * 4.8);
-          // the pool of light it throws on the ground
-          if (pj(ax, 0, az)) { const gr = 44 * F / PZ; c.globalAlpha = .38 * I * (.4 + .6 * dusk); c.drawImage(st.warm, PX - gr, PY - gr * .3, gr * 2, gr * .6); }
-          c.globalAlpha = 1;
-          bc.fillStyle = `rgba(255,240,210,${.5 * I})`; bc.beginPath(); bc.arc(X0, Y0, Math.min(R * 3, 40 * k), 0, TAU); bc.fill();
-          // torches that walk with him at dusk
-          if (dusk > .05) st.torch.forEach((T) => {
-            const u = ease.io(seg(p, .76 + T.lag, .9 + T.lag)), [tx, tz] = p < .76 ? [ax, az] : walkAt(SEARCH, u);
-            if (!pj(tx + T.dx, 3.2, tz + T.dz)) return;
-            const fk = .8 + .2 * Math.sin(t * 9 + T.ph) * Math.sin(t * 5.3 + T.ph * 2), R2 = Math.max(2.5 * k, 2.2 * F / PZ) * fk;
-            c.globalAlpha = Math.min(1, .8 * dusk); c.drawImage(st.fire, PX - R2 * 4, PY - R2 * 4, R2 * 8, R2 * 8); c.globalAlpha = 1;
-            bc.fillStyle = `rgba(255,170,90,${.4 * dusk})`; bc.beginPath(); bc.arc(PX, PY, Math.min(R2 * 3, 14 * k), 0, TAU); bc.fill();
-          });
-        }
+      // Ali's disc lights the dusk a little, more once he has found him; the pool at his feet; torches walk with him
+      if (aliHead) {
+        const found = smooth(seg(p, .895, .93)), I = on * (.35 + .5 * dusk + .35 * found * (1 - .3 * Math.sin(Math.PI * seg(p, .9, .99))));
+        const R = Math.max(10 * k, aliHead.r * 5);
+        c.globalAlpha = Math.min(1, .45 * I); c.drawImage(st.warm, aliHead.x - R * 3, aliHead.y - R * 3, R * 6, R * 6);
+        if (pj(ax, 0, az)) { const gr = 44 * F / PZ; c.globalAlpha = .38 * I * (.4 + .6 * dusk); c.drawImage(st.warm, PX - gr, PY - gr * .3, gr * 2, gr * .6); }
+        c.globalAlpha = 1;
+        bc.fillStyle = `rgba(255,236,200,${.4 * I})`; bc.beginPath(); bc.arc(aliHead.x, aliHead.y, Math.min(R * 1.5, 40 * k), 0, TAU); bc.fill();
+        if (dusk > .05) st.torch.forEach((T) => {
+          const u = ease.io(seg(p, .76 + T.lag, .9 + T.lag)), [tx, tz] = p < .76 ? [ax, az] : walkAt(SEARCH, u);
+          if (!pj(tx + T.dx, 3.2, tz + T.dz)) return;
+          const fk = .8 + .2 * Math.sin(t * 9 + T.ph) * Math.sin(t * 5.3 + T.ph * 2), R2 = Math.max(2.5 * k, 2.2 * F / PZ) * fk;
+          c.globalAlpha = Math.min(1, .8 * dusk); c.drawImage(st.fire, PX - R2 * 4, PY - R2 * 4, R2 * 8, R2 * 8); c.globalAlpha = 1;
+          bc.fillStyle = `rgba(255,170,90,${.4 * dusk})`; bc.beginPath(); bc.arc(PX, PY, Math.min(R2 * 3, 14 * k), 0, TAU); bc.fill();
+        });
       }
       // the army's fires at dusk, out on the plain
       if (dusk > .05) {

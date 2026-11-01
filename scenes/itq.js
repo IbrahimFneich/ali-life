@@ -3,6 +3,8 @@
 // rows by one cord; one by one the cord falls from them and they walk out along the palm-lined paths into the sunrise.
 // The DOM counter is the number whose release has come: each of the thousand has its own release p, set in init.
 // World in metres: x right, y up, z east (towards the sunrise). Pinhole camera; people and palms bucketed by distance.
+// Ali works the well: a veiled figure with a gold disc behind the head (scenes/holy.js); no face is ever drawn. The
+// thousand are faceless silhouettes.
 (() => {
   const rgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
   const mixc = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
@@ -478,7 +480,7 @@
           if (hpx > 30 * k) { open(rgb(mixc([16, 14, 20], fogC, fogB), .4), false); each(() => true, (q) => { const w = FSz[q] * .2 * st.wf[q]; c.moveTo(FX[q] + w, FY[q]); c.ellipse(FX[q], FY[q], w, w * .28, 0, 0, TAU); }); done(); }
           // the rim: dawn behind them, so a thin bright edge over the head and on the sun's side
           open(rgb(rimCol(dB), .3 + .6 * warm), false); each(() => true, (q) => fig(q, sunSide * .016, -.011)); done();
-          // his light on the side that faces him
+          // the warm light of his disc on the side that faces him
           open(rgb([255, 206, 140], .7 * (1 - .4 * day)), false);
           each((q) => Math.hypot(X[q] - LIGHT[0], Z[q] - LIGHT[2]) < 9, (q) => fig(q, (Math.sign(lightScr[0] - FX[q]) || 1) * .02, -.004)); done();
           for (let tn = 0; tn < 5; tn++) { open(rgb(figCol(tn, dB)), false); each((q) => st.tone[q] === tn, (q) => fig(q)); done(); }
@@ -494,10 +496,12 @@
       };
 
       // ---------- the farm: hut, well, a low wall, drawn among the buckets by distance ----------
-      const items = [];
+      const items = [], lift = .5 + .5 * Math.sin(p * 46); // the well's bucket, up and down with the scroll
+      let aliHead = null;
       const dist = (x, y, z) => Math.hypot(x - ex, y - ey, z - ez);
       items.push([dist((HUT[0] + HUT[1]) / 2, 1.3, HUT[3]), () => hut()]);
       items.push([dist(WELL[0], .5, WELL[1] - 1), () => well()]);
+      items.push([dist(LIGHT[0], .9, LIGHT[2]), () => ali()]);
       [[-17, -12, -17, 46], [-17, 46, -3, 46]].forEach(([x0, z0, x1, z1]) => { const n = Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 6); for (let q = 0; q < n; q++) { const a = mix(x0, x1, q / n), b = mix(z0, z1, q / n), a2 = mix(x0, x1, (q + 1) / n), b2 = mix(z0, z1, (q + 1) / n); items.push([dist((a + a2) / 2, .6, (b + b2) / 2), () => wallSeg(a, b, a2, b2)]); } });
       items.sort((m, n) => n[0] - m[0]);
       const shadeW = (alb, n) => { const l = Math.max(0, n); return [tone(alb[0] * (amb[0] + sunC[0] * l)), tone(alb[1] * (amb[1] + sunC[1] * l)), tone(alb[2] * (amb[2] + sunC[2] * l))]; };
@@ -541,15 +545,31 @@
         pr(wx - rO - .3, 2.6, wz, T0); pr(wx + rO + .3, 2.6, wz, T1); c.beginPath(); c.moveTo(T0[0], T0[1]); c.lineTo(T1[0], T1[1]); c.stroke();
         const s = F / Math.max(1, dist(wx, 2.3, wz));
         pr(wx, 2.32, wz, O); c.lineWidth = Math.max(1, .06 * s); c.beginPath(); c.arc(O[0], O[1], .22 * s, 0, TAU); c.stroke();
-        // the bucket is drawn up as his light works the well
-        const lift = .5 + .5 * Math.sin(p * 46);
+        // the bucket is drawn up as he hauls on the rope (ali() draws his side of it)
         const by = mix(.2, 1.5, lift);
         c.strokeStyle = rgb(mixc([150, 124, 84], fogC, .05)); c.lineWidth = Math.max(1, .02 * s);
-        pr(wx + .22, 2.32, wz, T0); pr(wx + .22, by + .4, wz, T1); c.beginPath(); c.moveTo(T0[0], T0[1]); c.lineTo(T1[0], T1[1]); c.stroke();
-        pr(wx + .22, by + .2, wz, O); c.fillStyle = rgb(mixc([70, 50, 36], fogC, .05)); c.beginPath(); c.ellipse(O[0], O[1], .2 * s, .2 * s, 0, 0, TAU); c.fill();
+        pr(wx - .22, 2.32, wz, T0); pr(wx - .22, by + .4, wz, T1); c.beginPath(); c.moveTo(T0[0], T0[1]); c.lineTo(T1[0], T1[1]); c.stroke();
+        pr(wx - .22, by + .2, wz, O); c.fillStyle = rgb(mixc([70, 50, 36], fogC, .05)); c.beginPath(); c.ellipse(O[0], O[1], .2 * s, .2 * s, 0, 0, TAU); c.fill();
         // the trough
         boxF(wx + 1.3, wx + 3.1, 0, .45, wz - .5, wz + .5, [.5, .45, .4]);
         c.beginPath(); if (quadW(wx + 1.45, .43, wz - .35, wx + 2.95, .43, wz - .35, wx + 2.95, .43, wz + .35, wx + 1.45, .43, wz + .35)) { c.fillStyle = rgb(mixc(skyHor, [40, 50, 70], .35)); c.fill(); }
+      }
+      // Ali at the well, hauling the rope over the pulley: his hands come down as the bucket comes up
+      function ali() {
+        const [ax, , az] = LIGHT, zg = CZ(ax, 0, az); if (zg < .5) return;
+        const gx = cx + F * CX(ax, 0, az) / zg, gy = cy - F * CY(ax, 0, az) / zg, h = Math.max(22 * k, 1.8 * F / zg);
+        const ux = (WELL[0] - ax) * .16, uz = (WELL[1] - az) * .16, hy = mix(1.72, 1.08, lift); // a step toward the well
+        const H1 = [ax + ux, hy, az + uz], H2 = [ax + ux * .7, hy - .26, az + uz * .7], hand = [[0, 0], [0, 0]];
+        if (!pr(H1[0], H1[1], H1[2], hand[0]) || !pr(H2[0], H2[1], H2[2], hand[1])) return;
+        // the rope: off the pulley, through both hands, its tail slack to the ground
+        c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
+        c.strokeStyle = rgb(mixc([150, 124, 84], fogC, .05)); c.lineWidth = Math.max(1, .02 * F / zg); c.lineCap = 'round';
+        if (pr(WELL[0] + .22, 2.32, WELL[1], T0) && pr(ax + ux * .4, .02, az + uz * .4, T1)) {
+          c.beginPath(); c.moveTo(T0[0], T0[1]); c.lineTo(hand[0][0], hand[0][1]); c.lineTo(hand[1][0], hand[1][1]);
+          c.quadraticCurveTo(hand[1][0], T1[1], T1[0], T1[1]); c.stroke();
+        }
+        const arms = hand.map(([x, y], i) => [i ? Math.max((x - gx) / h, .03) : Math.min((x - gx) / h, -.03), (y - gy) / h]); // one hand per shoulder
+        aliHead = Holy.draw(c, { who: 'ali', pose: 'stand', x: gx, y: gy, h, t, amb: mix(.3, 1, Math.min(1, day * .8 + warm * .2)), arms });
       }
       let bcur = NB - 1;
       for (const [d, fn] of items) { const bb = bucket(d); while (bcur > bb) flush(bcur--); fn(); }
@@ -586,20 +606,13 @@
           c.fillStyle = g; c.beginPath(); c.moveTo(sunHx, hy); c.lineTo(sunHx + Math.cos(a - .045) * L2, hy + Math.sin(a - .045) * L2); c.lineTo(sunHx + Math.cos(a + .045) * L2, hy + Math.sin(a + .045) * L2); c.fill();
         }
       }
-      // his light by the well: calm, warm, larger than any other
-      {
-        const zc = CZ(LIGHT[0], LIGHT[1], LIGHT[2]);
-        if (zc > .5) {
-          const X0 = lightScr[0], Y0 = lightScr[1], s = F / zc, br = 1 + .04 * Math.sin(t * 1.3), r = Math.max(1.8 * k, .1 * s) * br;
-          const night = 1 - day * .6;
-          halo(X0, Y0, Math.min(H * .6, Math.max(r * 16, 3.2 * s)), st.warm, .32 * night);
-          halo(X0, Y0, Math.max(r * 3.4, .45 * s), st.pale, .55);
-          halo(X0, Y0, r * 2.2, st.glow, .8);
-          bc.fillStyle = 'rgba(255,226,170,.9)'; bc.beginPath(); bc.arc(X0, Y0, r * 2.8, 0, TAU); bc.fill();
-          // the light it throws on the ground and the water by the well
-          const zg = CZ(LIGHT[0], 0, LIGHT[2]);
-          if (zg > .5) { const gx = cx + F * CX(LIGHT[0], 0, LIGHT[2]) / zg, gy = cy - F * CY(LIGHT[0], 0, LIGHT[2]) / zg, R2 = 7 * F / zg; c.globalAlpha = .28 * night; c.drawImage(st.warm, gx - R2, gy - R2 * .3, R2 * 2, R2 * .6); c.globalAlpha = 1; }
-        }
+      // his disc by the well: a soft warm bloom in the last of the night, and its light on the ground
+      if (aliHead) {
+        const night = 1 - day * .6, R = Math.max(6 * k, aliHead.r * 3);
+        halo(aliHead.x, aliHead.y, R * 5, st.warm, .12 * night);
+        bc.fillStyle = `rgba(255,226,170,${.18 * night})`; bc.beginPath(); bc.arc(aliHead.x, aliHead.y, R * 1.4, 0, TAU); bc.fill();
+        const zg = CZ(LIGHT[0], 0, LIGHT[2]);
+        if (zg > .5) { const gx = cx + F * CX(LIGHT[0], 0, LIGHT[2]) / zg, gy = cy - F * CY(LIGHT[0], 0, LIGHT[2]) / zg, R2 = 7 * F / zg; c.globalAlpha = .2 * night; c.drawImage(st.warm, gx - R2, gy - R2 * .3, R2 * 2, R2 * .6); c.globalAlpha = 1; }
       }
       // the lamp in the hut's door, burning down
       { const zc = CZ(HUT[0] + 2.85, 1.2, HUT[2] - .1); if (zc > 1) { const X0 = cx + F * CX(HUT[0] + 2.85, 1.2, HUT[2] - .1) / zc, Y0 = cy - F * CY(HUT[0] + 2.85, 1.2, HUT[2] - .1) / zc; halo(X0, Y0, Math.max(3 * k, 1.4 * F / zc), st.warm, .55 * (1 - day)); } }

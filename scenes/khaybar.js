@@ -1,6 +1,7 @@
 (() => {
 // khaybar: the gate of al-Qamus at dawn. A pinhole camera over a small 3D world (metres; x right, y up, z toward
-// the fortress). The door is the hero: an extruded, iron-bound slab with a keyed, weighty pose. People are lights.
+// the fortress). The door is the hero: an extruded, iron-bound slab with a keyed, weighty pose. People are lights, except
+// Ali: a veiled figure with a gold disc behind the head (scenes/holy.js); no face is ever drawn.
 const v3 = {
   sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
   add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
@@ -75,6 +76,7 @@ function rotM(yaw, pitch, tilt = 0, roll = 0) { // R = Ry(yaw) · Rx(pitch) · R
   return ap;
 }
 const HINGE = [-DW, DC, GATE.z];
+const HOLD = 2.35; // the door's centre height held overhead: its underside just above a 1.8 m man's raised hands
 const REST = [1.6, DT, 37.2];
 function doorPose(p) {
   let C = [0, DC, GATE.z], yaw = 0, pitch = 0, tilt = 0, roll = 0;
@@ -87,9 +89,9 @@ function doorPose(p) {
   // hinges tear: it lurches out of the arch
   const lu = smooth(seg(p, .468, .488));
   C = [C[0], C[1], C[2] - .7 * lu]; pitch -= .07 * lu; roll += .045 * lu;
-  // it rises, heavy, turning toward the horizontal
+  // it rises, heavy, turning toward the horizontal, onto his raised hands
   const ri = heavy(seg(p, .488, .578));
-  if (ri > 0) { C = v3.mix(C, [0, 5.7, 57.7], ri); pitch = mix(pitch, Math.PI / 2, ri); roll = mix(roll, 0, ri); pitch += .02 * Math.sin(p * 140) * smooth(seg(p, .56, .6)) * (1 - smooth(seg(p, .6, .62))); }
+  if (ri > 0) { C = v3.mix(C, [0, HOLD, 57.7], ri); pitch = mix(pitch, Math.PI / 2, ri); roll = mix(roll, 0, ri); pitch += .02 * Math.sin(p * 140) * smooth(seg(p, .56, .6)) * (1 - smooth(seg(p, .6, .62))); }
   // held as a shield: turned upright, its inner face toward us
   const sd = heavy(seg(p, .6, .652));
   if (sd > 0) { C = v3.mix(C, [.2, 3.05, 55.4], sd); pitch = mix(pitch, .05, sd); yaw = mix(yaw, Math.PI - .32, sd); }
@@ -112,17 +114,20 @@ function doorPose(p) {
   return { C, R: rotM(yaw, pitch, tilt, roll), lift: up };
 }
 
-// ---------- the lights ----------
+// ---------- Ali and Marhab ----------
 const ALI0 = [-8.1, 1.0, 9.5], MEET = [-.2, 1.35, 45];
 function aliAt(p) {
   if (p < .15) return ALI0;
   if (p < .25) return crv([ALI0, [-4.6, 1.3, 26], [-1.4, 1.35, 41], [-.9, 1.35, 45]], 3 * smooth(seg(p, .15, .25)));
   if (p < .29) { const a = Math.PI + seg(p, .245, .29) * TAU * 1.15, r = mix(.9, .55, seg(p, .245, .29)); return [MEET[0] + Math.cos(a) * r, 1.35 + .08 * Math.sin(a * 2), MEET[2] + Math.sin(a) * r * .7]; }
-  if (p < .37) return crv([[-.55, 1.35, 45], [-.3, 1.3, 49], [0, 1.25, 53], [0, 1.25, 57.2]], 3 * smooth(seg(p, .305, .37)));
-  if (p < .6) return [0, 1.25, 57.2];
+  if (p < .37) return crv([[-.55, 1.35, 45], [-.3, 1.3, 49], [0, 1.25, 53], [0, 1.25, 58.7]], 3 * smooth(seg(p, .305, .37)));
+  if (p < .6) return [0, 1.25, mix(58.7, 57.2, smooth(seg(p, .488, .53)))]; // hands on the door; he steps back as it comes down onto him
   if (p < .72) return v3.mix([0, 1.25, 57.2], [.15, 1.25, 54.2], smooth(seg(p, .6, .645)));
   return crv([[.15, 1.25, 54.2], [0, 1.25, 56.5], [0, 1.25, 59], [0, 1.25, 62]], 3 * smooth(seg(p, .72, .775)));
 }
+// how far Ali has walked by p (metres): it drives his steps, so he stops when the path stops
+const ALID = (() => { const n = 1000, d = new Float32Array(n + 1); let q = aliAt(0); for (let i = 1; i <= n; i++) { const a = aliAt(i / n); d[i] = d[i - 1] + Math.hypot(a[0] - q[0], a[2] - q[2]); q = a; } return d; })();
+const aliDist = (p) => { const f = c01(p) * 1000, i = Math.min(999, Math.floor(f)); return mix(ALID[i], ALID[i + 1], f - i); };
 function marhabAt(p) {
   const IN = [.3, 1.4, 61.6];
   if (p < .245) return crv([IN, [.3, 1.38, 58.5], [.4, 1.36, 52], [.7, 1.35, 46.8]], 3 * smooth(seg(p, .165, .245)));
@@ -227,6 +232,11 @@ S.khaybar = {
     items.push({ d: gh.d - .01, gate: true });
     const doorFree = p > .47;
     items.push({ d: doorFree ? Math.hypot(pose.C[0] - eye[0], pose.C[1] - eye[1], pose.C[2] - eye[2]) - 2 : gh.d - .02, door: true });
+    const aa = 1 - smooth(seg(p, .745, .775)), A = aliAt(p);
+    if (aa > 0) { // kept in front of the gate hole as he walks into it, and in front of the door while it is at his back
+      const doorD = items[items.length - 1].d;
+      items.push({ d: Math.min(Math.hypot(A[0] - eye[0], .9 - eye[1], A[2] - eye[2]), gh.d - .015, pose.C[2] > A[2] - .3 ? doorD - .01 : 1e9), ali: true });
+    }
     items.sort((a, b) => b.d - a.d);
     const sunK = mix(.55, 1, dawn), amb = mix(.24, .5, dawn);
     const basalt = [36, 35, 45], sunCol = [255, 178, 120];
@@ -322,7 +332,28 @@ S.khaybar = {
       c.restore();
       c.strokeStyle = 'rgba(16,9,4,.7)'; c.lineWidth = 1; c.stroke(face);
     };
-    items.forEach((it) => { if (it.gate) drawGate(); else if (it.door) drawDoor(); else drawBox(it.b); });
+    // ----- Ali: a veiled figure (scenes/holy.js) -----
+    let aliHead = null;
+    const drawAli = () => {
+      const g0 = P([A[0], 0, A[2]]); if (!g0) return;
+      const h = Math.max(22, 1.8 * F / g0[2]), walked = aliDist(p), walking = aliDist(p + .003) - walked > .04;
+      const at = (q) => { const s = P(q); return s ? [(s[0] - g0[0]) / h, (s[1] - g0[1]) / h] : null; };
+      const D = (u, v, w) => v3.add(pose.C, pose.R([u, v, w]));
+      const two = (a, b) => { if (!a || !b) return undefined; if (a[0] > b[0]) [a, b] = [b, a]; return [[Math.min(a[0], -.05), a[1]], [Math.max(b[0], .05), b[1]]]; }; // one hand per shoulder
+      const o = { who: 'ali', pose: walking ? 'walk' : 'stand', phase: walked / 1.5, sword: p > .29, x: g0[0], y: g0[1], h, t, amb: mix(.3, .95, dawn), alpha: aa };
+      if (p < .15) { const q = at([BAN.pole[0] + .06, 1.3, BAN.pole[2]]); if (q) o.arms = [q]; } // the banner is his
+      else if (p > .245 && p < .29) { // the duel: Dhul-Fiqar against Marhab, facing him; the last stroke lands on the flash
+        const m = P(marhabAt(p)); o.pose = 'fight'; o.sword = true; o.flip = !!m && m[0] < g0[0]; o.phase = ((p - .245) / .045 * 3 + .5) % 1;
+      } else if (p > .37 && p < .686) { // his hands on the door: on its face, then under it overhead, then on the shield
+        const ri = heavy(seg(p, .488, .578)), sd = heavy(seg(p, .6, .652)), v = mix(mix(-1.25, -.5, ri), -1.6, sd), w = mix(-DT, DT, Math.max(ri, sd)), u = mix(.55, .62, sd);
+        o.arms = two(at(D(-u, v, w)), at(D(u, v, w)));
+      } else if (p >= .686 && p < .745) { // the throw: both hands go up and over, then come down
+        const up = smooth(seg(p, .686, .7)), dn = smooth(seg(p, .71, .742)), y = mix(-1.15, -.42, dn), x = mix(.16, .2, dn);
+        if (up > 0) o.arms = [[-x, mix(-.6, y, up)], [x, mix(-.6, y, up)]];
+      }
+      c.globalAlpha = 1; aliHead = Holy.draw(c, o);
+    };
+    items.forEach((it) => { if (it.gate) drawGate(); else if (it.door) drawDoor(); else if (it.ali) drawAli(); else drawBox(it.b); });
     // ----- dust from the arch, hinge fragments -----
     if (p > .4 && p < .8) {
       const dg = smooth(seg(p, .45, .55)) * (1 - smooth(seg(p, .62, .78)));
@@ -390,16 +421,8 @@ S.khaybar = {
       }
     }
     setText(st.n, arNum(p < .765 ? 0 : Math.min(nMen, arrived)));
-    // Ali: a calm, warm light, larger than the rest; a pool of it on the ground
-    const aa = 1 - smooth(seg(p, .745, .775));
-    if (aa > 0) {
-      const A = aliAt(p), q = P(A), g0 = P([A[0], .02, A[2]]);
-      if (g0) { const s = F / Math.max(6, g0[2]); c.save(); c.translate(g0[0], g0[1]); c.scale(1, .3); glow([0, 0], s * 3.2, 'rgba(255,200,130,A)', .32 * aa); c.restore(); }
-      if (q) { const s = F / Math.max(6, q[2]), br = .92 + .08 * Math.sin(t * 1.3); // drawn as if never nearer than 6 m: a light, not a wash
-        glow(q, s * 5, 'rgba(255,190,110,A)', .22 * aa * br); glow(q, s * 1.6, 'rgba(255,218,160,A)', .55 * aa * br); glow(q, s * .4, 'rgba(255,250,235,A)', .95 * aa);
-        if (p > .36 && p < .74) { const dc = P(pose.C); if (dc) glow(dc, F / dc[2] * 3.2, 'rgba(255,200,130,A)', .18 * aa); } // its light on the door
-      }
-    }
+    // Ali's disc: a soft warm bloom in the dark before dawn, fainter as the day comes
+    if (aliHead) glow([aliHead.x, aliHead.y], Math.max(14, aliHead.r * 6), 'rgba(255,214,150,A)', aa * mix(.5, .18, dawn));
     // the meeting: one soft bloom, no rays
     const fl = Math.max(0, 1 - Math.abs(p - .29) / .012);
     if (fl > 0) { const q = P(MEET); if (q) { glow(q, F / q[2] * 9 * (1 + (1 - fl)), 'rgba(255,236,200,A)', .85 * fl); glow([W / 2, H / 2], Math.max(W, H), 'rgba(255,220,170,A)', .25 * fl); } }

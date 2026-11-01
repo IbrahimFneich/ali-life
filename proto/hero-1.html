@@ -49,6 +49,7 @@ html, body { margin: 0; height: 100%; background: var(--night); color: var(--fg)
   </figure>
   <a class="back" href="hero.html">النماذج الثلاثة</a>
 </header>
+<script src="../scenes/holy.js"></script>
 <script>
 /*LIB:BEGIN — shared by hero-1/2/3; keep in sync */
 const TAU = Math.PI * 2;
@@ -106,20 +107,39 @@ function sprite(rgb) {
 }
 function glow(c, x, y, r, rgb, a, ry) { if (a <= 0 || r <= 0) return; c.globalAlpha = Math.min(1, a); c.drawImage(sprite(rgb), x - r, y - (ry || r), 2 * r, 2 * (ry || r)); c.globalAlpha = 1; }
 
-// A holy person is never drawn: only a light. The Prophet: a white-gold orb. The Imams: a gold orb with a halo ring.
-function holyLight(c, x, y, r, t, o = {}) {
-  const a = o.a ?? 1, br = 1 + .07 * Math.sin(t * 1.25 + (o.ph || 0));
-  const halo = o.prophet ? C.goldHi : C.gold, core = o.prophet ? [255, 252, 240] : C.white;
-  c.save(); c.globalCompositeOperation = 'lighter';
-  glow(c, x, y, r * 11 * br, halo, .22 * a);
-  glow(c, x, y, r * 4 * br, o.prophet ? [255, 236, 190] : C.goldHi, .5 * a);
-  glow(c, x, y, r * 1.6, core, a);
-  if (o.ring) {
-    const rr = r * 2.5 * br;
-    c.strokeStyle = css(C.goldHi, .16 * a); c.lineWidth = Math.max(2, r * .9); c.beginPath(); c.arc(x, y, rr, 0, TAU); c.stroke();
-    c.strokeStyle = css(C.goldHi, .9 * a); c.lineWidth = Math.max(1, r * .2); c.beginPath(); c.arc(x, y, rr, 0, TAU); c.stroke();
-  }
+// The five of the Kisa are veiled figures (scenes/holy.js, loaded before this script): the face is never drawn, a
+// white veil hangs from under the turban, a flat gold disc stands behind the head. holy() draws one, with a soft warm
+// bloom at the disc. Everyone else stays a faceless silhouette.
+function holy(c, o, bloom = 1) {
+  const hd = Holy.draw(c, { t: 0, amb: .6, ...o });
+  if (hd && bloom > 0) { c.save(); c.globalCompositeOperation = 'lighter'; glow(c, hd.x, hd.y, hd.r * 5.5, C.goldHi, .3 * bloom * (o.alpha ?? 1)); c.restore(); }
+  return hd;
+}
+// The newborn at the Kaaba («ثم خرجت بعد الرابع وبيدها أمير المؤمنين»): Fatima bint Asad, a faceless dark silhouette (she is not
+// one of the five), holds him at her breast; he is a white swaddled bundle, the face wrapped, with a small gold disc
+// behind his head in holy.js's colours. (x, y) is her ground point, h her height.
+function newborn(c, x, y, h, t, a = 1) {
+  if (!(h > 0) || a <= 0) return;
+  const sw = Math.sin(t * .8) * h * .006, hy = y - h * .9;
+  c.save(); c.globalAlpha *= a;
+  c.beginPath(); c.moveTo(x - h * .05, hy - h * .07); // her chador, from the head to the ground
+  c.quadraticCurveTo(x - h * .12, hy - h * .05, x - h * .13, hy + h * .1);
+  c.bezierCurveTo(x - h * .2, y - h * .45, x - h * .22 + sw, y - h * .15, x - h * .24 + sw, y);
+  c.lineTo(x + h * .24 + sw, y);
+  c.bezierCurveTo(x + h * .22 + sw, y - h * .15, x + h * .2, y - h * .45, x + h * .13, hy + h * .1);
+  c.quadraticCurveTo(x + h * .12, hy - h * .05, x + h * .05, hy - h * .07);
+  c.quadraticCurveTo(x, hy - h * .1, x - h * .05, hy - h * .07); c.closePath();
+  const q = c.createLinearGradient(x - h * .24, 0, x + h * .24, 0); q.addColorStop(0, '#120e14'); q.addColorStop(1, '#2c2129');
+  c.fillStyle = q; c.fill(); c.strokeStyle = 'rgba(255,214,150,.45)'; c.lineWidth = Math.max(.8, h * .008); c.stroke();
+  const bx = x + h * .01, by = y - h * .57, hx = bx + h * .13, hb = by - h * .045, R = h * .09; // the bundle, his head to the right
+  const dq = c.createRadialGradient(hx, hb, 0, hx, hb, R); dq.addColorStop(0, '#f8e6a8'); dq.addColorStop(.72, '#d9ad52'); dq.addColorStop(1, '#a87c2c');
+  c.beginPath(); c.arc(hx, hb, R, 0, TAU); c.fillStyle = dq; c.fill(); c.strokeStyle = '#fbe7ad'; c.lineWidth = Math.max(.6, R * .06); c.stroke();
+  const wq = c.createLinearGradient(0, by - h * .05, 0, by + h * .05); wq.addColorStop(0, '#fbf6ea'); wq.addColorStop(1, '#d8cfbc'); c.fillStyle = wq;
+  c.beginPath(); c.ellipse(bx, by, h * .17, h * .06, -.28, 0, TAU); c.fill();
+  c.beginPath(); c.arc(hx, hb, h * .052, 0, TAU); c.fill(); // the wrapped head
+  c.fillStyle = '#251b22'; c.beginPath(); c.ellipse(bx - h * .02, by + h * .045, h * .18, h * .035, -.2, 0, Math.PI); c.fill(); // her sleeves under him
   c.restore();
+  c.save(); c.globalCompositeOperation = 'lighter'; glow(c, hx, hb, R * 4, C.goldHi, .3 * a); c.restore();
 }
 
 // Ink wash: a crisp silhouette (alpha) becomes a window with a roughened edge and a dissolving dry-brush halo.
@@ -379,11 +399,10 @@ function khaybarLive(g, x0, y0, w, h, U, t) {
   // torches on the towers
   [[-.2, .3], [.2, .3], [-.36, .15], [.36, .15]].forEach(([fx, fy], i) => { const f = .75 + .25 * Math.sin(t * 9 + i * 2) * Math.sin(t * 5.3 + i); g.save(); g.globalCompositeOperation = 'lighter'; glow(g, gx + fx * w, gy - fy * h, 9 * U, [255, 150, 70], .5 * f); g.restore(); g.fillStyle = css([255, 220, 160], .9 * f); g.fillRect(gx + fx * w - 1, gy - fy * h - 2, 2, 3); });
   // the door: rests in the arch, rises, is held overhead, is set down (a 10 s loop)
+  // Ali stands before the gate and lifts it over his head: the door rises into his raised hands
   const k = (t % 10) / 10, up = heavy(c01(k / .32)) * (1 - ease(c01((k - .7) / .22)));
-  const lift = up * h * .38, tilt = .06 * Math.sin(up * Math.PI) - .02 * up, dw = aw * 1.02, dh = ah * 1.08;
-  const lx = gx, ly = gy - h * .05;
+  const fh = ah * .95, lift = up * fh * 1.12, tilt = .06 * Math.sin(up * Math.PI) - .02 * up, dw = aw * 1.02, dh = ah * 1.08;
   if (up > .02) { g.save(); g.globalCompositeOperation = 'lighter'; glow(g, gx, gy - ah * .35, aw * 2.2, [255, 180, 100], .35 * up); g.restore(); }
-  holyLight(g, lx, ly, 3.4 * U, t, { ring: true, a: .95 });
   g.save(); g.translate(gx, gy - lift); g.rotate(tilt);
   const door = new Path2D(); door.moveTo(-dw, 0); door.lineTo(-dw, -dh * .65); door.quadraticCurveTo(-dw, -dh, 0, -dh * 1.08); door.quadraticCurveTo(dw, -dh, dw, -dh * .65); door.lineTo(dw, 0); door.closePath();
   const wood = g.createLinearGradient(-dw, 0, dw, 0); wood.addColorStop(0, '#2e1c10'); wood.addColorStop(.5, '#6a4426'); wood.addColorStop(1, '#3a2414');
@@ -392,6 +411,8 @@ function khaybarLive(g, x0, y0, w, h, U, t) {
   g.fillStyle = '#27242a'; [.15, .45, .75].forEach((v) => g.fillRect(-dw, -dh * v - 1.5 * U, dw * 2, 3 * U));
   g.restore(); g.strokeStyle = 'rgba(255,200,130,.35)'; g.lineWidth = 1; g.stroke(door);
   g.restore();
+  const hand = (sd) => [sd * mix(.13, Math.min(.26, dw * .6 / fh), c01(up * 3)), mix(-.42, -lift / fh, c01(up * 3))];
+  holy(g, { who: 'ali', pose: 'stand', x: gx, y: gy + 1.5 * U, h: fh, t, amb: .85, arms: up > .01 ? [hand(-1), hand(1)] : [] }, .7);
   // dust where it is set down
   const dk = c01((k - .9) / .1); if (dk > 0 && dk < 1) { g.save(); g.globalCompositeOperation = 'lighter'; glow(g, gx, gy - 2, aw * (1.5 + 2 * dk), [210, 170, 130], .4 * (1 - dk), aw * (.4 + .6 * dk)); g.restore(); }
 }
@@ -424,8 +445,10 @@ function ghadirLive(g, cx, cy, r, t) {
   g.save(); g.globalCompositeOperation = 'lighter';
   for (let ring = 0; ring < 4; ring++) { const n = 14 + ring * 7, rr = r * (.32 + ring * .15); for (let i = 0; i < n; i++) { const a = i / n * TAU + ring * .3, wave = .5 + .5 * Math.sin(t * 2 - ring * 1.1 + a * 2); glow(g, cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * .92, 2.4 + wave * 1.6, C.goldHi, .45 + .5 * wave); } }
   g.restore();
-  holyLight(g, cx + r * .07, cy - r * .02, r * .045, t, { prophet: true });
-  holyLight(g, cx - r * .07, cy - r * .06 - r * .03 * Math.sin(t * .8), r * .042, t, { ring: true, ph: 1 });
+  // the Prophet and Ali on the pulpit of saddles, seen from above: he takes Ali's hand and raises it
+  const up = .5 + .5 * Math.sin(t * .8), fh = r * .32;
+  holy(g, { who: 'prophet', pose: 'above', x: cx + r * .075, y: cy + r * .1, h: fh, t, amb: 1, arms: [[-.22, mix(-.62, -1.06, up)]] }, .6);
+  holy(g, { who: 'ali', pose: 'above', x: cx - r * .075, y: cy + r * .1, h: fh * .97, t, amb: 1, arms: [[.22, mix(-.62, -1.06, up)]] }, .6);
 }
 function mihrab(g, cx, cy, r) {
   g.fillStyle = '#1b3a34'; g.fillRect(cx - r, cy - r, r * 2, r * 2);
@@ -453,7 +476,7 @@ function vignette(x0, y0, w, h, dpr, paint, seed, o = {}) {
   const m = Math.ceil(o.m || 12), cnv = mkc((w + m * 2) * dpr, (h + m * 2) * dpr), g = cnv.getContext('2d');
   g.scale(dpr, dpr); g.translate(m - x0, m - y0); paint(g, x0, y0, w, h, rng(seed * 31 + 7));
   const fe = mkc(w + m * 2, h + m * 2), fg = fe.getContext('2d'); fg.fillStyle = '#fff'; fg.beginPath();
-  if (o.round) fg.ellipse(m + w / 2, m + h / 2, w / 2 - m * .3, h / 2 - m * .3, 0, 0, TAU);
+  if (o.round) fg.ellipse(m + w / 2, m + h / 2, Math.max(1, w / 2 - m * .3), Math.max(1, h / 2 - m * .3), 0, 0, TAU);
   else for (let i = 0; i <= 72; i++) { const a = i / 72 * TAU, cs = Math.cos(a), sn = Math.sin(a), e = o.sq || .45; fg.lineTo(m + w / 2 + Math.sign(cs) * Math.abs(cs) ** e * (w / 2 - m * .4), m + h / 2 + Math.sign(sn) * Math.abs(sn) ** e * (h / 2 - m * .4)); }
   fg.fill();
   const fi = inkify(fe, { seed: 40 + seed, spread: m * .8, reach: 1.5, rough: .8, streakL: 26, angle: .4 });
@@ -500,7 +523,7 @@ function mabit(g, x, y, w, h, u, R) {
   vgrad(g, rx, ry, rw, rh, [[0, [120, 74, 40]], [.6, [200, 130, 70]], [1, [90, 56, 32]]]);
   glow(g, rx + rw * .45, ry + rh * .62, rw * .6, [255, 200, 120], .45, rh * .5);
   g.fillStyle = '#3a2a1c'; g.fillRect(rx + rw * .12, ry + rh * .72, rw * .66, rh * .1); g.fillRect(rx + rw * .14, ry + rh * .82, 3 * u, rh * .18); g.fillRect(rx + rw * .74, ry + rh * .82, 3 * u, rh * .18); // the bed
-  // the green cloak, folded flat on the bed and hanging over its edge: nothing lies under it, the light rests above
+  // the green cloak on the bed, hanging over its edge: Ali lies under it (drawn live)
   g.fillStyle = '#2e7558'; g.fillRect(rx + rw * .13, ry + rh * .695, rw * .64, rh * .03);
   g.beginPath(); g.moveTo(rx + rw * .13, ry + rh * .72); g.lineTo(rx + rw * .77, ry + rh * .72); g.lineTo(rx + rw * .77, ry + rh * .8);
   for (let k = 8; k >= 0; k--) g.lineTo(rx + rw * (.13 + .64 * k / 8), ry + rh * (.8 + .015 * Math.sin(k * 2.1))); g.closePath(); g.fill();
@@ -514,7 +537,9 @@ function mabit(g, x, y, w, h, u, R) {
 }
 function mabitLive(g, x, y, w, h, u, t) {
   const rx = x + w * .04, rw = w * .5, ry = y + h * .16, rh = h * .74;
-  holyLight(g, rx + rw * .45, ry + rh * .58, 3.4 * u, t, { ring: true, ph: 2 });
+  // Ali asleep in the Prophet's bed, under his green cloak: the lie pose, the cloak in the Prophet's colours
+  const P = Holy.PAL.ali, own = P.cloak; P.cloak = Holy.PAL.prophet.cloak;
+  try { holy(g, { who: 'ali', pose: 'lie', x: rx + rw * .45, y: ry + rh * .72, h: rw * .66, t, amb: .6 }, .7); } finally { P.cloak = own; }
   // blades catching the moon
   g.save(); g.globalCompositeOperation = 'lighter';
   for (let i = 0; i < 5; i++) { const k = .5 + .5 * Math.sin(t * 1.6 + i * 1.9); const sx = x + w * (.64 + i * .078) + h * .14, sy = y + h * .9 - h * (.62 + .08 * hash(i)) * .78; glow(g, sx, sy, 6 * u * k, [220, 230, 255], .7 * k); }
@@ -552,9 +577,10 @@ function ghadirSideLive(g, x, y, w, h, u, t) {
   g.save(); g.globalCompositeOperation = 'lighter';
   for (let ring = 0; ring < 4; ring++) { const n = 18 + ring * 8, rx = w * (.14 + ring * .085), ry = h * (.05 + ring * .045); for (let i = 0; i < n; i++) { const a = i / n * TAU, wave = .5 + .5 * Math.sin(t * 1.8 - ring * 1.2 + a * 2); const xx = px + Math.cos(a) * rx, yy = py + h * .08 + Math.sin(a) * ry; if (Math.abs(xx - px) < 16 * u && yy < py + 4 * u) continue; glow(g, xx, yy, (1.8 + ring * .5 + wave * 1.2) * u, [255, 206, 120], .45 + .45 * wave); } }
   g.restore();
-  const lift = 6 * u * (.5 + .5 * Math.sin(t * .7));
-  holyLight(g, px + 8 * u, py - 30 * u, 3.6 * u, t, { prophet: true });
-  holyLight(g, px - 8 * u, py - 34 * u - lift, 3.3 * u, t, { ring: true, ph: 1 });
+  // the Prophet and Ali on the pulpit of saddles: he takes Ali's hand and raises it, and lowers it, slowly
+  const up = .5 + .5 * Math.sin(t * .7), top = py - 22.5 * u, fh = 30 * u;
+  holy(g, { who: 'prophet', pose: 'stand', x: px + 6.5 * u, y: top, h: fh, t, amb: 1, arms: [[-.2, mix(-.62, -1.08, up)]] }, .5);
+  holy(g, { who: 'ali', pose: 'stand', x: px - 6.5 * u, y: top, h: fh * .97, t, amb: 1, arms: [[.2, mix(-.62, -1.08, up)]] }, .5);
 }
 function kufa(g, x, y, w, h, u, R) {
   vgrad(g, x, y, w, h, [[0, [30, 36, 58]], [.5, [60, 74, 84]], [1, [24, 26, 30]]]);
@@ -574,7 +600,12 @@ function kufaLive(g, x, y, w, h, u, t) {
   g.strokeStyle = 'rgba(230,200,140,.6)'; g.lineWidth = 1; g.beginPath(); g.moveTo(mx, top - aw * .2); g.lineTo(mx, ly - 6 * u); g.stroke();
   g.fillStyle = '#d9b25a'; g.beginPath(); g.moveTo(mx - 7 * u, ly - 5 * u); g.lineTo(mx + 7 * u, ly - 5 * u); g.lineTo(mx + 4 * u, ly + 5 * u); g.lineTo(mx - 4 * u, ly + 5 * u); g.closePath(); g.fill();
   g.save(); g.globalCompositeOperation = 'lighter'; glow(g, mx, ly, aw * 1.2 * f, [255, 196, 120], .5 * f); glow(g, mx, ly - 2 * u, 6 * u, [255, 248, 220], .95); g.restore();
-  holyLight(g, mx, bot - h * .2, 4 * u, t, { ring: true, ph: 3, a: .9 });
+  // Ali at prayer in the mihrab: standing, bowing, prostrating, on a slow loop (one still posture under reduced motion)
+  const fh = (bot - top) * .5, cyc = REDUCED ? 0 : (t / 16) % 1, PR = [[0, 'stand'], [.35, 'ruku'], [.5, 'stand'], [.62, 'sujud'], [.9, 'stand']];
+  let i = PR.length - 1; while (i > 0 && cyc < PR[i][0]) i--;
+  const k = c01((cyc - PR[i][0]) / .03), was = PR[(i + PR.length - 1) % PR.length][1];
+  if (k < 1) holy(g, { who: 'ali', pose: was, x: mx, y: bot, h: fh, t, amb: .7, alpha: 1 - k }, .6);
+  holy(g, { who: 'ali', pose: PR[i][1], x: mx, y: bot, h: fh, t, amb: .7, alpha: k }, .6);
 }
 
 /*LIB:END*/
@@ -616,9 +647,9 @@ function build() {
   const vig = (f, paint, live, drift, o = {}) => { const [x0, y0] = F(f[0], f[1]), [x1, y1] = F(f[2], f[3]); V.push(vignette(x0, y0, x1 - x0, y1 - y0, dpr, paint, V.length + 1, { m: Math.max(8, spread * .8), live, drift, ...o })); };
   const U = bh / 680; // one unit at the 520 px design size
   const L = { F, U, bw, bh, bx, by };
-  // shadda: the two lights, side by side in the night
+  // shadda: the Prophet and Ali, side by side in the night
   vig([.05, -.05, .32, .2], (g, x, y, w, h, r) => { vgrad(g, x, y, w, h, [[0, [8, 12, 28]], [.7, [32, 30, 58]], [1, [90, 62, 70]]]); stars(g, x, y, w, h * .8, 40, r, .9); clouds(g, x, y + h * .5, w, h * .5, r, [180, 120, 120], 4, .25); },
-    (g, t) => { const [p1x, p1y] = F(.235, .06), [p2x, p2y] = F(.125, .06); holyLight(g, p1x, p1y, 5.5 * U, t, { prophet: true }); holyLight(g, p2x, p2y, 5 * U, t, { ring: true, ph: 1.4 }); }, .6);
+    (g, t) => { const [p1x, gy] = F(.235, .185), [p2x] = F(.125, 0); holy(g, { who: 'prophet', pose: 'stand', x: p1x, y: gy, h: 86 * U, t, amb: .4 }); holy(g, { who: 'ali', pose: 'stand', x: p2x, y: gy, h: 84 * U, t, amb: .4, seed: 1.4 }); }, .6);
   // lam: Dhul-Fiqar against the night
   vig([.42, .02, .64, .62], (g, x, y, w, h, r) => {
     vgrad(g, x, y, w, h, [[0, [6, 9, 22]], [.4, [24, 32, 64]], [.75, [110, 74, 92]], [.92, [230, 150, 96]], [1, [255, 210, 150]]]); stars(g, x, y, w, h * .6, 70, r, 1);
@@ -630,7 +661,7 @@ function build() {
     if (k > .82) { const [tx2, ty2] = F(.55, .085); const a = Math.sin(Math.PI * (k - .82) / .18); glow(g, tx2, ty2, 16 * U * a, [255, 248, 225], .9 * a); g.strokeStyle = css([255, 246, 222], .7 * a); g.lineWidth = 1; g.beginPath(); g.moveTo(tx2 - 22 * U * a, ty2); g.lineTo(tx2 + 22 * U * a, ty2); g.moveTo(tx2, ty2 - 22 * U * a); g.lineTo(tx2, ty2 + 22 * U * a); g.stroke(); }
     g.restore();
   }, .4);
-  // ain: the Kaaba at dusk, its wall split by a light
+  // ain: the Kaaba at dusk, its wall split, and Fatima bint Asad coming out with the newborn in her arms
   vig([.6, .34, 1.03, .76], (g, x, y, w, h, r) => {
     vgrad(g, x, y, w, h, [[0, [52, 40, 80]], [.3, [150, 86, 100]], [.55, [246, 176, 110]], [.66, [255, 220, 160]], [.71, [80, 52, 44]], [1, [30, 22, 20]]]);
     glow(g, x + w * .3, y + h * .64, w * .5, [255, 230, 180], .6, h * .16);
@@ -638,7 +669,7 @@ function build() {
     ridge(g, x, x + w, y + h * .58, 7 * U, [74, 46, 58], r, .8); ridge(g, x, x + w, y + h * .63, 5 * U, [44, 30, 34], r, .7);
     const [kx, ky] = F(.79, .64); kaaba(g, kx, ky, 112 * U);
     for (let i = 0; i < 6; i++) palm(g, x + w * (.05 + i * .17 + r() * .05), y + h * .66, (26 + r() * 16) * U, [24, 16, 14]);
-  }, (g, t) => { const [kx, ky] = F(.79, .64), s = 112 * U; const cx2 = kx + s * .5 + s * .2, cy2 = ky - s * .48; g.save(); g.globalCompositeOperation = 'lighter'; glow(g, cx2, cy2, s * .55, C.goldHi, .35 + .12 * Math.sin(t * 1.4), s * .7); g.restore(); holyLight(g, cx2, cy2, 3.6 * U, t, { ring: true, ph: .5 }); }, .8);
+  }, (g, t) => { const [kx, ky] = F(.79, .64), s = 112 * U; const cx2 = kx + s * .5 + s * .2, cy2 = ky - s * .48; g.save(); g.globalCompositeOperation = 'lighter'; glow(g, cx2, cy2, s * .55, C.goldHi, .35 + .12 * Math.sin(t * 1.4), s * .7); g.restore(); newborn(g, cx2, ky + 2 * U, s * .48, t); }, .8);
   // the bar, middle: riders of Badr under a dust-gold morning
   vig([.27, .55, .66, .76], (g, x, y, w, h, r) => { vgrad(g, x, y, w, h, [[0, [210, 150, 90]], [.55, [236, 190, 120]], [.75, [120, 80, 50]], [1, [40, 28, 22]]]); clouds(g, x, y + h * .2, w, h * .5, r, [255, 220, 170], 10, .4); },
     (g, t) => { const [x0, y0] = F(.27, .55), [x1, y1] = F(.66, .76); ridersLive(g, x0, y0, x1 - x0, y1 - y0, 62 * U, t, 6, 34 * U); }, .3);

@@ -1,11 +1,12 @@
 (() => {
 // hunayn: the valley of Hunayn, Shawwal 8 AH, at grey dawn (al-Irshad 1:140-141). Ten thousand march down into a
 // narrow wadi in the half-light; Hawazin rise on the slopes and the arrows come down; the army breaks and floods
-// back up the valley. Ten stay with the Prophet's light: nine of Banu Hashim, Ali's light in front with the sword,
-// and Ayman ibn Umm Ayman, who falls. Then the army turns and comes back, the ambush breaks, the sun clears the rim.
+// back up the valley. Ten stay with the Prophet, who holds his ground on his grey mule: nine of Banu Hashim, Ali in
+// front with the sword, and Ayman ibn Umm Ayman, who falls. Then the army turns and comes back, the ambush breaks, the sun clears the rim.
 // A pinhole camera over a small world in metres: x across the valley, y up, z down the valley toward the sunrise.
 // The terrain is a heightfield drawn as camera-facing depth bands, far to near (the uhud renderer). People are small
-// faceless silhouettes; the Prophet and the ten are lights only.
+// faceless silhouettes. The Prophet and Ali are veiled figures with a gold disc behind the head (scenes/holy.js; no
+// face is ever drawn); the nine others who stood are small lights.
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 const norm = (a) => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
@@ -135,7 +136,7 @@ S.hunayn = {
     // banners
     st.banM = Array.from({ length: 26 }, (_, i) => [Math.floor(R() * NM), i % 3 === 0 ? [222, 214, 190] : i % 3 === 1 ? [46, 110, 84] : [32, 30, 30]]);
     st.banH = Array.from({ length: 16 }, (_, i) => [Math.floor(R() * NH), i % 2 ? [120, 36, 30] : [36, 30, 28]]);
-    // the ten around the Prophet's light: Ali in front; eight more of Banu Hashim; Ayman
+    // the ten around the Prophet: Ali in front; eight more of Banu Hashim; Ayman
     st.ten = [];
     for (let i = 0; i < 8; i++) { const a = Math.PI / 2 + Math.PI * (.35 + i / 7 * 1.3); st.ten.push([Math.cos(a) * (4.6 + R() * 1.6), Math.sin(a) * (4.6 + R() * 1.6), R() * TAU]); }
     st.motes = Array.from({ length: 900 }, () => [(R() - .5) * 140, R() ** 1.5 * 40, 300 + R() * 500, R() * TAU, R()]);
@@ -354,7 +355,7 @@ S.hunayn = {
     });
     c.lineCap = 'round'; c.lineWidth = Math.max(1, F / 1100); c.strokeStyle = rgb(lerp([22, 20, 24], haze0, .15), .85); c.stroke(arP);
     c.lineWidth = Math.max(.5, F / 2600); c.strokeStyle = rgb([226, 222, 210], .35); c.stroke(arP);
-    // ----- the Prophet's light and the ten -----
+    // ----- the Prophet and Ali (veiled figures), the nine others (small lights) -----
     const halo = (x, y, z, size, k, col) => {
       if (k <= 0 || !pj(x, y, z)) return; const s = F / PZ, X = PX, Y = PY, Rr = Math.min(H * .09 * size, Math.max(1.8, size * s));
       c.globalCompositeOperation = 'lighter';
@@ -365,11 +366,13 @@ S.hunayn = {
       bc.fillStyle = rgb(col, Math.min(1, .45 * k)); bc.beginPath(); bc.arc(X, Y, Rr * 2.4, 0, TAU); bc.fill();
     };
     const pool = (x, z, r, k, col) => { if (k <= 0 || !pj(x, height(x, z) + .05, z)) return; const s = F / PZ, rr = r * s; c.save(); c.translate(PX, PY); c.scale(1, .3); const g = c.createRadialGradient(0, 0, 0, 0, 0, rr); g.addColorStop(0, rgb(col, .3 * k)); g.addColorStop(1, rgb(col, 0)); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(-rr, -rr, rr * 2, rr * 2); c.restore(); c.globalCompositeOperation = 'source-over'; };
-    // the Prophet rides with the column; at the break he holds his ground where the knot forms
+    // the Prophet rides with the column on his grey mule; at the break he holds his ground where the knot forms
     const pz = p < .25 ? Math.min(KZ, front - 330) : KZ, px = cxv(pz);
-    const proC = [255, 238, 200], aliC = [255, 212, 140], bhC = [250, 222, 170];
-    pool(px, pz, 7, 1, proC);
-    halo(px, height(px, pz) + 2.3, pz, .44, 1.1, proC);
+    const bhC = [250, 222, 170], famb = .5 + .5 * dawn, vs = 1 - Math.abs(sp) * .45, figs = [], heads = [];
+    const place = (x, z, m, min) => (pj(x, height(x, z), z) ? { x: PX, y: PY, z: PZ, h: Math.max(min, m * F / PZ * vs) } : null);
+    const left = (x, z, dx, dz) => { if (!pj(x, height(x, z), z)) return false; const x0 = PX; return pj(x + dx, height(x, z), z + dz) && PX < x0; }; // does (dx, dz) run to screen-left?
+    const fP = place(px, pz, 1.85, 24);
+    if (fP) figs.push([fP.z, () => heads.push([Holy.draw(c, { who: 'prophet', pose: 'ride', mount: 'mule', flip: left(px, pz, 0, 5), x: fP.x, y: fP.y, h: fP.h, t: p < .235 ? pz * .5 : 0, amb: famb }), 1])]);
     // the ten gather in as the army breaks
     const gather = smooth(seg(p, .27, .33)), loose = 1 - smooth(seg(p, .64, .72));
     const press = Math.sin(Math.PI * seg(p, .34, .58));
@@ -377,8 +380,16 @@ S.hunayn = {
     // Ali: in front, toward the ambush, moving to meet each rush
     const aa = Math.sin(p * 47) * .6, ar = 8 + 5 * press * fwd;
     const ax = px + Math.sin(aa) * ar * gather + (1 - gather) * -3, az = pz + Math.cos(aa) * ar * gather + (1 - gather) * -6;
-    halo(ax, height(ax, az) + 1.7, az, .3, (1.05 + .25 * press) * (.7 + .3 * gather + .3 * (1 - loose)), aliC);
-    pool(ax, az, 3, .8, aliC);
+    // on foot beside the mule on the march; with Dhul-Fiqar in front of the Prophet while the rushes last, facing out
+    const fA = place(ax, az, 1.8, 22);
+    if (fA) {
+      let pose = 'stand', phase = 0, fl = left(ax, az, 0, 5);
+      if (p < .235) { pose = 'walk'; phase = pz / 1.5; }
+      else if (press > 0) { pose = 'fight'; phase = (t * (.6 + .5 * press) + p * 25) % 1; if (fP) fl = fA.x < fP.x; }
+      figs.push([fA.z, () => heads.push([Holy.draw(c, { who: 'ali', pose, phase, sword: true, flip: fl, x: fA.x, y: fA.y, h: fA.h, t, amb: famb }), .8])]);
+    }
+    figs.sort((u, v) => v[0] - u[0]).forEach(([, f]) => f());
+    heads.forEach(([hd, k]) => { if (!hd) return; bc.fillStyle = `rgba(255,226,170,${k * (.1 + .2 * (1 - dawn))})`; bc.beginPath(); bc.arc(hd.x, hd.y, Math.max(8, hd.r * 4), 0, TAU); bc.fill(); });
     st.ten.forEach(([dx, dz, ph], i) => {
       const jx = Math.sin(t * .7 + ph) * .3, x = px + mix(dx * 3, dx, gather) + jx, z = pz + mix(dz * 3 - 12, dz, gather);
       const k = (.55 + .2 * Math.sin(t + ph)) * (.35 + .65 * gather) * (1 - .4 * (1 - loose) * c01(i / 8));

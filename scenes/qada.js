@@ -2,7 +2,9 @@
 // qada: «قضاؤه». The bench of judgment (dakkat al-qada) in the mosque of Kufa at night, seen across the arcade with
 // the bench against the east wall. Three cases play out on the reed mats in front of it: the two women and the child,
 // the loaves and the dirhams, the men set apart at the columns. People are faceless cloaked shapes; the child is a
-// small light; Ali is a calm warm light seated on the bench, larger than every other light.
+// small light; Ali sits on the bench, a veiled figure with the gold disc behind the head (scenes/holy.js; no face is
+// ever drawn), and the warm light he carries is larger than every other light. At each judgment he raises a sleeve
+// and a thread of light runs from it to the one it concerns.
 // World in metres: x right, y up, z away from the camera. The east wall stands at z = ZW.
 const v3 = {
   sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
@@ -27,7 +29,8 @@ const lerp2 = (a, b, k) => [mix(a[0], b[0], k), mix(a[1], b[1], k)];
 const ZW = 14, CEIL = 8.4, SPRING = 4.6, RISE = 2.4, COLR = .32, ARD = .8, IMP = .46, NEAR = .12;
 const XS = [-22.5, -16.5, -10.5, -4.5, 4.5, 10.5, 16.5, 22.5];
 const ROWS = [{ z: -1.5, xs: XS, arch: true }, { z: 5.5, xs: XS, arch: true }, { z: 10, xs: [-16.5, -10.5, -4.5, 4.5, 10.5, 16.5], arch: false }];
-const ALI = [0, 1.42, 12.95];
+const ALI = [0, 1.42, 12.95]; // the warmth he carries; he sits on the bench's rug at SEATA
+const SEATA = [0, .76, 12.95];
 const SCRIBE = [1.35, 1.02, 12.6];
 const NICHE = [0, 2.55, 13.82];
 const LAMPS = [];
@@ -572,6 +575,26 @@ S.qada = {
       st._yw = yw;
     }
 
+    // the judgments: a thread of light from his raised sleeve to the one it concerns
+    const threads = [];
+    if (c1 > 0) threads.push([[-1.3 + .38, 1.2, 8.6], c1 * bump(p, .252, .265, .29, .315)]);
+    if (c2 > 0) threads.push([[-.4, .1, 10.22], c2 * bump(p, .6, .612, .63, .65)]);
+    if (c3 > 0) { MEN3.forEach((m, i) => threads.push([[m[0], 1.5, m[1]], c3 * askI[i] * .9])); threads.push([[-1.7, .7, 8.1], c3 * smooth(seg(p, .91, .945)) * (1 - smooth(seg(p, 1.0, 1.1)))]); }
+    // Ali, seated on the bench: a veiled figure drawn on the scene's billboard (1 unit = 1 cm, up the projected
+    // vertical), so he leans with the camera like everyone else. The strongest thread raises his sleeve toward its end
+    let aliHead = null, aliHand = null;
+    items.push({ d: dist(SEATA) - .3, f: () => {
+      const A = P(SEATA), B = P([SEATA[0], SEATA[1] + 1, SEATA[2]]); if (!A || !B) return;
+      const s = F / A[2] * .01, bx = -(B[0] - A[0]) * .01, by = -(B[1] - A[1]) * .01, at = (u, v) => [A[0] + s * u + bx * v, A[1] + by * v];
+      const [to, a] = threads.reduce((m, q) => (q[1] > m[1] ? q : m), [null, 0]), T = to && P(to), side = T ? Math.sign(T[0] - A[0]) || 1 : 1, up = smooth(c01(a * 1.6));
+      const arms = [[side * mix(.13, .3, up), mix(-.1, -.46, up)], [-side * .13, -.1]];
+      c.save(); c.setTransform(s, 0, bx, by, A[0], A[1]);
+      const hd = Holy.draw(c, { who: 'ali', pose: 'sit', x: 0, y: 0, h: 180, t, amb: .42, arms });
+      c.restore();
+      if (hd) { const [hx, hy] = at(hd.x, hd.y); aliHead = [hx, hy, hd.r * s]; }
+      aliHand = at(arms[0][0] * 180, arms[0][1] * 180);
+    } });
+
     // draw: floor items first, then everything else far to near
     items.filter((it) => it.floorItem).sort((a, b) => b.d - a.d).forEach((it) => it.f());
     items.filter((it) => !it.floorItem).sort((a, b) => b.d - a.d).forEach((it) => it.f());
@@ -585,18 +608,16 @@ S.qada = {
     if (c2 > 0) { const v = P([.95, .13, 10.75]); if (v) { const s = F / v[2]; glow(v, s * 1.6, st.warm, .45 * floorLamp); glow(v, s * .3, st.warm, .7 * floorLamp); glow([v[0], v[1] - s * .03], s * .07, st.core, floorLamp); } }
     { const v = P(NICHE); if (v) { const s = F / v[2]; glow(v, s * 1.4, st.warm, .3); glow(v, s * .1, st.core, .9); } }
     COL3.forEach(([x, z], i) => { const I = colLampI[i]; if (I < .01) return; const v = P([x + (x < 0 ? .45 : -.45), 2.45, z - .25]); if (!v) return; const s = F / v[2]; glow(v, s * 2.4, st.warm, .38 * I); glow(v, s * .5, st.warm, .5 * I); glow(v, s * .12, st.core, Math.min(1, I)); });
-    // Ali: calm, warm, larger than every other light; a pool of it on the bench
-    { const v = P(ALI); if (v) { const s = F / Math.max(4, v[2]), br = .94 + .06 * Math.sin(t * 1.1); glow(v, s * 4.2, st.ali, .26 * br * Math.min(1.6, aliI)); glow(v, s * 1.25, st.ali, .6 * br); glow(v, s * .34, st.core, .95); } }
+    // the warmth he carries: larger than every other light, round him; a soft bloom at the disc
+    { const v = P(ALI); if (v) { const s = F / Math.max(4, v[2]), br = .94 + .06 * Math.sin(t * 1.1); glow(v, s * 4.2, st.ali, .22 * br * Math.min(1.6, aliI)); if (aliHead) glow(aliHead, Math.max(6 * k, aliHead[2] * 6), st.ali, .34 * br); } }
     if (scribeI > .01) { const v = P(SCRIBE); if (v) { const s = F / v[2]; glow(v, s * 1.1, st.pale, .5 * scribeI); glow(v, s * .14, st.core, .8 * scribeI); const wr = askI[0] + askI[1] + askI[2]; if (wr > .05) for (let j = 0; j < 4; j++) { const q = P([1.1 + hash(j, Math.floor(t * 6)) * .45, .99, 12.4 + hash(j + 4, Math.floor(t * 6)) * .3]); if (q) glow(q, s * .05, st.core, .8 * wr * scribeI); } } }
     // the child
     if (st._child && st._child.a > 0) { const v = P(st._child.q); if (v) { const s = F / v[2], br = .9 + .1 * Math.sin(t * 2.4); glow(v, s * 1.4, st.ali, .45 * st._child.a * br); glow(v, s * .16, st.core, st._child.a); } }
     // the cry: rings out from the mother
     if (c1 > 0) { const cr = seg(p, .226, .262); if (cr > 0 && cr < 1) { const W2 = [mix(-3.4, -1.3, 1) + .38 * smooth(seg(p, .224, .244)), 8.7]; const v = P([W2[0], 1.5, W2[1]]); if (v) { const s = F / v[2]; for (let j = 0; j < 3; j++) { const u = c01(cr * 1.4 - j * .2); if (u <= 0 || u >= 1) continue; c.strokeStyle = `rgba(255,232,190,${.5 * (1 - u)})`; c.lineWidth = Math.max(1, 2 * k * (1 - u)); c.beginPath(); c.ellipse(v[0], v[1], s * (.2 + 2.6 * u), s * (.2 + 2.6 * u) * .8, 0, 0, TAU); c.stroke(); } } } }
-    // the judgments: a thread of light from the bench
-    const thread = (to, a) => { if (a <= .01) return; const A = P(ALI), B = P(to); if (!A || !B) return; const g = c.createLinearGradient(A[0], A[1], B[0], B[1]); g.addColorStop(0, `rgba(255,220,160,${.5 * a})`); g.addColorStop(1, `rgba(255,220,160,${.12 * a})`); c.strokeStyle = g; c.lineWidth = Math.max(1, 1.6 * k); c.beginPath(); c.moveTo(A[0], A[1]); c.quadraticCurveTo((A[0] + B[0]) / 2, Math.min(A[1], B[1]) - Math.abs(A[0] - B[0]) * .15, B[0], B[1]); c.stroke(); };
-    if (c1 > 0) thread([-1.3 + .38, 1.2, 8.6], c1 * bump(p, .252, .265, .29, .315));
-    if (c2 > 0) thread([-.4, .1, 10.22], c2 * bump(p, .6, .612, .63, .65));
-    if (c3 > 0) { MEN3.forEach((m, i) => thread([m[0], 1.5, m[1]], c3 * askI[i] * .9)); thread([-1.7, .7, 8.1], c3 * smooth(seg(p, .91, .945)) * (1 - smooth(seg(p, 1.0, 1.1)))); }
+    // the judgments: the threads, from his raised hand
+    const thread = (to, a) => { if (a <= .01) return; const A = aliHand || P(ALI), B = P(to); if (!A || !B) return; const g = c.createLinearGradient(A[0], A[1], B[0], B[1]); g.addColorStop(0, `rgba(255,220,160,${.5 * a})`); g.addColorStop(1, `rgba(255,220,160,${.12 * a})`); c.strokeStyle = g; c.lineWidth = Math.max(1, 1.6 * k); c.beginPath(); c.moveTo(A[0], A[1]); c.quadraticCurveTo((A[0] + B[0]) / 2, Math.min(A[1], B[1]) - Math.abs(A[0] - B[0]) * .15, B[0], B[1]); c.stroke(); };
+    threads.forEach(([to, a]) => thread(to, a));
     // the takbir: a wave through the hall, along the floor and up through the lamps
     if (tkOn) {
       const ring = []; for (let i = 0; i <= 64; i++) { const a = i / 64 * TAU; ring.push([ALI[0] + Math.cos(a) * tkR, .03, ALI[2] + Math.sin(a) * tkR]); }
