@@ -702,3 +702,111 @@ html:not(.fx-on) .book { display: none; }
 :root:not(.fx-on) .scene .ov { display: block !important; position: relative !important; inset: auto !important; transform: none !important; opacity: 1 !important; max-width: min(92vw, 44rem); margin: 0 auto; padding: 1rem 1.2rem; background: rgba(9, 10, 8, .72); border-radius: 3px; }
 :root:not(.fx-on) .scene .stage { justify-content: flex-start; gap: 1.2rem; }
 :root:not(.fx-on) .scene .ov * { opacity: 1 !important; filter: none !important; }
+
+/* ---------- sound toggle ---------- */
+.sound-btn { position: fixed; z-index: 30; left: max(14px, env(safe-area-inset-left, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); font: 500 .78rem var(--f-ui); color: var(--gold-hi); background: rgba(13, 14, 11, .72); border: 1px solid rgba(201, 165, 78, .45); border-radius: 999px; padding: .45rem .95rem .55rem; cursor: pointer; backdrop-filter: blur(6px); }
+.sound-btn[aria-pressed="true"] { background: rgba(46, 117, 88, .85); color: #fff; }
+
+/* ---------- saying of the day, search ---------- */
+.hk-today { margin: 1rem 0 3rem; display: grid; gap: .8rem; justify-items: start; }
+.hk-card { margin: 0; width: min(100%, 40rem); padding: 2rem 2.2rem 1.4rem; border: 1px solid rgba(201, 165, 78, .5); background: radial-gradient(ellipse at 80% 0%, rgba(201, 165, 78, .16), transparent 60%), #14150f; box-shadow: inset 0 0 0 6px #14150f, inset 0 0 0 7px rgba(201, 165, 78, .3); }
+.hk-card blockquote { margin: 0 0 1rem; font: 700 clamp(1.4rem, 1.4vw + .9rem, 2.1rem) / 1.8 var(--f-naskh); color: var(--gold-hi); text-wrap: balance; }
+.hk-card figcaption { display: flex; justify-content: space-between; gap: 1rem; font: .8rem var(--f-ui); color: var(--fg-dim); }
+.hk-brand { color: var(--gold); }
+.hk-actions { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+.hk-actions button { font: 500 .85rem var(--f-ui); color: var(--gold-hi); background: transparent; border: 1px solid rgba(201, 165, 78, .5); padding: .45rem 1rem .55rem; cursor: pointer; }
+.hk-actions button:hover { background: rgba(201, 165, 78, .12); }
+#hk-msg { font: .8rem var(--f-ui); color: var(--green-hi); }
+.hk-find { display: grid; gap: .5rem; margin: 0 0 1.4rem; max-width: 30rem; }
+.hk-find input { font: 1.05rem var(--f-naskh); color: var(--fg); background: #14150f; border: 1px solid rgba(201, 165, 78, .45); padding: .6rem .9rem; }
+.hk-find input:focus { outline: 2px solid var(--gold-hi); outline-offset: 1px; }
+.hk-count { margin: 0; font: .8rem var(--f-ui); color: var(--fg-dim); min-height: 1.2em; }
+
+/* ---------- two lives ---------- */
+.lives-head { padding-bottom: 4vh !important; }
+.lives-lead { max-width: 44rem; margin: 0; color: var(--fg-dim); }
+.lives-sc .stage { background: radial-gradient(ellipse 70% 50% at 50% 50%, #1a1d15, var(--ink) 75%); }
+.lv-track { position: absolute; top: 0; bottom: 0; right: 0; }
+.lv-lane { position: absolute; height: 3px; border-radius: 2px; }
+.lv-lane-p { top: 38vh; background: linear-gradient(270deg, rgba(255, 251, 233, .9), rgba(255, 251, 233, .55)); box-shadow: 0 0 14px rgba(255, 251, 233, .5); }
+.lv-lane-a { top: 62vh; background: linear-gradient(270deg, var(--gold-hi), var(--gold)); box-shadow: 0 0 14px rgba(243, 217, 143, .45); }
+.lv-thread { position: absolute; top: 38vh; height: 24vh; width: 1.5px; margin-right: -.75px; background: linear-gradient(rgba(255, 251, 233, .7), rgba(243, 217, 143, .7)); transform-origin: top; }
+.lv-ev { position: absolute; width: 11rem; margin-right: -5.5rem; display: grid; justify-items: center; text-align: center; gap: .1rem; }
+.lv-ev i { width: 12px; height: 12px; border-radius: 50%; background: var(--gold-hi); box-shadow: 0 0 12px rgba(243, 217, 143, .9); }
+.lv-p i { background: #fffbe9; box-shadow: 0 0 14px rgba(255, 251, 233, .9); }
+.lv-ev b { font: 600 .8rem var(--f-ui); color: var(--gold); }
+.lv-ev span { font: 600 .95rem / 1.5 var(--f-kufi); color: var(--fg); }
+.lv-p { top: calc(38vh - 6px); }
+.lv-p.r0 { transform: translateY(-100%); flex-direction: column-reverse; }
+.lv-p.r0, .lv-p.r1 { }
+.lv-p.r0 { top: calc(38vh + 6px); display: flex; flex-direction: column-reverse; align-items: center; transform: translateY(-100%); }
+.lv-p.r1 { top: calc(38vh - 6px); }
+.lv-p.r1 b, .lv-p.r1 span { order: 2; }
+.lv-a { top: calc(62vh - 6px); }
+.lv-a.r1 { top: calc(62vh - 6px); padding-top: 4.2rem; }
+.lv-a.r1 i { margin-top: -4.2rem; margin-bottom: 4.2rem; }
+.lv-a.r2 { top: calc(62vh - 6px); padding-top: 8.4rem; }
+.lv-a.r2 i { margin-top: -8.4rem; margin-bottom: 8.4rem; }
+.lv-alone { position: absolute; top: 66vh; width: 24rem; margin: 0 -12rem 0 0; text-align: center; font-size: 1rem; color: var(--fg-dim); }
+.lv-head { position: absolute; z-index: 3; left: 50%; top: 22vh; bottom: 14vh; width: 2px; margin-left: -1px; background: linear-gradient(transparent, rgba(243, 217, 143, .8) 20%, rgba(243, 217, 143, .8) 80%, transparent); }
+.lv-year { position: absolute; z-index: 3; left: 50%; top: 14vh; transform: translateX(-50%); margin: 0; font-family: var(--f-kufi); }
+.lv-year b { font-size: clamp(1.8rem, 3.6vw, 3rem); color: var(--gold-hi); white-space: nowrap; }
+.lv-legend { position: absolute; z-index: 3; right: 4vw; bottom: 6vh; margin: 0; display: grid; gap: .3rem; font: 500 .85rem var(--f-ui); }
+.lv-l-p::before, .lv-l-a::before { content: ""; display: inline-block; width: 1.6rem; height: 3px; margin-left: .5rem; vertical-align: middle; }
+.lv-l-p::before { background: #fffbe9; } .lv-l-a::before { background: var(--gold-hi); }
+html:not(.fx-on) .lives-sc { display: none; }
+.lv-ev span, .lv-ev b { text-shadow: 0 1px 6px rgba(0, 0, 0, .9), 0 0 14px rgba(0, 0, 0, .7); }
+
+/* ---------- English toggle ---------- */
+.en-btn { position: fixed; z-index: 30; left: calc(max(14px, env(safe-area-inset-left, 0px)) + 8.6rem); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); font: 500 .78rem var(--f-ui); color: var(--gold-hi); background: rgba(13, 14, 11, .72); border: 1px solid rgba(201, 165, 78, .45); border-radius: 999px; padding: .45rem .95rem .55rem; cursor: pointer; backdrop-filter: blur(6px); }
+.en-btn[aria-pressed="true"] { background: rgba(46, 117, 88, .85); color: #fff; }
+span.en { display: none; }
+html.en .en { display: block; direction: ltr; text-align: left; unicode-bidi: isolate; margin-top: .45em; font: italic 400 .62em / 1.6 Georgia, "Times New Roman", serif; letter-spacing: 0; color: inherit; opacity: .78; text-shadow: none; max-width: 60ch; }
+html.en .src .en, html.en span.src > .en { display: inline; margin: 0 0 0 .5em; font-size: .95em; }
+html.en .qt .en, html.en .call .en, html.en .vow .en, html.en .salam-big .en, html.en .op-t .en { font-size: .4em; font-weight: 400; }
+html.en .ov-c .en, html.en .close .en { text-align: center; margin-inline: auto; }
+
+/* ---------- the muttaqin, clause by clause ---------- */
+.mtq .stage { background: #0a0908; }
+.mtq-k { position: absolute; z-index: 2; right: 6vw; top: 9vh; max-width: min(88vw, 40rem); }
+.mtq-list { position: absolute; z-index: 2; right: 6vw; top: 22vh; margin: 0; padding: 0; list-style: none; width: min(88vw, 40rem); display: grid; gap: 1.2rem; }
+.mtq-list li { font: 700 clamp(1.3rem, 1.4vw + .7rem, 2.1rem) / 1.7 var(--f-naskh); color: var(--fg); text-shadow: 0 2px 18px rgba(0, 0, 0, .8); }
+html:not(.fx-on) .mtq-list { position: relative; right: auto; top: auto; margin: 10vh 6vw; }
+/* ---------- Yemen ---------- */
+.ym-q .qt { margin-inline: auto; font-size: clamp(2rem, 4vw, 3.6rem); color: #fff4d8; }
+.ym-q2 { font-size: clamp(1.4rem, 2vw + .5rem, 2.4rem); }
+.mtq .stage::after { content: ""; position: absolute; z-index: 2; inset: 0 0 auto 0; height: 24vh; background: linear-gradient(#0a0908 62%, rgba(10, 9, 8, 0)); pointer-events: none; }
+.mtq-k { z-index: 3; }
+.mtq-list { z-index: 1; }
+
+/* ---------- companions ---------- */
+.companions .wrap { max-width: 74rem; }
+.comp { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: 1.6rem; }
+.comp li { display: grid; grid-template-rows: auto 1fr; border: 1px solid rgba(201, 165, 78, .3); background: #12130f; min-width: 0; }
+.comp-art { width: 100%; height: 11rem; display: block; }
+.comp-tx { padding: 1.2rem 1.4rem 1.4rem; display: grid; gap: .7rem; align-content: start; }
+.comp h3 { margin: 0; font: 700 1.6rem var(--f-kufi); color: var(--gold-hi); }
+.comp-role { margin: 0; font: .82rem var(--f-ui); color: var(--fg-dim); }
+.comp blockquote { margin: 0; font-weight: 700; line-height: 1.95; }
+.comp p { margin: 0; }
+
+.dua-sabah { padding-block: 6vh 10vh !important; }
+.dua { font-size: 1.35em; color: var(--gold-hi); border-color: var(--gold); }
+.note-sm { margin: 1rem 0 0; font: .85rem / 1.8 var(--f-ui); color: var(--fg-dim); max-width: 46rem; }
+
+/* ---------- Ziyarat Amin Allah ---------- */
+.ziyara .wrap { max-width: 52rem; }
+.zy-src { margin: 0 0 2rem; color: var(--on-paper-dim); }
+.zy { display: grid; gap: 1.4rem; padding: 2.4rem 2.4rem 2rem; border: 5px double #b8913a; background: radial-gradient(ellipse at 50% 0%, #fbf4e0, #f1e5c6 75%); }
+.zy p { margin: 0; font-size: 1.18em; line-height: 2.15; text-wrap: pretty; }
+.zy-dir { font-size: .9em !important; color: #7a5f22; font-style: italic; }
+.close-2 .wrap { padding-block: 14vh; }
+
+/* Play mode: the guided, read-aloud tour */
+.play-btn { position: fixed; z-index: 30; left: calc(max(14px, env(safe-area-inset-left, 0px)) + 14.4rem); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); font: 600 .78rem var(--f-ui); color: #1a1408; background: linear-gradient(#f3d98f, #c9a54e); border: 1px solid rgba(243, 217, 143, .8); border-radius: 999px; padding: .45rem 1.05rem .55rem; cursor: pointer; box-shadow: 0 0 18px rgba(201, 165, 78, .35); }
+.play-btn[aria-pressed="true"] { background: rgba(13, 14, 11, .8); color: var(--gold-hi); }
+.play-btn:disabled { opacity: .6; cursor: progress; }
+.speaking { text-shadow: 0 0 22px rgba(243, 217, 143, .55), 0 2px 18px rgba(0, 0, 0, .7); transition: text-shadow .4s; }
+/* while the tour plays, side-by-side text becomes one column so it can be read in order */
+html.playing :is(.facts, .three, .trio ol, .vcards, .bib, .kcards, .comp) { grid-template-columns: minmax(0, 1fr); }
+html.playing .hk-grid { columns: 1; }

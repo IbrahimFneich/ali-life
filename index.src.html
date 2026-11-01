@@ -17,6 +17,16 @@
 <link rel="stylesheet" href="scenes/siffin.css">
 <link rel="stylesheet" href="scenes/climes.css">
 <link rel="stylesheet" href="scenes/khaybar.css">
+<link rel="stylesheet" href="scenes/shajara.css">
+<link rel="stylesheet" href="scenes/muttaqin.css">
+<link rel="stylesheet" href="scenes/wada.css">
+<link rel="stylesheet" href="scenes/shaqshaq.css">
+<link rel="stylesheet" href="scenes/rihla.css">
+<link rel="stylesheet" href="scenes/abwab.css">
+<link rel="stylesheet" href="scenes/tabaqat.css">
+<link rel="stylesheet" href="scenes/qada.css">
+<link rel="stylesheet" href="scenes/hunayn.css">
+<link rel="stylesheet" href="scenes/radd.css">
 <link rel="stylesheet" href="scenes/camel.css">
 <link rel="stylesheet" href="scenes/khandaq.css">
 <link rel="stylesheet" href="scenes/kisa.css">
@@ -32,6 +42,9 @@
 <body dir="rtl" lang="ar">
 
 <button class="menu-btn" id="menu-btn" aria-controls="menu" aria-expanded="false" aria-label="فهرس الفصول"><i></i><i></i><i></i></button>
+<button class="en-btn" id="en-btn" aria-pressed="false" lang="en">English</button>
+<button class="play-btn" id="play" aria-pressed="false" title="جولة مسموعة: تمرّ الصفحة وحدها وتُقرأ نصوصها">▶ استمع</button>
+<button class="sound-btn" id="sound" aria-pressed="false" title="أصوات المكان، بلا موسيقى">الصوت: مُطفأ</button>
 <div class="hud" id="hud" aria-hidden="true"><span id="hud-t">عليّ</span><span id="hud-y">٢٣ ق.هـ — ٤٠ هـ</span><span id="hud-a">٦٣ سنة</span><i class="life"><b id="life-bar"></b></i></div>
 <dialog class="menu" id="menu" aria-label="الفصول">
   <form method="dialog"><button class="menu-x">إغلاق</button></form>
@@ -227,6 +240,16 @@
   </div></div>
 </section>
 
+<!-- ============ حنين ============ -->
+<section class="chapter" id="hunayn" data-title="حُنين" data-y="8" data-age="31" data-place="وادي حُنين">
+  <header class="opener"><p class="op-k"><span class="op-n"></span><span>شوّال ٨ هـ</span><span>وادي حُنين</span></p><h2 class="op-t" data-fx="o 0 1 .14 .34 | y 50px 0px .14 .4 out">حُنين</h2></header>
+  <!--@scene:hunayn-->
+  <div class="band paper"><div class="wrap prose">
+    <blockquote class="pull" data-k="R2q">«فلمّا التقوا مع المشركين لم يلبثوا حتى انهزموا بأجمعهم، فلم يبقَ منهم مع النبي صلى الله عليه وآله إلا عشرة أنفس: تسعة من بني هاشم خاصّة، وعاشرهم أيمن بن أمّ أيمن، فقُتل أيمن رحمه الله، وثبت تسعة النفر الهاشميّون حتى ثاب إلى رسول الله صلى الله عليه وآله من كان انهزم» <span class="src">الإرشاد للشيخ المفيد ١:١٤٠–١٤١</span></blockquote>
+    <p>وكان عليّ عليه السلام فيهم «بين يديه بالسيف». <span class="src">الإرشاد ١:١٤١</span></p>
+  </div></div>
+</section>
+
 <!-- ============ ١١ تبوك: حديث المنزلة ============ -->
 <section class="chapter" id="tabuk" data-title="حديث المنزلة" data-y="9" data-age="32" data-place="المدينة">
   <header class="opener"><p class="op-k"><span class="op-n"></span><span>غزوة تبوك، ٩ هـ</span><span>المدينة</span></p><h2 class="op-t" data-fx="o 0 1 .14 .34 | y 50px 0px .14 .4 out">حديث المنزلة</h2></header>
@@ -256,6 +279,23 @@
   <!--@scene:kisa-->
 </section>
 
+<!-- ============ اليمن ============ -->
+<section class="chapter" id="yemen" data-title="قاضياً في اليمن" data-y="10" data-age="33" data-place="اليمن">
+  <header class="opener"><p class="op-k"><span class="op-n"></span><span>في حياة النبي صلى الله عليه وآله</span><span>اليمن</span></p><h2 class="op-t" data-fx="o 0 1 .14 .34 | y 50px 0px .14 .4 out">قاضياً في اليمن</h2></header>
+  <div class="scene sig yemen" data-scene="yemen" data-rest=".95" style="--len:520vh">
+    <div class="stage">
+      <canvas class="cv" aria-hidden="true"></canvas>
+      <div class="ov ov-tr" data-fx="o 0 1 .03 .08 | o 1 0 .3 .34"><p class="kick">قبل أن يخرج</p><p class="cap" data-k="R3a">قال أمير المؤمنين عليه السلام: «تنفذني يا رسول الله للقضاء وأنا شابّ ولا علم لي بكلّ القضاء»، فقال له: «ادنُ منّي»، فدنا منه فضرب على صدره بيده، وقال:</p></div>
+      <div class="ov ov-c ym-q" data-fx="o 0 1 .36 .42 | o 1 0 .6 .64"><p class="qt" data-k="R3b">«اللهمّ اهدِ قلبه وثبّت لسانه»</p></div>
+      <div class="ov ov-tr" data-fx="o 0 1 .68 .73"><p class="qt ym-q2" data-k="R3c">«فما شككتُ في قضاءٍ بين اثنين بعد ذلك المقام»</p><span class="src">الإرشاد للشيخ المفيد ١:١٩٤–١٩٥</span></div>
+    </div>
+  </div>
+  <div class="band paper"><div class="wrap prose">
+    <p>ومن قضائه وهو باليمن، خبر زُبيةٍ حُفرت للأسد فوقع فيها أربعة، كلٌّ يجذب صاحبه:</p>
+    <blockquote class="pull" data-k="Q1e">«فقضى عليه السلام أنّ الأوّل فريسة الأسد وعليه ثلث الدية للثاني، وعلى الثاني ثلثا الدية للثالث، وعلى الثالث الدية كاملة للرابع». وانتهى الخبر إلى رسول الله صلى الله عليه وآله فقال: «لقد قضى أبو الحسن فيهم بقضاء الله عزّ وجلّ فوق عرشه» <span class="src">الإرشاد للشيخ المفيد ١:١٩٦</span></blockquote>
+  </div></div>
+</section>
+
 <!-- ============ ١٣ غدير خم ============ -->
 <section class="chapter" id="ghadir" data-title="غدير خمّ" data-y="10" data-age="33" data-place="غدير خمّ، قرب الجحفة">
   <header class="opener"><p class="op-k"><span class="op-n"></span><span>١٨ ذي الحجة ١٠ هـ</span><span>غدير خمّ</span></p><h2 class="op-t" data-fx="o 0 1 .14 .34 | y 50px 0px .14 .4 out">غدير خمّ</h2></header>
@@ -265,12 +305,7 @@
 <!-- ============ ١٤ الوداع ============ -->
 <section class="chapter" id="farewell" data-title="رحيل رسول الله" data-y="11" data-age="33" data-place="المدينة">
   <header class="opener"><p class="op-k"><span class="op-n"></span><span>٢٨ صفر ١١ هـ، في رواية المفيد</span><span>المدينة</span></p><h2 class="op-t" data-fx="o 0 1 .14 .34 | y 50px 0px .14 .4 out">رحيل رسول الله</h2></header>
-  <div class="scene sig lamp" style="--len:440vh">
-    <div class="stage">
-      <div class="lampbox" aria-hidden="true" data-fx="b 1 .45 .7 1"><i class="flame"></i><i class="lamp-body"></i><i class="lamp-glow"></i></div>
-      <div class="ov ov-c lamp-q"><p class="kick">نهج البلاغة، الخطبة ١٩٧</p><p class="qt" data-k="N197" data-say=".06 .78">ولقد قُبض رسول الله صلى الله عليه وآله وإنّ رأسه لعلى صدري، ولقد سالت نفسه في كفّي، فأمررتها على وجهي، ولقد وليتُ غسله صلى الله عليه وآله والملائكة أعواني</p></div>
-    </div>
-  </div>
+  <!--@scene:wada-->
 </section>
 
 <!-- ============ ١٥ الصبر ============ -->
@@ -279,35 +314,19 @@
   <div class="band paper"><div class="wrap prose">
     <p>وبينما كان عليه السلام مشغولاً بتجهيز رسول الله صلى الله عليه وآله ودفنه، اجتمع قومٌ في سقيفة بني ساعدة فعقدوا الأمر لغيره. فكانت إمامته بعد النبي ثلاثين سنة، «منها أربع وعشرون سنة وأشهر ممنوعاً من التصرّف على أحكامها». <span class="src">الإرشاد ١:٩</span> وفي الخطبة الشقشقية يصف تلك السنين:</p>
   </div></div>
-  <div class="scene sig raha" style="--len:620vh">
-    <div class="stage">
-      <svg class="mill" viewBox="0 0 600 600" aria-hidden="true" data-fx="o 1 0 .46 .52">
-        <g class="mill-rot" data-fx="r 0deg -540deg 0 .5 lin">
-          <circle cx="300" cy="300" r="250" class="m-stone"/><circle cx="300" cy="300" r="214" class="m-ring"/>
-          <circle cx="300" cy="300" r="180" class="m-dress"/><circle cx="300" cy="300" r="140" class="m-dress d2"/><circle cx="300" cy="300" r="100" class="m-dress d3"/><circle cx="300" cy="300" r="56" class="m-eye"/>
-          <rect x="452" y="290" width="88" height="20" rx="6" class="m-handle"/>
-        </g>
-        <circle cx="300" cy="300" r="34" class="m-axis"/>
-      </svg>
-      <p class="axis-l" aria-hidden="true" data-fx="o 0 1 .12 .18 | o 1 0 .46 .5">القطب</p>
-      <svg class="peak" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true" data-fx="o 0 1 .48 .54 | y 20vh 0vh .48 .58 out">
-        <defs><linearGradient id="pkg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3528"/><stop offset=".5" stop-color="#1a1912"/><stop offset="1" stop-color="#0d0e0b"/></linearGradient></defs>
-        <path class="pk" d="M0 900 L0 760 L180 640 L330 690 L520 470 L640 520 L800 210 L900 330 L980 300 L1120 520 L1260 480 L1420 650 L1600 600 L1600 900 Z"/>
-        <path class="pk-snow" d="M800 210 L760 290 L790 280 L812 312 L840 276 L872 296 Z"/>
-        <path class="flow" pathLength="1" d="M796 230 C 760 330, 700 400, 640 520 C 600 600, 520 680, 470 900" data-fx="dash 1 0 .56 .72"/>
-        <path class="flow" pathLength="1" d="M806 236 C 830 340, 900 380, 960 470 C 1010 560, 1080 680, 1120 900" data-fx="dash 1 0 .58 .74"/>
-        <path class="flow" pathLength="1" d="M800 240 C 800 400, 780 560, 800 900" data-fx="dash 1 0 .6 .76"/>
-      </svg>
-      <div class="birds" id="birds" aria-hidden="true"></div>
-      <div class="ov ov-tr rh-q1" data-fx="o 0 1 .04 .1 | o 1 0 .44 .48"><p class="qt" data-k="N3a">أما والله لقد تقمّصها فلان وإنّه ليعلم أنّ محلّي منها محلّ القطب من الرحى</p></div>
-      <div class="ov ov-tr rh-q2" data-fx="o 0 1 .5 .55 | o 1 0 .76 .8"><p class="qt" data-k="N3a2">ينحدر عنّي السيل، ولا يرقى إليّ الطير</p></div>
-      <div class="ov ov-c rh-q3" data-fx="o 0 1 .82 .88"><p class="qt" data-k="N3b">فصبرتُ وفي العين قذى، وفي الحلق شجا، أرى تراثي نهباً</p><span class="src">نهج البلاغة، الخطبة ٣ (الشقشقية)</span></div>
-    </div>
-  </div>
+  <!--@scene:shaqshaq-->
   <div class="band night zahra"><div class="wrap prose">
     <p class="lead">فاطمة الزهراء عليها السلام</p>
     <p data-k="H17">«وبقيت بعد أبيها خمسة وسبعين يوماً»، ولها ثماني عشرة سنة. «ولمّا قُبضت فاطمة عليها السلام دفنها أمير المؤمنين سرّاً، وعفا على موضع قبرها». <span class="src" data-k="H17src">الكافي، ج١، باب مولد الزهراء عليها السلام</span> «فلمّا حضرتها الوفاة وصّت أمير المؤمنين عليه السلام أن يتولّى أمرها، ويدفنها ليلاً، ويعفي قبرها». <span class="src">الأمالي للشيخ المفيد، المجلس ٣٣</span> وقال عند دفنها، مخاطباً رسول الله صلى الله عليه وآله:</p>
     <blockquote class="pull" data-k="N202">السلام عليك يا رسول الله عنّي، وعن ابنتك النازلة في جوارك، والسريعة اللحاق بك. قلّ يا رسول الله عن صفيّتك صبري، ورقّ عنها تجلّدي … أمّا حزني فسرمد، وأمّا ليلي فمسهّد <span class="src">نهج البلاغة، الخطبة ٢٠٢</span></blockquote>
+  </div></div>
+  <div class="band paper"><div class="wrap prose">
+    <p class="lead">جمع القرآن</p>
+    <blockquote class="pull" data-k="R4">«فلمّا رأى عليّ عليه السلام غدرهم، وقلّة وفائهم له، لزم بيته، وأقبل على القرآن يؤلّفه ويجمعه، فلم يخرج من بيته حتى جمعه» <span class="src">كتاب سُليم بن قيس، عنه بحار الأنوار ٢٨:٢٦١</span></blockquote>
+    <p data-k="R4b">وبعث إليه القوم يدعونه، فبعث إليهم: «أنّي مشغول، وقد آليتُ على نفسي يميناً أن لا أرتدي برداءٍ إلا للصلاة حتى أؤلّف القرآن وأجمعه». <span class="src">المصدر نفسه</span></p>
+    <p class="lead">فدك</p>
+    <p>وكتب بعد ذلك إلى عامله عثمان بن حنيف:</p>
+    <blockquote class="pull" data-k="R5">«بلى! كانت في أيدينا فدك من كلّ ما أظلّته السماء، فشحّت عليها نفوس قوم، وسخت عنها نفوس قوم آخرين، ونعم الحكم الله» <span class="src">نهج البلاغة، الكتاب ٤٥</span></blockquote>
   </div></div>
   <!--@scene:itq-->
 </section>
@@ -321,6 +340,13 @@
     <blockquote class="pull" data-k="N15">والله لو وجدته قد تُزوّج به النساء، ومُلك به الإماء لرددته؛ فإنّ في العدل سعة، ومن ضاق عليه العدل فالجور عليه أضيق <span class="src">نهج البلاغة، الخطبة ١٥</span></blockquote>
     <p>وجاءه أخوه عقيل يطلب من بيت المال فوق حقّه:</p>
     <blockquote class="pull" data-k="N224a">والله لقد رأيت عقيلاً وقد أملق حتى استماحني من برّكم صاعاً … فأحميتُ له حديدة، ثم أدنيتها من جسمه ليعتبر بها … ثكلتك الثواكل يا عقيل! أتئنّ من حديدة أحماها إنسانها للعبه، وتجرّني إلى نارٍ سجرها جبّارها لغضبه <span class="src">نهج البلاغة، الخطبة ٢٢٤</span></blockquote>
+    <p>وبلغه أنّ خيل معاوية أغارت على الأنبار، فقال:</p>
+    <blockquote class="pull" data-k="A1">«ولقد بلغني أنّ الرجل منهم كان يدخل على المرأة المسلمة، والأخرى المعاهدة، فينتزع حجلها وقُلبها وقلائدها ورُعُثها … فلو أنّ امرأً مسلماً مات من بعد هذا أسفاً ما كان به ملوماً، بل كان به عندي جديراً» <span class="src">نهج البلاغة، الخطبة ٢٧</span></blockquote>
+    <p class="lead">في أسواق الكوفة</p>
+    <blockquote class="pull" data-k="T1">«كان أمير المؤمنين عليه السلام بالكوفة عندكم يغتدي كلّ يوم بكرةً من القصر، فيطوف في أسواق الكوفة سوقاً سوقاً، ومعه الدِّرّة على عاتقه … فيقف على أهل كلّ سوق فينادي: يا معشر التجّار، اتّقوا الله عزّ وجلّ» <span class="src">الكافي ٥:١٥١</span></blockquote>
+    <p data-k="T1b">وكان يقول على المنبر: «يا معشر التجّار، الفقه ثمّ المتجر، الفقه ثمّ المتجر، الفقه ثمّ المتجر». <span class="src">الكافي ٥:١٥٠</span></p>
+    <p class="lead">الأرملة</p>
+    <blockquote class="pull" data-k="T2">«ونظر عليّ إلى امرأةٍ على كتفها قربة ماء، فأخذ منها القربة فحملها إلى موضعها، وسألها عن حالها … فانصرف وبات ليلته قلقاً، فلمّا أصبح حمل زنبيلاً فيه طعام، فقال بعضهم: أعطني أحمله عنك، فقال: من يحمل وزري عنّي يوم القيامة؟ … ذُق يا عليّ، هذا جزاء من ضيّع الأرامل واليتامى» <span class="src">مناقب آل أبي طالب لابن شهرآشوب ٢:١١٥، عنه بحار الأنوار ٤١:٥٢</span></blockquote>
   </div></div>
   <!--@scene:climes-->
   <div class="band paper"><div class="wrap prose">
@@ -329,6 +355,12 @@
     <p>وكتب إلى عامله على البصرة عثمان بن حنيف:</p>
     <blockquote class="pull" data-k="L45">ألا وإنّ لكلّ مأموم إماماً يقتدي به، ويستضيء بنور علمه. ألا وإنّ إمامكم قد اكتفى من دنياه بطِمرَيه، ومن طُعمه بقُرصَيه … ولو شئتُ لاهتديت الطريق إلى مصفّى هذا العسل، ولباب هذا القمح، ونسائج هذا القزّ، ولكن هيهات أن يغلبني هواي … ولعلّ بالحجاز أو اليمامة من لا طمع له في القرص، ولا عهد له بالشبع <span class="src">نهج البلاغة، الكتاب ٤٥</span></blockquote>
   </div></div>
+  <!--@scene:tabaqat-->
+</section>
+
+<!-- ============ قضاؤه ============ -->
+<section class="band ink qada-sec" id="qada" data-label="قضاؤه">
+  <!--@scene:qada-->
 </section>
 
 <!-- ============ ١٧ الجمل ============ -->
@@ -430,6 +462,7 @@
 
 <!-- ============ حكمته ============ -->
 <section class="band ink wisdom" id="wisdom" data-label="حكمته">
+  <!--@scene:abwab-->
   <div class="scene stair" style="--len:560vh">
     <div class="stage">
       <p class="kick st-k">نهج البلاغة، الخطبة الأولى</p>
@@ -449,7 +482,16 @@
     </div>
   </div>
   <div class="wrap hk-wrap">
-    <p class="kick">من قصار حِكَمه</p>
+    <div class="hk-today">
+      <p class="kick">حكمة اليوم</p>
+      <figure class="hk-card" id="hk-card"><blockquote id="hk-t"></blockquote><figcaption><span id="hk-s"></span><span class="hk-brand">سيرة أمير المؤمنين</span></figcaption></figure>
+      <div class="hk-actions"><button type="button" id="hk-copy">نسخ الحكمة</button><button type="button" id="hk-next">حكمة أخرى</button><span id="hk-msg" role="status"></span></div>
+    </div>
+    <div class="hk-find">
+      <label for="hk-q" class="kick">ابحث في قصار حِكَمه، بكلمة أو برقم الحكمة</label>
+      <input id="hk-q" type="search" placeholder="مثلاً: العقل، أو ٨١" autocomplete="off">
+      <p id="hk-count" class="hk-count" role="status"></p>
+    </div>
     <ul class="hk-grid" id="hk-grid">
       <li><p>قيمة كلّ امرئ ما يُحسنه</p><span>الحكمة ٨١</span></li>
       <li><p>الناس أعداء ما جهلوا</p><span>الحكمة ١٧٢</span></li>
@@ -495,11 +537,13 @@
       <blockquote class="pull">ومن لطائف صنعته، وعجائب خلقته، ما أرانا من غوامض الحكمة في هذه الخفافيش التي يقبضها الضياء الباسط لكلّ شيء، ويبسطها الظلام القابض لكلّ حيّ <span class="src">الخطبة ١٥٥</span></blockquote>
       <blockquote class="pull">ومن أعجبها خلقاً الطاوس الذي أقامه في أحكم تعديل، ونضّد ألوانه في أحسن تنضيد <span class="src">الخطبة ١٦٥</span></blockquote>
     </div>
-    <div class="creation">
-      <p class="kick">في صفة المتّقين، خطبة همّام</p>
-      <blockquote class="pull">فالمتّقون فيها هم أهل الفضائل: منطقهم الصواب، وملبسهم الاقتصاد، ومشيهم التواضع … عظُم الخالق في أنفسهم فصغُر ما دونه في أعينهم <span class="src">الخطبة ١٩٣</span></blockquote>
-    </div>
   </div>
+  <div class="wrap hk-wrap dua-sabah">
+    <p class="kick">من مناجاته: دعاء الصباح</p>
+    <blockquote class="pull dua" data-k="S2">«اللهمّ يا من دلع لسان الصباح بنطق تبلّجه، وسرّح قطع الليل المظلم بغياهب تلجلجه، وأتقن صنع الفلك الدوّار في مقادير تبرّجه، وشعشع ضياء الشمس بنور تأجّجه، يا من دلّ على ذاته بذاته، وتنزّه عن مجانسة مخلوقاته، وجلّ عن ملاءمة كيفيّاته» <span class="src">بحار الأنوار ٩٤:٢٤٢، عن «الاختيار» لابن الباقي</span></blockquote>
+    <p class="note-sm">«كان أمير المؤمنين عليه السلام يدعو بعد ركعتي الفجر بهذا الدعاء». يرويه المجلسي بلا سند، وينبّه محقّق البحار إلى ضعف أسانيد هذه الأدعية. <span class="src">بحار الأنوار ٨٧:٣٣٩</span></p>
+  </div>
+  <!--@scene:muttaqin-->
 </section>
 
 <!-- ============ في القرآن والسنّة ============ -->
@@ -528,6 +572,16 @@
   </div>
 </section>
 
+<!-- ============ ردّ الشمس ============ -->
+<section class="band ink radd-sec" id="radd" data-label="ردّ الشمس">
+  <header class="opener"><p class="op-k"><span>من أعلامه</span><span>مرّةً في حياة النبي، ومرّةً بعده</span><span>المدينة، ثم بابل</span></p><h2 class="op-t" data-fx="o 0 1 .14 .34 | y 50px 0px .14 .4 out">ردّ الشمس</h2></header>
+  <!--@scene:radd-->
+  <div class="band paper"><div class="wrap prose">
+    <p data-k="R1i">يذكرها الشيخ المفيد في فصل «ممّا أظهره الله تعالى من الأعلام الباهرة على يده»: «رجوع الشمس له عليه السلام مرّتين: في حياة النبي صلى الله عليه وآله مرّة، وبعد وفاته مرّة أخرى». <span class="src">الإرشاد للشيخ المفيد ١:٣٤٥</span></p>
+    <blockquote class="pull" data-k="R1q">«فقالت أسماء: أم والله لقد سمعنا لها عند غروبها صريراً كصرير المنشار في الخشبة» <span class="src">الإرشاد ١:٣٤٦</span></blockquote>
+  </div></div>
+</section>
+
 <!-- ============ أبناؤه ============ -->
 <section class="band paper children" id="children" data-label="أبناؤه">
   <div class="wrap">
@@ -535,19 +589,43 @@
     <h2 class="sec-t">سبعة وعشرون ولداً، ذكراً وأنثى</h2>
     <p class="kids-lead" data-k="F5">«فأولاد أمير المؤمنين صلوات الله عليه سبعة وعشرون ولداً ذكراً وأنثى». <span class="src">الإرشاد للشيخ المفيد ١:٣٥٤</span></p>
   </div>
-  <div class="scene sig kin" data-scene="kin" data-rest="1" style="--len:900vh">
-    <div class="stage">
-      <div class="kin-tree" id="kin-tree"></div>
-      <p class="kin-n" aria-hidden="true"><b id="kin-n">٠</b><span>من ٢٧</span></p>
-      <div class="ov ov-tr kin-cap" id="kin-cap" aria-live="off"></div>
-      <div class="ov kin-end" data-fx="o 0 1 .84 .9"><p class="qt">«الشهداء مع أخيهم الحسين … بطفّ كربلاء»</p><span class="src">الإرشاد للشيخ المفيد ١:٣٥٤</span></div>
-    </div>
-  </div>
+  <!--@scene:shajara-->
   <div class="wrap kin-wrap">
     <div class="kdots" aria-label="أبناؤه السبعة والعشرون"><i class="kd kd-f kd-imam" data-name="الإمام الحسن عليه السلام" tabindex="0" aria-label="الإمام الحسن عليه السلام"></i><i class="kd kd-f kd-imam" data-name="الإمام الحسين عليه السلام" tabindex="0" aria-label="الإمام الحسين عليه السلام"></i><i class="kd kd-f" data-name="زينب الكبرى" tabindex="0" aria-label="زينب الكبرى"></i><i class="kd kd-f" data-name="زينب الصغرى المكنّاة أمّ كلثوم" tabindex="0" aria-label="زينب الصغرى المكنّاة أمّ كلثوم"></i><i class="kd" data-name="محمّد المكنّى أبا القاسم" tabindex="0" aria-label="محمّد المكنّى أبا القاسم"></i><i class="kd" data-name="عمر" tabindex="0" aria-label="عمر"></i><i class="kd" data-name="رقيّة" tabindex="0" aria-label="رقيّة"></i><i class="kd kd-m" data-name="العبّاس" tabindex="0" aria-label="العبّاس"></i><i class="kd kd-m" data-name="جعفر" tabindex="0" aria-label="جعفر"></i><i class="kd kd-m" data-name="عثمان" tabindex="0" aria-label="عثمان"></i><i class="kd kd-m" data-name="عبد الله" tabindex="0" aria-label="عبد الله"></i><i class="kd kd-m" data-name="محمّد الأصغر المكنّى أبا بكر" tabindex="0" aria-label="محمّد الأصغر المكنّى أبا بكر"></i><i class="kd kd-m" data-name="عبيد الله" tabindex="0" aria-label="عبيد الله"></i><i class="kd" data-name="يحيى" tabindex="0" aria-label="يحيى"></i><i class="kd" data-name="أمّ الحسن" tabindex="0" aria-label="أمّ الحسن"></i><i class="kd" data-name="رملة" tabindex="0" aria-label="رملة"></i><i class="kd" data-name="نفيسة" tabindex="0" aria-label="نفيسة"></i><i class="kd" data-name="زينب الصغرى" tabindex="0" aria-label="زينب الصغرى"></i><i class="kd" data-name="رقيّة الصغرى" tabindex="0" aria-label="رقيّة الصغرى"></i><i class="kd" data-name="أمّ هانئ" tabindex="0" aria-label="أمّ هانئ"></i><i class="kd" data-name="أمّ الكرام" tabindex="0" aria-label="أمّ الكرام"></i><i class="kd" data-name="جمانة المكنّاة أمّ جعفر" tabindex="0" aria-label="جمانة المكنّاة أمّ جعفر"></i><i class="kd" data-name="أمامة" tabindex="0" aria-label="أمامة"></i><i class="kd" data-name="أمّ سلمة" tabindex="0" aria-label="أمّ سلمة"></i><i class="kd" data-name="ميمونة" tabindex="0" aria-label="ميمونة"></i><i class="kd" data-name="خديجة" tabindex="0" aria-label="خديجة"></i><i class="kd" data-name="فاطمة" tabindex="0" aria-label="فاطمة"></i></div>
     <p class="kleg"><span><i class="kd kd-imam"></i> إمامان</span><span><i class="kd kd-f"></i> من فاطمة الزهراء</span><span><i class="kd kd-m"></i> استُشهدوا مع الحسين بكربلاء</span></p>
     <ul class="kcards"><li><p class="km">فاطمة البتول، سيّدة نساء العالمين</p><p class="kn"><span class="imam">الإمام الحسن عليه السلام</span>، <span class="imam">الإمام الحسين عليه السلام</span>، زينب الكبرى، زينب الصغرى المكنّاة أمّ كلثوم</p></li><li><p class="km">خولة بنت جعفر بن قيس الحنفية</p><p class="kn">محمّد المكنّى أبا القاسم</p></li><li><p class="km">أمّ حبيب بنت ربيعة</p><p class="kn">عمر، رقيّة</p><p class="kx">كانا توأمين</p></li><li><p class="km">أمّ البنين بنت حزام بن خالد بن دارم</p><p class="kn"><span class="kmart">العبّاس</span>، <span class="kmart">جعفر</span>، <span class="kmart">عثمان</span>، <span class="kmart">عبد الله</span></p><p class="kx">«الشهداء مع أخيهم الحسين بطفّ كربلاء»</p></li><li><p class="km">ليلى بنت مسعود الدارمية</p><p class="kn"><span class="kmart">محمّد الأصغر المكنّى أبا بكر</span>، <span class="kmart">عبيد الله</span></p><p class="kx">«الشهيدان مع أخيهما الحسين عليه السلام بالطفّ»</p></li><li><p class="km">أسماء بنت عُميس الخثعمية</p><p class="kn">يحيى</p></li><li><p class="km">أمّ سعيد بنت عروة بن مسعود الثقفي</p><p class="kn">أمّ الحسن، رملة</p></li><li><p class="km">لأمّهاتٍ شتّى</p><p class="kn">نفيسة، زينب الصغرى، رقيّة الصغرى، أمّ هانئ، أمّ الكرام، جمانة المكنّاة أمّ جعفر، أمامة، أمّ سلمة، ميمونة، خديجة، فاطمة</p></li></ul>
     <p class="kids-note" data-k="F6">«وفي الشيعة من يذكر أنّ فاطمة صلوات الله عليها أسقطت بعد النبي صلى الله عليه وآله ولداً ذكراً كان سمّاه رسول الله وهو حملٌ محسناً، فعلى قول هذه الطائفة أولاد أمير المؤمنين عليه السلام ثمانية وعشرون». <span class="src">الإرشاد ١:٣٥٥</span></p>
+  </div>
+</section>
+
+<!-- ============ أصحابه ============ -->
+<section class="band ink companions" id="companions" data-label="أصحابه">
+  <div class="wrap">
+    <p class="kick">أصحابه</p>
+    <h2 class="sec-t">رجالٌ عرفوه فلزموه</h2>
+    <ul class="comp">
+      <li><canvas class="comp-art" data-paint="nile" aria-hidden="true"></canvas><div class="comp-tx"><h3>مالك الأشتر</h3><p class="comp-role">قائده، وواليه على مصر</p>
+        <blockquote data-k="C1a">«أمّا بعد، فقد بعثتُ إليكم عبداً من عباد الله، لا ينام أيّام الخوف، ولا ينكل عن الأعداء ساعات الرَّوع، أشدّ على الفجّار من حريق النار، وهو مالك بن الحارث أخو مذحج» <span class="src">نهج البلاغة، الكتاب ٣٨، إلى أهل مصر</span></blockquote>
+        <p>وقال حين جاءه نعيه:</p>
+        <blockquote data-k="C1b">«مالكٌ وما مالك! والله لو كان جبلاً لكان فِنداً، ولو كان حجراً لكان صلداً، لا يرتقيه الحافر، ولا يوفي عليه الطائر» <span class="src">نهج البلاغة، الحكمة ٤٤٣</span></blockquote></div></li>
+      <li><canvas class="comp-art" data-paint="siffin" aria-hidden="true"></canvas><div class="comp-tx"><h3>عمّار بن ياسر</h3><p class="comp-role">استُشهد معه في صفّين</p>
+        <blockquote data-k="H22c">قال له رسول الله صلى الله عليه وآله: «إنّك من أهل الجنّة، تقتلك الفئة الباغية» <span class="src">وقعة صفّين لنصر بن مزاحم، ص٣٢٤</span></blockquote>
+        <p>وقال عليّ عليه السلام بعد ذلك بالكوفة:</p>
+        <blockquote data-k="C2">«أين إخواني الذين ركبوا الطريق، ومضوا على الحقّ؟ أين عمّار؟ وأين ابن التيّهان؟ وأين ذو الشهادتين؟ وأين نظراؤهم من إخوانهم الذين تعاقدوا على المنيّة، وأُبرد برؤوسهم إلى الفجرة!» <span class="src">نهج البلاغة، الخطبة ١٨٢</span></blockquote></div></li>
+      <li><canvas class="comp-art" data-paint="night" aria-hidden="true"></canvas><div class="comp-tx"><h3>كميل بن زياد</h3><p class="comp-role">صاحب الوصيّة والدعاء</p>
+        <blockquote data-k="HK147b">«يا كميل، العلم خيرٌ من المال: العلم يحرسك وأنت تحرس المال، والمال تنقصه النفقة، والعلم يزكو على الإنفاق» <span class="src">نهج البلاغة، الحكمة ١٤٧</span></blockquote>
+        <p data-k="H30b">«روي أنّ كميل بن زياد النخعي رأى أمير المؤمنين عليه السلام ساجداً يدعو بهذا الدعاء في ليلة النصف من شعبان»، فصار يُعرف بدعاء كميل. <span class="src">مصباح المتهجّد للطوسي</span></p>
+        <p data-k="C3">ولمّا طلبه الحجّاج قال له كميل: «ولقد خبّرني أمير المؤمنين عليّ بن أبي طالب عليه السلام أنّك قاتلي»، فقتله. <span class="src">الإرشاد للشيخ المفيد ١:٣٢٧</span></p></div></li>
+      <li><canvas class="comp-art" data-paint="palm" aria-hidden="true"></canvas><div class="comp-tx"><h3>ميثم التمّار</h3><p class="comp-role">بائع التمر في الكوفة</p>
+        <blockquote data-k="C4">قال له عليّ عليه السلام ذات يوم: «إنّك تؤخذ بعدي فتُصلب وتُطعن بحربة … وتُصلب على باب دار عمرو بن حريث عاشر عشرة، أنت أقصرهم خشبة، وأقربهم من المطهرة، وامضِ حتى أُريك النخلة التي تُصلب على جذعها» فأراه إيّاها <span class="src">الإرشاد للشيخ المفيد ١:٣٢٣</span></blockquote>
+        <p data-k="C4b">وكان ميثم يصلّي عندها ويقول: «بوركتِ من نخلة، لكِ خُلقتُ ولي غُذّيتِ». <span class="src">الإرشاد ١:٣٢٤</span></p></div></li>
+      <li><canvas class="comp-art" data-paint="meadow" aria-hidden="true"></canvas><div class="comp-tx"><h3>حُجر بن عديّ</h3><p class="comp-role">من خاصّته</p>
+        <p>قتله معاوية بعد أن أعطاه العهود، فكتب إليه الإمام الحسين عليه السلام:</p>
+        <blockquote data-k="C5">«ألستَ قاتل حُجر بن عديّ أخي كندة وأصحابه الصالحين المطيعين العابدين، كانوا ينكرون الظلم، ويستعظمون المنكر والبدع، ويؤثرون حكم الكتاب، ولا يخافون في الله لومة لائم، فقتلتهم ظلماً وعدواناً، بعدما كنت أعطيتهم الأيمان المغلّظة، والمواثيق المؤكّدة» <span class="src">الاحتجاج للطبرسي ٢:٢٠</span></blockquote></div></li>
+      <li><canvas class="comp-art" data-paint="door" aria-hidden="true"></canvas><div class="comp-tx"><h3>قنبر</h3><p class="comp-role">مولاه</p>
+        <p>اشترى ثوبين، أحدهما بثلاثة دراهم والآخر بدرهمين:</p>
+        <blockquote data-k="C6">«فقال: يا قنبر، خذ الذي بثلاثة. قال: أنت أولى به يا أمير المؤمنين، تصعد المنبر وتخطب الناس. قال: يا قنبر، أنت شابّ، ولك شَرَه الشباب، وأنا أستحيي من ربّي أن أتفضّل عليك، لأنّي سمعت رسول الله صلى الله عليه وآله يقول: ألبسوهم ممّا تلبسون، وأطعموهم ممّا تأكلون» <span class="src">الغارات للثقفي، عنه بحار الأنوار ١٠٣:٩٣</span></blockquote></div></li>
+    </ul>
   </div>
 </section>
 
@@ -595,6 +673,29 @@
   </div>
 </section>
 
+<!-- ============ خريطة حياته ============ -->
+<section class="band ink rihla-sec" id="rihla" data-label="خريطة حياته">
+  <!--@scene:rihla-->
+</section>
+
+<!-- ============ حياتان ============ -->
+<section class="band ink lives" id="lives" data-label="حياتان">
+  <div class="wrap lives-head">
+    <p class="kick">حياتان</p>
+    <h2 class="sec-t">رسول الله صلى الله عليه وآله، وعليّ عليه السلام</h2>
+    <p class="lives-lead">خطّان على مرّ السنين: أين بدأ كلٌّ منهما، وأين اجتمعا، وأين مضى عليّ وحده بعد رسول الله. مرِّر ليتحرّك الزمن.</p>
+  </div>
+  <div class="scene sig lives-sc" data-scene="lives" data-rest="1" style="--len:900vh">
+    <div class="stage">
+      <canvas class="cv" aria-hidden="true"></canvas>
+      <div class="lv-track" id="lv-track"></div>
+      <i class="lv-head" aria-hidden="true"></i>
+      <p class="lv-year" aria-hidden="true"><b id="lv-y">٥٣ ق.هـ</b></p>
+      <p class="lv-legend"><span class="lv-l-p">رسول الله صلى الله عليه وآله</span><span class="lv-l-a">عليّ عليه السلام</span></p>
+    </div>
+  </div>
+</section>
+
 <!-- ============ الخاتمة ============ -->
 <section class="band night close" id="close" data-label="الخاتمة">
   <div class="wrap">
@@ -602,6 +703,27 @@
     <p class="close-a" data-k="N77pre" data-words=".12 .36">فأشهد لقد رأيته في بعض مواقفه وقد أرخى الليل سدوله، وهو قائمٌ في محرابه، قابضٌ على لحيته، يتململ تململ السليم، ويبكي بكاء الحزين، ويقول:</p>
     <p class="close-b" data-k="HK77" data-words=".3 .56">يا دنيا يا دنيا إليكِ عنّي، أبي تعرّضتِ؟ أم إليّ تشوّقتِ؟ لا حان حينُكِ! هيهات! غُرّي غيري، لا حاجة لي فيكِ، قد طلّقتُكِ ثلاثاً لا رجعة فيها</p>
     <p class="salam">السلام عليك يا أمير المؤمنين</p>
+  </div>
+</section>
+
+<!-- ============ زيارة أمين الله ============ -->
+<section class="band paper ziyara" id="ziyara" data-label="زيارة أمين الله">
+  <div class="wrap">
+    <p class="kick">زيارة أمين الله</p>
+    <h2 class="sec-t">زارَه بها الإمام زين العابدين عليه السلام</h2>
+    <p class="zy-src">يرويها ابن قولويه بسنده عن الإمام الرضا، عن أبيه الكاظم، عن أبيه الصادق عليهم السلام: أنّ عليّ بن الحسين عليه السلام زار قبره فوقف عليه وبكى وقال: <span class="src">كامل الزيارات لابن قولويه، الباب ١١، ص٣٧–٣٨</span></p>
+    <div class="zy" data-k="Z1">
+      <p>السلام عليك يا أمين الله في أرضه، وحجّته على عباده. أشهد أنّك جاهدت في الله حقّ جهاده، وعملت بكتابه، واتّبعت سنن نبيّه صلى الله عليه وآله وسلّم، حتى دعاك الله في جواره، وقبضك باختياره، وألزم أعداءك الحجّة في قتلهم إيّاك، مع ما لك من الحجج البالغة على جميع خلقه.</p>
+      <p>اللهمّ فاجعل نفسي مطمئنّةً بقدرك، راضيةً بقضائك، مولعةً بذكرك ودعائك، محبّةً لصفوة أوليائك، محبوبةً في أرضك وسمائك، صابرةً على نزول بلائك، شاكرةً لفواضل نعمائك، ذاكرةً لسوابغ آلائك، مشتاقةً إلى فرحة لقائك، متزوّدةً التقوى ليوم جزائك، مستنّةً بسنن أوليائك، مفارقةً لأخلاق أعدائك، مشغولةً عن الدنيا بحمدك وثنائك.</p>
+      <p class="zy-dir">ثم وضع خدّه على القبر وقال:</p>
+      <p>اللهمّ إنّ قلوب المخبتين إليك والهة، وسبل الراغبين إليك شارعة، وأعلام القاصدين إليك واضحة، وأفئدة العارفين منك فازعة، وأصوات الداعين إليك صاعدة، وأبواب الإجابة لهم مفتّحة، ودعوة من ناجاك مستجابة، وتوبة من أناب إليك مقبولة، وعبرة من بكى من خوفك مرحومة، والإعانة لمن استعان بك موجودة، والإغاثة لمن استغاث بك مبذولة، وعداتك لعبادك منجزة، وزلل من استقالك مقالة، وأعمال العاملين لديك محفوظة، وأرزاقك إلى الخلائق من لدنك نازلة، وعوائد المزيد لهم متواترة، وذنوب المستغفرين مغفورة، وحوائج خلقك عندك مقضيّة، وجوائز السائلين عندك موفورة، وعوائد المزيد إليهم واصلة، وموائد المستطعمين معدّة، ومناهل الظماء لديك مترعة.</p>
+      <p>اللهمّ فاستجب دعائي، واقبل ثنائي، وأعطني رجائي، واجمع بيني وبين أوليائي، بحقّ محمّدٍ وعليٍّ وفاطمة والحسن والحسين عليهم السلام، إنّك وليّ نعمائي، ومنتهى رجائي، وغاية مناي في منقلبي ومثواي. أنت إلهي وسيّدي ومولاي، اغفر لأوليائنا، وكفّ عنّا أعداءنا، واشغلهم عن أذانا، وأظهر كلمة الحقّ واجعلها العليا، وأدحض كلمة الباطل واجعلها السفلى، إنّك على كلّ شيءٍ قدير.</p>
+    </div>
+  </div>
+</section>
+<section class="band night close close-2" data-label="الخاتمة">
+  <div class="wrap">
+    <p class="salam">السلام عليك يا أمير المؤمنين ورحمة الله وبركاته</p>
   </div>
 </section>
 
@@ -622,6 +744,11 @@
       <li><b>عوالي اللآلي</b><span>ابن أبي جمهور الأحسائي</span></li>
       <li><b>غرر الحكم ودرر الكلم</b><span>عبد الواحد الآمدي</span></li>
       <li><b>بحار الأنوار</b><span>العلّامة المجلسي (ت ١١١٠ هـ)</span></li>
+      <li><b>كامل الزيارات</b><span>ابن قولويه (ت ٣٦٨ هـ)</span></li>
+      <li><b>كتاب سُليم بن قيس</b><span>سُليم بن قيس الهلالي</span></li>
+      <li><b>الاحتجاج</b><span>أبو منصور الطبرسي</span></li>
+      <li><b>الغارات</b><span>إبراهيم بن محمد الثقفي (ت ٢٨٣ هـ)</span></li>
+      <li><b>قرب الإسناد</b><span>عبد الله بن جعفر الحميري، عنه وسائل الشيعة</span></li>
       <li><b>الأنوار العلوية</b><span>الشيخ جعفر النقدي (معاصر)</span></li>
     </ul>
     <p class="note">نصوص القرآن الكريم بالرسم الإملائي. وكلّ نصّ منسوب إلى نهج البلاغة رُوجع على طبعة صبحي الصالح، وكلّ حديثٍ رُوجع على الكتاب المذكور بجانبه. الصفحة عمل محبّةٍ غير رسميّ، والرسوم فيها لا تصوّر أحداً من النبيّ وأهل بيته، بل تجعلهم نوراً.</p>
@@ -631,6 +758,7 @@
 </main>
 
 <script src="scenes/core.js"></script>
+<script src="scenes/sound.js"></script>
 <script src="scenes/main.js"></script>
 <script src="scenes/mabit.js"></script>
 <script src="scenes/idols.js"></script>
@@ -648,6 +776,17 @@
 <script src="scenes/kisa.js"></script>
 <script src="scenes/khandaq.js"></script>
 <script src="scenes/camel.js"></script>
+<script src="scenes/radd.js"></script>
+<script src="scenes/hunayn.js"></script>
+<script src="scenes/qada.js"></script>
+<script src="scenes/tabaqat.js"></script>
+<script src="scenes/abwab.js"></script>
+<script src="scenes/rihla.js"></script>
+<script src="scenes/shaqshaq.js"></script>
+<script src="scenes/wada.js"></script>
+<script src="scenes/muttaqin.js"></script>
+<script src="scenes/shajara.js"></script>
 <script src="app.js"></script>
+<script src="scenes/play.js"></script>
 </body>
 </html>

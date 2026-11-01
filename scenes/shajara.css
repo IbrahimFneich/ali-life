@@ -1,0 +1,69 @@
+/* shajara: his children as a colossal tree of light. The canvas draws the light; .shj-lay holds the names, the
+   mothers, the hit targets and the tooltip, placed by shajara.js and moved with the camera tilt. The caption and the
+   end quote keep to the right column (desktop) or the top band (phone); the counter sits low on the right.
+   The scene lives inside section.band.paper, so text colours are reset here. */
+.shajara .stage { background: #03040a; color: var(--fg); }
+.shajara .stage::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse 85% 80% at 42% 42%, transparent 62%, rgba(0, 0, 0, .42)); }
+.shajara .stage .kick { color: var(--gold); }
+.shajara .stage .src { color: var(--gold); border-color: rgba(201, 165, 78, .45); }
+
+.shj-lay { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.shj-lay > b { position: absolute; left: 0; top: 0; margin: 0; padding: .04em .42em .14em; white-space: nowrap; opacity: 0; line-height: 1.3; text-shadow: 0 0 3px #000, 0 0 8px rgba(0, 0, 0, .95), 0 1px 14px rgba(0, 0, 0, .8);
+  background: radial-gradient(closest-side, rgba(4, 5, 9, .62), rgba(4, 5, 9, .34) 68%, rgba(4, 5, 9, 0)); } /* a soft pool of night behind each name */
+.shj-nm { font: 600 max(11.5px, calc(15px * var(--u, 1))) var(--f-kufi); color: #f1ead6; }
+.shj-nm.imam { font-size: max(13px, calc(18px * var(--u, 1))); color: var(--gold-hi); }
+.shj-nm.shj-f { color: #a7e2c4; }
+.shj-nm.shj-m { color: #f2aba2; }
+.shj-nm.on { color: #fff; }
+.shj-mo { font: 500 max(11px, calc(13.5px * var(--u, 1))) var(--f-kufi); color: #e6d4a4; }
+.shj-mo-f { color: var(--green-hi); font-size: max(11.5px, calc(14.5px * var(--u, 1))); }
+.shj-ali { font: 700 max(13px, calc(19px * var(--u, 1))) var(--f-kufi); color: #fff4d8; }
+.shj-karb { font: 600 max(11px, calc(14px * var(--u, 1))) var(--f-kufi); color: #f08b7f; }
+/* the phone layout (set by shajara.js on portrait or narrow screens) */
+.nar .shj-nm { font-size: max(10px, calc(11.5px * var(--u, 1))); }
+.nar .shj-nm.imam { font-size: max(11.5px, calc(13.5px * var(--u, 1))); }
+.nar .shj-mo { font-size: max(9.5px, calc(10.5px * var(--u, 1))); }
+.nar .shj-mo-f { font-size: max(10px, calc(11px * var(--u, 1))); }
+.nar .shj-ali { font-size: max(12px, calc(14px * var(--u, 1))); }
+.nar .shj-karb { font-size: max(10px, calc(11.5px * var(--u, 1))); }
+.shj-hit { position: absolute; left: 0; top: 0; z-index: 3; padding: 0; margin: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+.shj-hit:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 2px; }
+.shj-tip { position: absolute; left: 0; top: 0; z-index: 4; margin: 0; padding: .3rem .75rem .42rem; white-space: nowrap; pointer-events: none; border-radius: 3px; border: 1px solid rgba(201, 165, 78, .5); background: rgba(16, 14, 9, .92); color: var(--gold-hi); font: 600 .92rem var(--f-kufi); box-shadow: 0 6px 18px rgba(0, 0, 0, .45); }
+
+.shajara .shj-cap { top: 9vh; right: 4vw; max-width: 21.5rem; }
+.shajara .shj-cap.empty { display: none; }
+.shj-cm { margin: 0 0 .3rem; font: 600 clamp(1.15rem, 1.5vw, 1.5rem) / 1.5 var(--f-kufi); color: var(--gold-hi); text-shadow: 0 1px 12px rgba(0, 0, 0, .9); }
+.shj-kids { margin: 0 0 .4rem; font: 600 1.12rem / 1.8 var(--f-naskh); text-shadow: 0 1px 12px rgba(0, 0, 0, .9); }
+.shajara .shj-note { color: #ef8a80; }
+.shajara .shj-more { font-size: .98em; color: var(--fg-dim); }
+.shajara .shj-more .src { margin-top: .2rem; }
+.shj-n { position: absolute; z-index: 2; right: 4vw; bottom: 5vh; margin: 0; display: flex; align-items: baseline; gap: .6rem; font-family: var(--f-kufi); text-shadow: 0 1px 12px rgba(0, 0, 0, .9); }
+.shj-n b { font-size: clamp(2.6rem, 5vw, 4.4rem); line-height: 1; color: var(--gold-hi); }
+.shj-n span { color: var(--fg-dim); }
+.shajara .shj-end { top: 9vh; right: 4vw; max-width: 22rem; margin: 0; }
+.shajara .shj-end .qt { font-size: clamp(1.3rem, 1.75vw, 1.9rem); }
+
+/* phones and portrait screens: caption and quote in the top band (shajara.js switches its layout at the same point) */
+@media (max-width: 699px), (max-aspect-ratio: 1/1) {
+  .shj-tip { font-size: .85rem; }
+  .shajara .shj-cap { top: 8vh; right: 0; left: 0; max-width: none; }
+  .shajara .shj-cap .kick { margin-bottom: .1rem; font-size: .72rem; }
+  .shj-cm { font-size: 1.02rem; line-height: 1.45; margin-bottom: .1rem; }
+  .shj-kids { font-size: 1rem; line-height: 1.6; margin-bottom: .1rem; }
+  .shajara .shj-note { font-size: .92rem; line-height: 1.6; }
+  .shajara .shj-more { display: none; }
+  .shj-n { right: var(--gut-r); bottom: calc(env(safe-area-inset-bottom, 0px) + 58px); gap: .4rem; } /* clear of the fixed buttons */
+  .shj-n b { font-size: 2.2rem; }
+  .shj-n span { font-size: .85rem; }
+  .shajara .shj-end { top: 8vh; right: 0; left: 0; max-width: none; text-align: center; }
+  .shajara .shj-end .qt { font-size: 1.3rem; margin-inline: auto; }
+}
+/* reduced motion: one still screen, the whole tree at rest with its names and the end quote in place. The global
+   rules stack every .ov at the top of a tall stage; these put the stage and the quote back where the tree expects. */
+:root:not(.fx-on) .shajara .stage { display: block; height: 100vh; height: 100svh; min-height: 0; padding: 0; }
+:root:not(.fx-on) .shajara .stage .ov { position: absolute !important; margin: 0 !important; padding: 0 var(--gut-r) 0 var(--gut) !important; background: none !important; }
+:root:not(.fx-on) .shajara .stage .shj-end { inset: 9vh 4vw auto auto !important; max-width: 22rem !important; }
+:root:not(.fx-on) .shajara .stage .shj-cap.empty { display: none !important; }
+@media (max-width: 699px), (max-aspect-ratio: 1/1) {
+  :root:not(.fx-on) .shajara .stage .shj-end { inset: 8vh 0 auto 0 !important; max-width: none !important; }
+}

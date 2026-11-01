@@ -686,6 +686,193 @@ S.pairs = {
   },
 };
 
+// Wisdom: a saying for today (the same for everyone on a given day), copy, next; and a search over the sayings
+// by word (ignoring vowel marks and hamza forms) or by number (Arabic-Indic or Western digits).
+(() => {
+  const grid = $('#hk-grid'); if (!grid) return;
+  const items = [...grid.children];
+  const plain = (s) => s.replace(/[ً-ٰٟـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  const day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
+  let at = day % items.length;
+  const show = () => { const li = items[at]; $('#hk-t').textContent = li.querySelector('p').textContent; $('#hk-s').textContent = `نهج البلاغة، ${li.querySelector('span').textContent}`; };
+  show();
+  $('#hk-next').addEventListener('click', () => { at = (at + 1) % items.length; show(); $('#hk-msg').textContent = ''; });
+  $('#hk-copy').addEventListener('click', async () => {
+    const txt = `«${$('#hk-t').textContent}»\n— الإمام عليّ عليه السلام، ${$('#hk-s').textContent}`;
+    try { await navigator.clipboard.writeText(txt); $('#hk-msg').textContent = 'نُسخت الحكمة'; }
+    catch { const r = document.createRange(); r.selectNodeContents($('#hk-card')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); $('#hk-msg').textContent = 'حدِّد النصّ وانسخه'; }
+  });
+  const index = items.map((li) => plain(li.textContent));
+  const count = $('#hk-count');
+  $('#hk-q').addEventListener('input', (e) => {
+    const q = plain(e.target.value.trim());
+    let n = 0;
+    items.forEach((li, i) => { const hit = !q || (/^\d+$/.test(q) ? new RegExp(`(^|\\D)${q}(\\D|$)`).test(index[i]) : index[i].includes(q)); li.hidden = !hit; if (hit) n++; });
+    count.textContent = q ? (n ? `${arNum(n)} من ${arNum(items.length)}` : 'لا حكمة بهذا اللفظ في هذه المختارات') : '';
+  });
+})();
+
+// Two lives side by side, right to left in time: the Prophet's line and Ali's. Threads join them where they were
+// together; after 11 AH Ali's line runs on alone. The track slides under a fixed playhead as you scroll.
+const LIVES = {
+  span: [[-53, -23, .5], [-23, -13, .9], [-13, 1, 1], [1, 11, 2.6], [11, 35, .55], [35, 40, 2.2]],
+  P: [[-53, 'ولادته في عام الفيل'], [-13, 'البعثة في ٢٧ رجب، وله أربعون سنة'], [1, 'الهجرة إلى المدينة'], [11, 'رحيله، ٢٨ صفر، وله ثلاث وستون سنة']],
+  A: [[-23, 'ولادته في جوف الكعبة'], [-13, 'أوّل من آمن، وله عشر سنين'], [-10, 'يوم الدار'], [1, 'ليلة المبيت'], [2, 'بدر'], [3, 'أُحد'], [5, 'الخندق'], [7, 'خيبر'], [8, 'الفتح وحُنين'], [9, 'تبوك والمباهلة'], [10, 'غدير خمّ'], [11, 'رحيل النبي، وله ثلاث وثلاثون'], [35, 'البيعة'], [36, 'الجمل'], [37, 'صفّين'], [38, 'النهروان'], [40, 'الشهادة، وله ثلاث وستون']],
+  shared: [-13, -10, 1, 2, 3, 5, 7, 8, 9, 10, 11],
+};
+const lvUnits = LIVES.span.reduce((a, [y0, y1, w]) => a + (y1 - y0) * w, 0);
+const lvX = (y) => { let u = 0; for (const [y0, y1, w] of LIVES.span) { if (y <= y1) return (u + (Math.max(y, y0) - y0) * w) / lvUnits; u += (y1 - y0) * w; } return 1; };
+const LV_W = 340; // track width in vw
+S.lives = {
+  init(host, st) {
+    const tr = $('#lv-track', host);
+    const at = (y) => .04 + lvX(y) * .9; // scroll position when the playhead reaches year y
+    const pos = (y) => 50 + lvX(y) * (LV_W - 100); // vw from the track's right edge
+    let html = `<i class="lv-lane lv-lane-p" style="right:${pos(-53)}vw;width:${pos(11) - pos(-53)}vw"></i><i class="lv-lane lv-lane-a" style="right:${pos(-23)}vw;width:${pos(40) - pos(-23)}vw"></i>`;
+    LIVES.shared.forEach((y) => { html += `<i class="lv-thread" style="right:${pos(y)}vw" data-fx="o 0 1 ${f4(at(y) - .01)} ${f4(at(y) + .01)} | sx 0 1 ${f4(at(y) - .01)} ${f4(at(y) + .01)}"></i>`; });
+    const mk = (lane, list) => list.forEach(([y, t], i) => {
+      const row = lane === 'p' ? i % 2 : i % 3;
+      html += `<div class="lv-ev lv-${lane} r${row}" style="right:${pos(y)}vw" data-fx="o .25 1 ${f4(at(y) - .015)} ${f4(at(y) + .005)}"><i></i><b>${y < 0 ? `${arNum(-y)} ق.هـ` : `${arNum(y)} هـ`}</b><span>${t}</span></div>`;
+    });
+    mk('p', LIVES.P); mk('a', LIVES.A);
+    html += `<p class="lv-alone" style="right:${(pos(11) + pos(35)) / 2}vw" data-fx="o 0 1 ${f4(at(16))} ${f4(at(20))}">أربعٌ وعشرون سنةً وأشهر «ممنوعاً من التصرّف على أحكامها» <span class="src">الإرشاد ١:٩</span></p>`;
+    tr.innerHTML = html;
+    tr.style.width = `${LV_W}vw`;
+    tr.dataset.fx = `x 0vw ${LV_W - 100}vw .04 .94`;
+    st.y = $('#lv-y', host);
+    st.cv = host.querySelector('canvas'); st.eras = null;
+  },
+  frame(p, t, host, st) {
+    const k = c01((p - .04) / .9);
+    let y = -53;
+    for (let lo = -53, hi = 40, it = 0; it < 30; it++) { const mid = (lo + hi) / 2; if (lvX(mid) < k) lo = mid; else hi = mid; y = mid; }
+    const yr = Math.round(y);
+    // the place behind the two lines: Mecca before the Hijra, Medina after it, Kufa from 36 AH
+    const cv = st.cv;
+    if (fit(cv, .6) || !st.eras) st.eras = [lvMecca, lvMedina, lvKufa].map((paint) => { const o = document.createElement('canvas'); o.width = cv.width; o.height = cv.height; paint(o.getContext('2d'), o.width, o.height); return o; });
+    const c = cv.getContext('2d');
+    const w1 = smooth(c01((y - .2) / 1.6)), w2 = smooth(c01((y - 34.5) / 1.5));
+    c.globalAlpha = 1; c.drawImage(st.eras[0], 0, 0);
+    if (w1 > 0) { c.globalAlpha = w1; c.drawImage(st.eras[1], 0, 0); }
+    if (w2 > 0) { c.globalAlpha = w2; c.drawImage(st.eras[2], 0, 0); }
+    c.globalAlpha = 1;
+    setText(st.y, yr < 0 ? `${arNum(-yr)} ق.هـ` : yr === 0 ? 'الهجرة' : `${arNum(yr)} هـ`);
+  },
+};
+
+
+// painted places behind the two lives
+const lvSky = (c, W, H, cols) => { const g = c.createLinearGradient(0, 0, 0, H); cols.forEach((k, i) => g.addColorStop(i / (cols.length - 1), k)); c.fillStyle = g; c.fillRect(0, 0, W, H); };
+const lvPalm = (c, x, y, h, col) => { c.strokeStyle = col; c.lineWidth = h * .035; c.lineCap = 'round'; c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + h * .08, y - h * .5, x + h * .04, y - h); c.stroke(); c.fillStyle = col; for (let k = 0; k < 7; k++) { const a = -Math.PI / 2 + (k - 3) * .5; c.beginPath(); c.moveTo(x + h * .04, y - h); c.quadraticCurveTo(x + h * .04 + Math.cos(a) * h * .3, y - h + Math.sin(a) * h * .3 - h * .05, x + h * .04 + Math.cos(a) * h * .45, y - h + Math.sin(a) * h * .45 + h * .12); c.quadraticCurveTo(x + h * .04 + Math.cos(a) * h * .25, y - h + Math.sin(a) * h * .2, x + h * .04, y - h + h * .02); c.fill(); } };
+const lvShade = (c, W, H) => { const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, 'rgba(13,14,11,.55)'); g.addColorStop(.3, 'rgba(13,14,11,.25)'); g.addColorStop(.75, 'rgba(13,14,11,.45)'); g.addColorStop(1, 'rgba(13,14,11,.9)'); c.fillStyle = g; c.fillRect(0, 0, W, H); };
+function lvMecca(c, W, H) {
+  lvSky(c, W, H, ['#0a0d1c', '#2a2440', '#6a4a4a']);
+  const r = rng(31); for (let i = 0; i < 160; i++) { c.fillStyle = `rgba(240,232,210,${(.2 + r() * .6).toFixed(2)})`; c.fillRect(r() * W, r() * H * .45, 1.4, 1.4); }
+  [[.78, '#1d1a24', 40], [.84, '#141219', 26]].forEach(([y, col, amp], n) => { c.fillStyle = col; c.beginPath(); c.moveTo(0, H); for (let i = 0; i <= 20; i++) c.lineTo(i / 20 * W, H * y - Math.abs(Math.sin(i * 1.3 + n) * amp + Math.sin(i * .4) * amp * .6) * H / 400); c.lineTo(W, H); c.closePath(); c.fill(); });
+  const x = W * .5, y = H * .86, s = H / 90; c.fillStyle = '#060606'; c.fillRect(x - 5 * s, y - 8 * s, 10 * s, 8 * s); c.fillStyle = '#b8913a'; c.fillRect(x - 5 * s, y - 6.4 * s, 10 * s, .9 * s);
+  lvShade(c, W, H);
+}
+function lvMedina(c, W, H) {
+  lvSky(c, W, H, ['#4d6a84', '#c9a77a', '#e6c99a']);
+  c.fillStyle = '#7c6446'; c.fillRect(0, H * .84, W, H * .16);
+  for (let i = 0; i < 14; i++) lvPalm(c, W * (i / 13), H * .86, H * (.12 + (i % 3) * .03), '#2c3220');
+  c.fillStyle = '#3a2c1c'; c.fillRect(W * .38, H * .78, W * .24, H * .06); for (let k = 0; k <= 10; k++) { c.fillStyle = '#8a6a44'; c.fillRect(W * (.38 + k * .024), H * .79, W * .004, H * .05); }
+  lvShade(c, W, H);
+}
+function lvKufa(c, W, H) {
+  lvSky(c, W, H, ['#1c1830', '#7a3e2e', '#d08a4a']);
+  c.fillStyle = '#20160e'; c.fillRect(0, H * .82, W, H * .18);
+  const g = c.createLinearGradient(0, H * .86, 0, H * .92); g.addColorStop(0, '#5a4a52'); g.addColorStop(1, '#241a20'); c.fillStyle = g; c.fillRect(0, H * .86, W, H * .05);
+  const r = rng(17); for (let i = 0; i < 40; i++) { const w = W * (.02 + r() * .04), h = H * (.02 + r() * .04), x = r() * W; c.fillStyle = '#1a120c'; c.fillRect(x, H * .82 - h, w, h); }
+  for (let i = 0; i < 9; i++) lvPalm(c, W * (.05 + i * .12), H * .84, H * (.1 + (i % 2) * .04), '#120c08');
+  lvShade(c, W, H);
+}
+
+// The muttaqin, clause by clause: each line comes up bright over the lamplit niche, the list climbs, and the
+// earlier lines stay behind, dimmer, so the whole portrait builds as you scroll.
+S.mtq = {
+  init(host, st) {
+    st.cv = host.querySelector('canvas'); st.bg = null;
+    const items = [...host.querySelectorAll('#mtq-list li')], n = items.length;
+    items.forEach((li, i) => { const a = .04 + (i / n) * .9; li.dataset.fx = `o 0 1 ${f4(a)} ${f4(a + .012)} | o 1 .42 ${f4(a + .9 / n)} ${f4(a + 1.6 / n)} | y 18px 0px ${f4(a)} ${f4(a + .02)} out`; });
+    const list = host.querySelector('#mtq-list');
+    list.dataset.fx = `y 0% -${((n - 4) / n * 100).toFixed(2)}% .04 .94`;
+  },
+  frame(p, t, host, st) {
+    const cv = st.cv;
+    if (fit(cv, .6) || !st.bg) { st.bg = document.createElement('canvas'); st.bg.width = cv.width; st.bg.height = cv.height; SCENERY[3](st.bg.getContext('2d'), cv.width, cv.height, cv.height / 100); }
+    const c = cv.getContext('2d');
+    c.drawImage(st.bg, 0, 0);
+    const g = c.createLinearGradient(cv.width, 0, cv.width * .35, 0); g.addColorStop(0, 'rgba(10,9,8,.86)'); g.addColorStop(1, 'rgba(10,9,8,.2)');
+    c.fillStyle = g; c.fillRect(0, 0, cv.width, cv.height);
+  },
+};
+
+// Yemen: terraced mountains at sunrise. The Prophet's prayer for him comes as a wash of light from the north,
+// then his light travels the mountain road down to the valley towns.
+S.yemen = {
+  init(host, st) {
+    st.cv = host.querySelector('canvas'); st.bg = null;
+    const r = rng(52);
+    st.towers = Array.from({ length: 26 }, () => [r(), r(), r()]);
+  },
+  frame(p, t, host, st) {
+    const cv = st.cv;
+    const W = cv.width, H = cv.height;
+    if (fit(cv) || !st.bg || st.bg.width !== cv.width) {
+      const W2 = cv.width, H2 = cv.height;
+      st.bg = document.createElement('canvas'); st.bg.width = W2; st.bg.height = H2;
+      const c = st.bg.getContext('2d');
+      const g = c.createLinearGradient(0, 0, 0, H2 * .7); g.addColorStop(0, '#26304e'); g.addColorStop(.55, '#c8835a'); g.addColorStop(1, '#f2c98e'); c.fillStyle = g; c.fillRect(0, 0, W2, H2);
+      const layers = [[.42, '#7a6a7a', 70, 3], [.52, '#5e5060', 90, 5], [.64, '#4a3c34', 110, 7], [.78, '#33281e', 130, 9]];
+      layers.forEach(([base, col, amp, seed], li) => {
+        const q = rng(seed), pts = []; let v = 0;
+        for (let i = 0; i <= 40; i++) { v = v * .75 + (q() - .5) * amp; pts.push([i / 40 * W2, H2 * base - Math.abs(v) * H2 / 900 - Math.sin(i * .3 + seed) * amp * H2 / 1600]); }
+        c.fillStyle = col; c.beginPath(); c.moveTo(0, H2); pts.forEach(([x, y]) => c.lineTo(x, y)); c.lineTo(W2, H2); c.closePath(); c.fill();
+        // terraces: contour steps that follow the ridge, greener in front
+        c.save(); c.clip();
+        for (let k = 1; k < 9; k++) {
+          c.strokeStyle = li > 1 ? `rgba(120,150,80,${(.18 + li * .04).toFixed(2)})` : 'rgba(255,230,200,.06)'; c.lineWidth = Math.max(1, H2 / 500);
+          c.beginPath(); pts.forEach(([x, y], i) => { const yy = y + k * H2 * .018 + Math.sin(i * .7 + k) * H2 * .002; i ? c.lineTo(x, yy) : c.moveTo(x, yy); }); c.stroke();
+        }
+        c.restore();
+        // tower houses on the nearer ridges
+        if (li >= 2) st.towers.forEach(([tx, ty, th], i) => { if (i % 2 !== li % 2) return; const x = tx * W2, top = pts[Math.round(tx * 40)][1]; const h = (H2 * .03 + th * H2 * .04) * (li === 3 ? 1.3 : .8), w = h * .45; c.fillStyle = li === 3 ? '#6e5a44' : '#7d6a56'; c.fillRect(x - w / 2, top - h + H2 * .01, w, h); c.fillStyle = 'rgba(245,240,225,.85)'; c.fillRect(x - w / 2, top - h + H2 * .01, w, h * .08); for (let wy = 0; wy < 3; wy++) c.fillRect(x - w * .18, top - h * (.82 - wy * .25) + H2 * .01, w * .36, h * .06); });
+      });
+    }
+    const c = cv.getContext('2d');
+    c.drawImage(st.bg, 0, 0);
+    // the prayer: a wash of light from the north
+    const pr = seg(p, .34, .42) * (1 - seg(p, .55, .68));
+    if (pr > 0) { c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(W * .2, -H * .1, 0, W * .2, -H * .1, H * 1.4); g.addColorStop(0, `rgba(255,244,214,${(.55 * pr).toFixed(3)})`); g.addColorStop(1, 'rgba(255,244,214,0)'); c.fillStyle = g; c.fillRect(0, 0, W, H); c.globalCompositeOperation = 'source-over'; }
+    // his light on the road: from the northern pass down to the valley
+    const road = [[.12, .4], [.3, .5], [.22, .6], [.45, .66], [.62, .74], [.5, .84]];
+    const k = seg(p, .42, .95) * (road.length - 1), i = Math.min(road.length - 2, Math.floor(k)), f = k - i;
+    const [x0, y0] = road[i], [x1, y1] = road[i + 1];
+    const x = mix(x0, x1, f) * W, y = mix(y0, y1, f) * H, s = H / 900;
+    c.strokeStyle = 'rgba(243,217,143,.35)'; c.lineWidth = 2 * s; c.setLineDash([6 * s, 8 * s]); c.beginPath(); road.forEach(([rx, ry], n) => (n ? c.lineTo(rx * W, ry * H) : c.moveTo(rx * W, ry * H))); c.stroke(); c.setLineDash([]);
+    c.globalCompositeOperation = 'lighter';
+    const gl = c.createRadialGradient(x, y, 0, x, y, 60 * s); gl.addColorStop(0, 'rgba(255,240,200,.95)'); gl.addColorStop(.25, 'rgba(243,217,143,.5)'); gl.addColorStop(1, 'rgba(243,217,143,0)');
+    c.fillStyle = gl; c.fillRect(x - 60 * s, y - 60 * s, 120 * s, 120 * s);
+    c.globalCompositeOperation = 'source-over';
+  },
+};
+
+// His companions: a small painted place for each, drawn once.
+(() => {
+  const P = {
+    nile: (c, W, H) => { lvSky(c, W, H, ['#3a3150', '#c06a48', '#f0b070']); const g = c.createLinearGradient(0, H * .62, 0, H); g.addColorStop(0, '#6a5a6a'); g.addColorStop(1, '#2a2030'); c.fillStyle = g; c.fillRect(0, H * .62, W, H * .38); for (let i = 0; i < 6; i++) lvPalm(c, W * (.06 + i * .17), H * .64, H * (.34 + (i % 2) * .1), '#1c120c'); c.fillStyle = '#1c120c'; c.beginPath(); c.moveTo(W * .55, H * .8); c.lineTo(W * .72, H * .8); c.lineTo(W * .68, H * .86); c.lineTo(W * .58, H * .86); c.fill(); c.beginPath(); c.moveTo(W * .63, H * .8); c.lineTo(W * .63, H * .4); c.lineTo(W * .76, H * .78); c.closePath(); c.fill(); },
+    siffin: (c, W, H) => { lvSky(c, W, H, ['#2a0c0a', '#8a2a1c', '#e09a5a']); c.fillStyle = '#2a1410'; c.fillRect(0, H * .7, W, H * .3); const g = c.createLinearGradient(0, H * .74, 0, H * .84); g.addColorStop(0, '#4a3a44'); g.addColorStop(1, '#1a1018'); c.fillStyle = g; c.fillRect(0, H * .74, W, H * .1); c.strokeStyle = '#1a0806'; c.lineWidth = 2; for (let i = 0; i < 40; i++) { const x = (i / 40) * W; c.beginPath(); c.moveTo(x, H * .72); c.lineTo(x + 4, H * .35 + (i % 5) * 6); c.stroke(); } },
+    night: (c, W, H) => { lvSky(c, W, H, ['#03040a', '#0e1222', '#1c1a26']); const r = rng(8); for (let i = 0; i < 220; i++) { c.fillStyle = `rgba(240,232,210,${(.2 + r() * .7).toFixed(2)})`; c.fillRect(r() * W, r() * H * .75, 1.3, 1.3); } c.fillStyle = '#0a0908'; c.fillRect(0, H * .8, W, H * .2); const x = W * .7, y = H * .72, gl = c.createRadialGradient(x, y, 0, x, y, H * .35); gl.addColorStop(0, 'rgba(243,217,143,.55)'); gl.addColorStop(1, 'rgba(243,217,143,0)'); c.fillStyle = gl; c.fillRect(0, 0, W, H); },
+    palm: (c, W, H) => { lvSky(c, W, H, ['#1d2440', '#8a6a6a', '#e8c49a']); c.fillStyle = '#2a2016'; c.fillRect(0, H * .82, W, H * .18); lvPalm(c, W * .5, H * .84, H * .7, '#120c08'); },
+    meadow: (c, W, H) => { lvSky(c, W, H, ['#22304a', '#6a7a6a', '#c8b98a']); c.fillStyle = '#2e3a22'; c.beginPath(); c.moveTo(0, H); c.lineTo(0, H * .7); c.quadraticCurveTo(W * .5, H * .6, W, H * .72); c.lineTo(W, H); c.fill(); c.fillStyle = '#1a2414'; for (let i = 0; i < 7; i++) { const x = W * (.08 + i * .14), h = H * (.3 + (i % 3) * .08); c.beginPath(); c.moveTo(x, H * .74); c.quadraticCurveTo(x - h * .12, H * .74 - h * .5, x, H * .74 - h); c.quadraticCurveTo(x + h * .12, H * .74 - h * .5, x, H * .74); c.fill(); } },
+    door: (c, W, H) => { c.fillStyle = '#1a1510'; c.fillRect(0, 0, W, H); for (let y = 0; y < H; y += 14) for (let x = (y / 14) % 2 ? 0 : -14; x < W; x += 28) { c.fillStyle = `rgba(90,72,52,${(.4 + ((x + y) % 7) / 30).toFixed(2)})`; c.fillRect(x + 1, y + 1, 26, 12); } const x = W * .5, w = W * .26, top = H * .22; c.fillStyle = '#0b0805'; c.beginPath(); c.moveTo(x - w / 2, H); c.lineTo(x - w / 2, top + w * .4); c.quadraticCurveTo(x, top - w * .1, x + w / 2, top + w * .4); c.lineTo(x + w / 2, H); c.fill(); const gl = c.createRadialGradient(x, H * .6, 0, x, H * .6, w); gl.addColorStop(0, 'rgba(243,217,143,.55)'); gl.addColorStop(1, 'rgba(243,217,143,0)'); c.fillStyle = gl; c.fillRect(0, 0, W, H); },
+  };
+  const paint = () => document.querySelectorAll('canvas[data-paint]').forEach((cv) => { fit(cv); const c = cv.getContext('2d'); P[cv.dataset.paint]?.(c, cv.width, cv.height); });
+  paint();
+  let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(paint, 200); });
+})();
+
 // ---------- canvas scenes ----------
 const ctxOf = (cv) => cv.getContext('2d');
 

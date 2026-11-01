@@ -1,0 +1,31 @@
+/* Muttaqin: the kick sits high on the right; the clauses climb one by one in a column under it, the current one at
+   a fixed line, the two before it dimmer above, older ones fading out under a mask. The picture keeps to the left and
+   the lower half. The global .mtq-k / .mtq-list rules in styles.css still match these elements: every one of their
+   properties is overridden here, in both modes. */
+.muttaqin .stage { background: #07080d; }
+.muttaqin .mtq-k {
+  position: absolute; z-index: 3; top: 8vh; right: 5vw; left: auto; max-width: min(38vw, 33rem); margin: 0;
+  font-size: clamp(.8rem, .3vw + .7rem, .95rem); color: var(--gold-hi); text-shadow: 0 1px 12px rgba(0, 0, 0, .9);
+}
+.muttaqin .mq-col {
+  position: absolute; z-index: 2; top: 0; bottom: 0; right: 5vw; width: min(36vw, 32rem); pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 15vh, #000 27vh); mask-image: linear-gradient(to bottom, transparent 15vh, #000 27vh);
+}
+.muttaqin .mtq-list {
+  position: absolute; z-index: auto; top: 34vh; right: 0; left: auto; width: 100%; margin: 0; padding: 0;
+  list-style: none; display: grid; gap: 1.05rem; will-change: transform;
+}
+.muttaqin .mtq-list li {
+  font: 700 clamp(1.25rem, 1.15vw + .7rem, 1.9rem) / 1.7 var(--f-naskh); color: var(--fg);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, .9), 0 0 3px rgba(0, 0, 0, .7); text-wrap: pretty;
+}
+html:not(.fx-on) .muttaqin .mtq-k { position: relative; inset: auto; max-width: none; margin: 0 4vw; }
+html:not(.fx-on) .muttaqin .mq-col { position: relative; inset: auto; width: auto; margin: 0 4vw; -webkit-mask-image: none; mask-image: none; }
+html:not(.fx-on) .muttaqin .mtq-list { position: relative; inset: auto; width: auto; max-width: 44rem; margin: 0 auto; padding: 1.2rem 1.4rem; background: rgba(9, 10, 8, .74); border-radius: 3px; transform: none; }
+@media (max-width: 640px) {
+  .muttaqin .mtq-k { top: 4.5vh; right: 1.1rem; max-width: calc(100% - 2.2rem); font-size: .78rem; }
+  .muttaqin .mq-col { right: 1.1rem; width: calc(100% - 2.2rem); -webkit-mask-image: linear-gradient(to bottom, transparent 9vh, #000 15vh); mask-image: linear-gradient(to bottom, transparent 9vh, #000 15vh); }
+  .muttaqin .mtq-list { top: 18vh; gap: .7rem; }
+  .muttaqin .mtq-list li { font-size: 1.22rem; line-height: 1.65; }
+  html:not(.fx-on) .muttaqin .mtq-list li { font-size: 1.1rem; }
+}

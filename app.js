@@ -3,6 +3,11 @@
 (() => {
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+// English lookup keys are read now, before any counter animates the numbers inside its text block
+const LEAF = 'p, li, blockquote, h1, h2, h3, figcaption, label, dt, dd, th';
+const normAr = (s) => s.replace(/[ً-ٰٟـ]/g, '').replace(/\s+/g, ' ').trim();
+const textOf = (el) => { let t = ''; el.childNodes.forEach((n) => { if (n.nodeType === 3) t += n.textContent; else if (n.nodeType === 1 && !n.classList.contains('src') && !n.classList.contains('en')) t += textOf(n); }); return t; };
+const enKeys = new Map($$(`${LEAF}, span.src`).map((el) => [el, normAr(textOf(el))]));
 const fx = document.documentElement.classList.contains('fx-on');
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 const ar = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]);
@@ -142,6 +147,41 @@ function render() {
 
 // ---------- HUD: where we are in his life ----------
 // Age runs continuously: from one chapter's age to the next across the chapter's height.
+// ---------- ambient sound: one bed per section, chosen by the place ----------
+const SOUND = {
+  top: 'night', birth: 'night', lap: 'desert', dar: 'night', mabit: 'night', brother: 'crowd', home: 'fire',
+  badr: 'battle', uhud: 'battle', khandaq: 'storm', khaybar: 'battle', radd: 'desert', fath: 'crowd', hunayn: 'battle',
+  yemen: 'desert', tabuk: 'desert', kisa: 'fire', ghadir: 'crowd', farewell: 'fire', sabr: 'wind', adl: 'crowd', jamal: 'battle',
+  siffin: 'river', wasiyya: 'fire', nahrawan: 'river', mihrab: 'mosque', ghari: 'shrine', imams: 'wind', rihla: 'wind', close: 'night',
+};
+const soundBtn = $('#sound');
+soundBtn?.addEventListener('click', () => {
+  const on = window.Sound.toggle();
+  soundBtn.setAttribute('aria-pressed', String(on));
+  soundBtn.textContent = on ? 'الصوت: يعمل' : 'الصوت: مُطفأ';
+  window.Sound.chapter(SOUND[cur?.id] || 'still');
+});
+// ---------- English: a translation of the meaning appears under each Arabic text block ----------
+const enBtn = $('#en-btn');
+let enDict = null;
+enBtn?.addEventListener('click', async () => {
+  const on = !document.documentElement.classList.contains('en');
+  if (on && !enDict) {
+    try { enDict = await (await fetch('i18n/en.json')).json(); } catch { enDict = {}; }
+    $$(`${LEAF}, span.src`).forEach((el) => {
+      if (el.closest('span.en, button, dialog') || (!el.matches('span.src') && el.querySelector(LEAF))) return;
+      const tr = enDict[enKeys.get(el) ?? normAr(textOf(el))];
+      if (!tr) return;
+      const en = document.createElement('span');
+      en.className = 'en'; en.lang = 'en'; en.dir = 'ltr'; en.textContent = tr;
+      el.append(en);
+    });
+  }
+  document.documentElement.classList.toggle('en', on);
+  enBtn.setAttribute('aria-pressed', String(on));
+  enBtn.textContent = on ? 'العربية فقط' : 'English';
+  measure();
+});
 const hudT = $('#hud-t');
 const hudY = $('#hud-y');
 const hudA = $('#hud-a');
@@ -150,7 +190,7 @@ let cur;
 function hud() {
   const mid = sy + innerHeight / 2;
   const c = sections.find((s) => { const b = boxOf(s); return mid >= b.top && mid < b.top + b.h; }) || sections[0];
-  if (c !== cur) { cur = c; hudT.textContent = labelOf(c); }
+  if (c !== cur) { cur = c; hudT.textContent = labelOf(c); window.Sound?.chapter(SOUND[c.id] || 'still'); }
   const i = chapters.indexOf(c);
   if (i >= 0) {
     const b = boxOf(c);

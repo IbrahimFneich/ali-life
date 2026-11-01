@@ -1,11 +1,11 @@
 import sys, os, json, socket, base64, struct, subprocess, time, urllib.request, tempfile
-# usage: dev/pageshot.py OUTDIR MODE 'SEL@P' 'SEL@P' ...  — real page with app.js, scrolled via CDP. MODE d|m
+# usage: dev/pageshot.py OUTDIR MODE 'SEL@P' 'js:EXPR' ...  — real page with app.js, scrolled via CDP. MODE d|m
 OUT, MODE, SHOTS = sys.argv[1], sys.argv[2], sys.argv[3:]
 W, H, DPR = {'d': (1440, 900, 1), 'm': (390, 844, 2)}[MODE]
 os.makedirs(OUT, exist_ok=True)
 port = 9300 + os.getpid() % 500
 ud = tempfile.mkdtemp()
-ch = subprocess.Popen(['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '--headless=new', '--hide-scrollbars',
+ch = subprocess.Popen(['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '--headless=new', '--hide-scrollbars', '--autoplay-policy=no-user-gesture-required',
   f'--remote-debugging-port={port}', f'--user-data-dir={ud}', '--window-size=1440,900', 'about:blank'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 for _ in range(100):
     try:
@@ -55,6 +55,8 @@ send('Emulation.setDeviceMetricsOverride', width=W, height=H, deviceScaleFactor=
 send('Page.navigate', url='http://127.0.0.1:8091/index.html')
 time.sleep(4)
 for i, sh in enumerate(SHOTS):
+    if sh.startswith('js:'):  # 'js:EXPR' evaluates EXPR in the page and prints its value
+        print(i, send('Runtime.evaluate', expression=sh[3:], awaitPromise=True, returnByValue=True).get('result', {}).get('value')); time.sleep(.8); continue
     sel, pp = sh.rsplit('@', 1)
     js = f"""(() => {{ const t = document.querySelector({json.dumps(sel)}); let top = 0; for (let n = t; n; n = n.offsetParent) top += n.offsetTop;
       const pin = t.classList.contains('scene'); const y = pin ? top + {pp} * Math.max(0, t.offsetHeight - innerHeight) : top + {pp} * t.offsetHeight; scrollTo(0, y); return y; }})()"""

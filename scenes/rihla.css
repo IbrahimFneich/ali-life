@@ -1,0 +1,17 @@
+.rihla .stage { background: #0b0906; }
+.rihla .rh-kick { top: 9vh; }
+.rihla .rh-kick .kick { font-size: .95rem; text-shadow: 0 1px 10px rgba(0, 0, 0, .9); }
+.rihla .rh-pin { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
+.rihla .rh-lab { position: absolute; top: 0; transform: translateY(-50%); display: flex; flex-direction: column; gap: .05rem; white-space: nowrap; line-height: 1.25; }
+.rihla .rh-r { left: 30px; align-items: flex-end; }
+.rihla .rh-l { right: 30px; align-items: flex-start; }
+.rihla .rh-lab b { font-family: var(--f-naskh); font-weight: 700; font-size: 1.55rem; color: var(--paper); text-shadow: 0 1px 2px rgba(10, 6, 2, .95), 0 0 12px rgba(10, 6, 2, .85), 0 0 24px rgba(10, 6, 2, .6); }
+.rihla .rh-lab span { font-family: var(--f-ui); font-weight: 500; font-size: .9rem; color: var(--gold-hi); text-shadow: 0 1px 2px rgba(10, 6, 2, .95), 0 0 10px rgba(10, 6, 2, .85); }
+.rihla .rh-sm b { font-size: 1.05rem; font-weight: 700; color: var(--paper); }
+html:not(.fx-on) .rihla .rh-pin { position: absolute; }
+@media (max-width: 640px) {
+  .rihla .rh-lab b { font-size: 1.1rem; }
+  .rihla .rh-sm b { font-size: .8rem; }
+  .rihla .rh-r { left: 22px; }
+  .rihla .rh-l { right: 22px; }
+}
