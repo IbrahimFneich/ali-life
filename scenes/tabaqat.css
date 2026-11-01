@@ -1,0 +1,33 @@
+/* Tabaqat: the covenant's words over the sky at the start; a rail of the seven classes down the right edge, in the
+   order of the terraces; the plea for the lowest class high on the left while the strand glows. */
+.tabaqat .stage { background: #070912; }
+.tabaqat .tb-a { top: 7vh; width: min(40vw, 34rem); }
+.tabaqat .tb-a .qt { font-size: clamp(1.45rem, 1.4vw + .7rem, 2.2rem); line-height: 1.8; max-width: none; }
+.tabaqat .tb-a::before, .tabaqat .tb-b::before {
+  content: ""; position: absolute; z-index: -1; inset: -6vh -8vw -6vh -12vw; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(4, 5, 10, .55), rgba(4, 5, 10, 0));
+}
+.tabaqat .tb-rail {
+  list-style: none; margin: 0; padding: 0; top: 50%; right: 2.4vw; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: clamp(.9rem, 2.6vh, 1.9rem); width: auto; max-width: 15rem;
+  border-right: 1px solid rgba(201, 165, 78, .35); padding-right: .9rem;
+}
+.tabaqat .tb-rail::before {
+  content: ""; position: absolute; z-index: -1; inset: -14vh -2.4vw -14vh -9vw; pointer-events: none;
+  background: linear-gradient(to left, rgba(4, 5, 10, .72), rgba(4, 5, 10, .45) 55%, rgba(4, 5, 10, 0));
+}
+.tabaqat .tb-l { position: relative; font-family: var(--f-kufi); font-size: clamp(.9rem, .5vw + .62rem, 1.15rem); line-height: 1.35; color: var(--paper); text-shadow: 0 1px 12px rgba(0, 0, 0, .9); }
+.tabaqat .tb-l::before { content: ""; position: absolute; right: calc(-.9rem - 4px); top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--gold-hi); box-shadow: 0 0 10px rgba(243, 217, 143, .7); }
+.tabaqat .tb-l7 { color: var(--gold-hi); font-size: clamp(.95rem, .55vw + .7rem, 1.25rem); }
+.tabaqat .tb-b { top: 7vh; width: min(42vw, 36rem); }
+.tabaqat .tb-b .qt { font-size: clamp(1.4rem, 1.35vw + .7rem, 2.1rem); line-height: 1.85; max-width: none; color: var(--paper); text-shadow: 0 0 36px rgba(243, 217, 143, .2), 0 2px 24px rgba(0, 0, 0, .85); }
+html:not(.fx-on) .tabaqat .tb-rail { transform: none; }
+@media (max-width: 640px) {
+  .tabaqat .tb-a { top: 5vh; right: 0; width: 100%; }
+  .tabaqat .tb-a .qt { font-size: 1.25rem; line-height: 1.75; }
+  .tabaqat .tb-rail { top: auto; bottom: 4vh; transform: none; right: 4vw; gap: .35rem; max-width: 60vw; }
+  .tabaqat .tb-l { font-size: .78rem; }
+  .tabaqat .tb-l7 { font-size: .9rem; }
+  .tabaqat .tb-b { top: 5vh; left: 0; width: 100%; }
+  .tabaqat .tb-b .qt { font-size: 1.2rem; line-height: 1.8; }
+}

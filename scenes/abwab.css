@@ -1,0 +1,16 @@
+.abwab .stage { background: var(--night); }
+.abwab .ab-open { top: 9vh; width: min(30vw, 27rem); }
+.abwab .ab-open .cap { font-size: clamp(1.05rem, .8vw + .65rem, 1.45rem); line-height: 1.95; max-width: none; color: var(--paper); }
+.abwab .ab-count { display: flex; align-items: baseline; gap: .8rem; bottom: 9vh; }
+.abwab .ab-n { font-family: var(--f-naskh); font-weight: 700; font-size: clamp(2.8rem, 4.4vw, 5rem); line-height: 1; color: var(--gold-hi); text-shadow: 0 0 28px rgba(201, 165, 78, .45), 0 2px 18px rgba(0, 0, 0, .85); font-variant-numeric: tabular-nums; min-width: 5.4em; text-align: start; unicode-bidi: isolate; }
+.abwab .ab-l { font-family: var(--f-ui); font-size: .95rem; color: var(--gold); text-shadow: 0 1px 10px rgba(0, 0, 0, .8); }
+.abwab .ab-q { top: 10vh; width: min(32vw, 30rem); }
+.abwab .ab-q .qt { font-size: clamp(1.55rem, 1.6vw + .75rem, 2.5rem); line-height: 1.75; max-width: none; color: var(--paper); text-shadow: 0 0 36px rgba(243, 217, 143, .25), 0 2px 24px rgba(0, 0, 0, .85); }
+@media (max-width: 640px) {
+  .abwab .ab-open { top: 5vh; right: 0; width: 100%; }
+  .abwab .ab-open .cap { font-size: 1.05rem; }
+  .abwab .ab-count { bottom: 5vh; right: 0; width: 100%; justify-content: flex-start; }
+  .abwab .ab-n { font-size: 2.7rem; min-width: 0; }
+  .abwab .ab-q { top: 5vh; right: 0; width: 100%; }
+  .abwab .ab-q .qt { font-size: 1.5rem; }
+}

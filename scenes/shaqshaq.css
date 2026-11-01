@@ -1,0 +1,21 @@
+/* الشقشقية: the first quote keeps to the upper right, clear of the quern; the axle's name sits under the axle
+   (placed from JS); the mountain quote keeps right of the summit; the last quote takes the sky over the held shot. */
+.shaqshaq .stage { background: #0c0b09; }
+.shaqshaq .sq-q1, .shaqshaq .sq-q2 { top: 8vh; max-width: min(100%, 34rem); }
+.shaqshaq .sq-q1::before, .shaqshaq .sq-q2::before, .shaqshaq .sq-q3::before {
+  content: ""; position: absolute; z-index: -1; inset: -5vh -6vw -5vh -10vw; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(6, 6, 8, .3), rgba(6, 6, 8, 0));
+}
+.shaqshaq .qt { text-shadow: 0 1px 3px rgba(0, 0, 0, .85), 0 2px 26px rgba(0, 0, 0, .8); }
+.shaqshaq .sq-axis { position: absolute; z-index: 2; left: 30%; top: 66%; margin: 0; translate: calc(-100% - .4rem) -50%; white-space: nowrap; font: 600 clamp(1.25rem, 1.2vw + .6rem, 1.7rem) var(--f-kufi); color: var(--gold-hi); letter-spacing: .02em; text-shadow: 0 0 14px rgba(0, 0, 0, .95), 0 0 4px #000, 0 0 2px #000; pointer-events: none; }
+.shaqshaq .sq-yr { position: absolute; z-index: 2; right: 4vw; bottom: 7vh; font: 500 .95rem var(--f-ui); color: var(--gold); font-variant-numeric: tabular-nums; text-shadow: 0 1px 10px rgba(0, 0, 0, .9); }
+.shaqshaq .sq-yr b { font: 600 clamp(1.9rem, 3vw, 2.6rem) / 1 var(--f-kufi); color: var(--gold-hi); margin-inline-end: .25rem; }
+.shaqshaq .sq-q3 { top: 7vh; left: 0; right: 0; margin: 0 auto; text-align: center; max-width: min(100%, 50rem); }
+.shaqshaq .sq-q3 .qt { max-width: 30ch; margin-inline: auto; color: #fff3d6; }
+html:not(.fx-on) .shaqshaq .sq-axis, html:not(.fx-on) .shaqshaq .sq-yr { display: none; }
+@media (max-width: 640px) {
+  .shaqshaq .sq-q1, .shaqshaq .sq-q2 { top: 6vh; left: 0; right: 0; max-width: 100%; }
+  .shaqshaq .sq-q3 { top: 6vh; }
+  .shaqshaq .sq-yr { right: 6vw; bottom: 5vh; }
+  .shaqshaq .sq-axis { font-size: 1rem; }
+}

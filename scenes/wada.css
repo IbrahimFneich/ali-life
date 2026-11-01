@@ -1,0 +1,12 @@
+/* الوداع: the quote keeps to the upper right; the two lights, the lamp and the rising column keep to the left and
+   the middle, out from under it. On phones the quote goes to the foot of the screen and the lights sit above it. */
+.wada .stage { background: #06080f; }
+.wada .wd-q { top: 7vh; max-width: min(100%, 33rem); }
+.wada .wd-q::before { content: ""; position: absolute; z-index: -1; inset: -6vh -5vw -6vh -12vw; pointer-events: none; background: radial-gradient(closest-side, rgba(5, 6, 10, .6), rgba(5, 6, 10, 0)); }
+.wada .wd-q .qt { max-width: 26ch; font-size: clamp(1.35rem, 1.7vw + .6rem, 2.25rem); line-height: 1.8; text-shadow: 0 1px 3px rgba(0, 0, 0, .9), 0 2px 24px rgba(0, 0, 0, .85); }
+.wada .wd-q .kick { color: var(--gold); }
+@media (max-width: 640px) {
+  .wada .wd-q { top: auto; bottom: 5vh; left: 0; right: 0; max-width: 100%; }
+  .wada .wd-q .qt { font-size: clamp(1.1rem, 4.6vw, 1.4rem); line-height: 1.75; max-width: none; }
+  .wada .wd-q::before { inset: -4vh -4vw -3vh -4vw; background: linear-gradient(rgba(5, 6, 10, 0), rgba(5, 6, 10, .78) 30%); }
+}

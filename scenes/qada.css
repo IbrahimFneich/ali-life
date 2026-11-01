@@ -1,0 +1,17 @@
+/* Qada: the words sit high in the dark under the ceiling beams; the cases play out low, before the bench. */
+.qada .stage { background: #060507; }
+.qada .qd-k { top: 6vh; }
+.qada .qd-k .kick { font-family: var(--f-kufi); font-size: clamp(1.1rem, .8vw + .7rem, 1.5rem); color: var(--gold-hi); letter-spacing: 0; }
+.qada .qd-c { top: calc(6vh + 2.6rem); width: min(34vw, 30rem); min-height: 9.5rem; }
+.qada .qd-c .cap { max-width: none; font-size: clamp(1.05rem, .55vw + .8rem, 1.3rem); }
+.qada .qd-c::before, .qada .qd-k::before {
+  content: ""; position: absolute; z-index: -1; inset: -9vh -8vw -10vh -14vw; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(5, 4, 6, .38), rgba(5, 4, 6, 0));
+}
+.qada .qd-k::before { inset: -3vh -4vw -3vh -6vw; }
+@media (max-width: 640px) {
+  .qada .qd-k { top: 4vh; right: 0; }
+  .qada .qd-c { top: calc(4vh + 2.2rem); right: 0; width: 100%; min-height: 0; }
+  .qada .qd-c .cap { font-size: 1rem; line-height: 1.8; }
+  .qada .qd-c::before { inset: -3vh 0 -5vh; background: linear-gradient(to bottom, rgba(5, 4, 6, .75) 50%, rgba(5, 4, 6, 0)); }
+}
