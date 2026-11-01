@@ -1,7 +1,8 @@
-// فتح مكة: the Kaaba in hazy morning light, ringed by 360 idols. A calm light goes round (tawaf) and the idols
-// fall forward on their faces as it passes; a smaller light hands it a palmful of pebbles, they are thrown, the
+// فتح مكة: the Kaaba in hazy morning light, ringed by 360 idols. The Prophet goes round (tawaf) and the idols
+// fall forward on their faces as he passes; Ali, beside him, hands him a palmful of pebbles, he throws them, the
 // rest go down, and the broken idols are carried out. World in metres: x west (right), y up, z south (away).
-// Nobody is drawn: the Prophet and Ali are lights, the crowd is massed dots. Idols are crude pillars, no faces.
+// The Prophet and Ali are veiled figures with a gold disc behind the head (scenes/holy.js), no face drawn; the
+// crowd is massed dots. Idols are crude pillars, no faces.
 (() => {
   const rgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
   const mixc = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
@@ -144,6 +145,19 @@
       const aa = ang - mix(.24, .15, meet);
       const ali = [Math.cos(aa) * (PR - 1.4 * meet), 1.5, Math.sin(aa) * (PR - 1.4 * meet)];
       const lightA = 1 - .35 * smooth(seg(p, .9, 1));
+      // ---- the Prophet and Ali: veiled figures (scenes/holy.js); ground point by PJ, never under 22 css px ----
+      const dpr = W / (st.cv.clientWidth || W);
+      const place = (P, m) => { const q = PJ(P[0], 0, P[2]); return q[2] < 1 ? null : { x: q[0], y: q[1], h: Math.max(22 * dpr, m * F / q[2]) }; };
+      const fP = place(proph, 1.85), fA = place(ali, 1.8);
+      // arms: a hand target in metres, as [dx, dy] in units of h from the figure's ground point; k eases it from the side
+      const armTo = (f, H3, k) => { const q = PJ(...H3), dx = (q[0] - f.x) / f.h, dy = (q[1] - f.y) / f.h, sd = Math.sign(dx) || 1; return [mix(sd * .13, dx, k), mix(-.42, dy, k)]; };
+      // the hand-over: both reach towards the point between them and the pebbles cross the small gap; then he throws
+      const reach = smooth(seg(p, .734, .748)) * (1 - smooth(seg(p, .776, .79)));
+      const hA3 = [mix(ali[0], proph[0], .44), 1.15, mix(ali[2], proph[2], .44)], hP3 = [mix(proph[0], ali[0], .44), 1.15, mix(proph[2], ali[2], .44)];
+      const taM = A0 + TAU * (WAVE + (1 - WAVE) * .52), tdl = Math.hypot(Math.cos(taM) * 20 - proph[0], Math.sin(taM) * 20 - proph[2]);
+      const thr3 = [proph[0] + (Math.cos(taM) * 20 - proph[0]) / tdl * .7, 2.15, proph[2] + (Math.sin(taM) * 20 - proph[2]) / tdl * .7];
+      const thr = Math.sin(Math.PI * seg(p, .776, .815)) ** .6;
+      const heads = {};
 
       // ---- sky, far hills, ground ----
       c.setTransform(1, 0, 0, 1, 0, 0);
@@ -194,7 +208,16 @@
       items.push([zOf(0, 0), () => kaaba()]);
       items.push([zOf((kcorner[0][0] + kcorner[1][0]) / 2 * 1.6, (kcorner[0][1] + kcorner[1][1]) / 2 * 1.6), () => hijr()]);
       pose.forEach((q) => { if (q) items.push([q.zc, () => idol(q)]); });
-      [[proph, .8, st.pale], [ali, .42, st.pale]].forEach(([P, R, img], k) => items.push([zOf(P[0], P[2]) - .1, () => orb(P, R, img, k)]));
+      if (fP) items.push([zOf(proph[0], proph[2]), () => { // walks the round, stands to receive the pebbles and throw them
+        const arms = fA && thr > .01 ? [armTo(fP, thr3, thr)] : fA && reach > .01 ? [armTo(fP, hP3, reach)] : undefined;
+        heads.pr = Holy.draw(c, { who: 'prophet', pose: p > .1 && p < .7 ? 'walk' : 'stand', phase: PR * (ang - A0) / 1.4, x: fP.x, y: fP.y, h: fP.h, t, amb: .95, arms });
+        bloom(heads.pr, 9, fP);
+      }]);
+      if (fA) items.push([zOf(ali[0], ali[2]), () => { // walks beside him, steps in to hand over the pebbles, steps back
+        const arms = fP && reach > .01 ? [armTo(fA, hA3, reach)] : undefined;
+        heads.ali = Holy.draw(c, { who: 'ali', pose: (p > .1 && p < .745) || (p > .8 && p < .86) ? 'walk' : 'stand', phase: (PR * (aa - A0) + 1.4 * meet) / 1.4 + .5, x: fA.x, y: fA.y, h: fA.h, t, amb: .95, arms });
+        bloom(heads.ali, 4.5, fA);
+      }]);
       items.sort((m, n) => n[0] - m[0]);
       // crowd far half first, near half after the items
       crowd(false);
@@ -220,25 +243,20 @@
       const hand = seg(p, .742, .776), throwK = seg(p, .776, .815);
       if (hand > 0 && throwK < 1) st.sparks.forEach(([a, b, q], k) => {
         let P;
-        if (throwK <= 0) { const u = ease.io(hand); P = [mix(ali[0], proph[0], u) + (a - .5) * .25, mix(ali[1], proph[1], u) + Math.sin(u * Math.PI) * .9 + (b - .5) * .2, mix(ali[2], proph[2], u) + (q - .5) * .25]; }
+        if (throwK <= 0) { const u = ease.io(hand); P = [mix(hA3[0], hP3[0], u) + (a - .5) * .12, 1.15 + Math.sin(u * Math.PI) * .25 + (b - .5) * .1, mix(hA3[2], hP3[2], u) + (q - .5) * .12]; }
         else {
           const ta = A0 + TAU * (WAVE + (1 - WAVE) * (.12 + .8 * a)), tr = 16 + 8 * b, u = ease.out(throwK);
-          P = [mix(proph[0], Math.cos(ta) * tr, u), proph[1] + Math.sin(u * Math.PI) * 2.5 - u * 1.5, mix(proph[2], Math.sin(ta) * tr, u)];
+          P = [mix(thr3[0], Math.cos(ta) * tr, u), thr3[1] + Math.sin(u * Math.PI) * 2.5 - u * 1.35, mix(thr3[2], Math.sin(ta) * tr, u)];
         }
         const [x, y, zc] = PJ(...P); if (zc < 1) return;
-        const R = .3 * F / zc, al = (throwK > 0 ? 1 - throwK * throwK : c01(hand * 6)) * .95;
+        const R = (throwK > 0 ? .2 : .09) * F / zc, al = (throwK > 0 ? 1 - throwK * throwK : c01(hand * 6)) * .95;
         if (throwK > 0) for (let j = 1; j < 5; j++) { // a short trail behind each thrown pebble
           const u = ease.out(Math.max(0, throwK - j * .03)), ta = A0 + TAU * (WAVE + (1 - WAVE) * (.12 + .8 * a)), tr = 16 + 8 * b;
-          const Q = PJ(mix(proph[0], Math.cos(ta) * tr, u), proph[1] + Math.sin(u * Math.PI) * 2.5 - u * 1.5, mix(proph[2], Math.sin(ta) * tr, u));
+          const Q = PJ(mix(thr3[0], Math.cos(ta) * tr, u), thr3[1] + Math.sin(u * Math.PI) * 2.5 - u * 1.35, mix(thr3[2], Math.sin(ta) * tr, u));
           c.globalAlpha = al * (1 - j / 5) * .6; c.drawImage(st.glow, Q[0] - R * .7, Q[1] - R * .7, R * 1.4, R * 1.4);
         }
         c.globalAlpha = al;
         c.drawImage(st.glow, x - R, y - R, R * 2, R * 2);
-      });
-      // the two calm lights glow over everything
-      [[proph, 9, .3, .45], [ali, 4.5, .26, .4]].forEach(([P, R, a1, a2]) => {
-        const [x, y, zc] = PJ(...P); if (zc < 1) return;
-        halo(x, y, R * F / zc, st.pale, a1 * lightA); halo(x, y, R * .3 * F / zc, st.pale, a2 * lightA);
       });
       c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
       { const sx = PJ(cxw - 400 * SUN[0] / Math.hypot(SUN[0], SUN[2]) * -1, 60, czw + 400 * SUN[2] / Math.hypot(SUN[0], SUN[2]))[0];
@@ -401,10 +419,12 @@
           c.fill();
         });
       }
-      function orb(P, R, img, k) {
-        const [x, y, zc] = PJ(...P); if (zc < 1) return;
+      // a soft warm bloom at a disc (morning: a soft one), R metres wide; drawn with the figure, so what stands nearer
+      // (the Kaaba, the idols) covers it
+      function bloom(q, R, f) {
+        if (!q) return;
         c.globalCompositeOperation = 'lighter';
-        halo(x, y, R * 2.4 * F / zc, img, .7 * lightA); halo(x, y, R * .7 * F / zc, st.glow, .9 * lightA);
+        halo(q.x, q.y, R * f.h / 1.85, st.pale, .2 * lightA); halo(q.x, q.y, 4 * q.r, st.pale, .14 * lightA);
         c.globalCompositeOperation = 'source-over';
       }
       function halo(x, y, R, img, a) {

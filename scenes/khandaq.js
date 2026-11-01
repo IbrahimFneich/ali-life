@@ -5,8 +5,9 @@
 // A low winter sun stands east-south-east. The film opens over Medina looking north across the trench at the camp,
 // comes down and turns to look east along the trench for the duel (camp on screen-left, Muslims on screen-right, the
 // sun backlighting both), climbs back, goes into the camp for the storm, and ends over Medina at night.
-// Beats: the dark rider leaps the trench and calls the challenge; Ali comes out as a calm light; they circle in dust;
-// one flash; the dark figure falls; the camp falters; wind and storm tear it apart; a clear, cold, empty night.
+// Beats: the dark rider leaps the trench and calls the challenge; Ali comes out on foot, a veiled figure with a gold
+// disc behind the head and Dhul-Fiqar (scenes/holy.js; no face is ever drawn); they circle in dust; one flash; the dark
+// figure falls; the camp falters; wind and storm tear it apart; a clear, cold, empty night.
 const FLASH = .47, D = [128, 0, -17], DEEP = 4.6, NEAR = 1;
 const SUN = (() => { const v = [.963, .078, -.258], l = Math.hypot(...v); return v.map((x) => x / l); })();
 const SUN_AZ = Math.atan2(SUN[2], SUN[0]);
@@ -88,7 +89,7 @@ const LK = [
 ];
 const FOG = [[-.06, 3600], [.5, 3800], [.66, 2600], [.72, 1500], [.79, 1000], [.86, 1300], [.93, 6000], [1.06, 6000]];
 
-// ---------- the dark rider and the light ----------
+// ---------- the dark rider and Ali ----------
 const RUN = [[56, 0, 172], [77, 0, 116], [101, 0, 58], [116.5, 0, 22], [121, 0, 9.6]];
 const LAND = [124.6, 0, -3.4];
 const IN = [[124.6, 0, -3.4], [127.4, 0, -8.6], [130.4, 0, -12.6], [132, 0, -14.6]];
@@ -107,7 +108,7 @@ function amr(p) { // the horse: h (feet), v (heading), gait, ph, pitch, ha; the 
   else if (p < .258) { const k = ease.out(seg(p, .222, .258)); o.h = crv(IN, 3 * k); o.v = v3.sub(crv(IN, Math.min(3, 3 * k + .03)), crv(IN, Math.max(0, 3 * k - .03))); o.gait = 'gallop'; o.ph = RUN_L / 5.8 + k * IN_L / 4.6; }
   else if (p < .29) { const k = seg(p, .258, .29); o.v = v3.sub(IN[3], IN[2]); o.gait = 'rear'; o.pitch = .62 * Math.sin(Math.PI * k) ** .8; o.ph = k; }
   else { o.v = v3.sub(IN[3], IN[2]); o.ph = p * 40; }
-  // he slides from the saddle as the light comes out; the horse runs off east into the dust
+  // he slides from the saddle as Ali comes out; the horse runs off east into the dust
   const dm = smooth(seg(p, .292, .314));
   if (dm > 0) {
     o.mounted = false;
@@ -394,7 +395,7 @@ S.khandaq = {
     st.palms.forEach((pm, i) => { const d = Math.hypot(pm[0] - e0, pm[1] - e2); if (d > 9000) return; LB[bandOf(d)].p.push(i); });
     const FP = st.fx;
     for (let i = 0; i < Fi.n; i++) { const j = i * 4; FP[j + 3] = 0; if (!pj(Fi.x[i], .4, Fi.z[i])) continue; FP[j] = QX; FP[j + 1] = QY; FP[j + 2] = QZ; FP[j + 3] = 1; }
-    // the bloom buffer (fires, lamps, the light)
+    // the bloom buffer (fires, lamps, Ali's disc)
     const bc = st.bc, BW = Math.max(8, Math.round(W / 4)), BH = Math.max(8, Math.round(H / 4));
     if (st.bloom.width !== BW || st.bloom.height !== BH) { st.bloom.width = BW; st.bloom.height = BH; }
     bc.setTransform(1, 0, 0, 1, 0, 0); bc.clearRect(0, 0, BW, BH); bc.setTransform(BW / W, 0, 0, BH / H, 0, 0);
@@ -563,38 +564,40 @@ S.khandaq = {
       c.globalAlpha = 1;
     };
     duelDust(false);
+    const aliA = smooth(seg(p, .262, .29)), aq = P(ali), duelists = []; // drawn far to near: the horse, the man, Ali
     if (A.ha > .01) {
       const q = P(A.h);
-      if (q) {
+      if (q) duelists.push([q[2], () => {
         const s = F / q[2], qa = P(v3.add(A.h, v3.mul(v3.norm(A.v), 2))), face = qa && qa[0] < q[0] ? -1 : 1;
         drawShadow(A.h[0], A.h[2], A.mounted ? 2.7 : 2, .5, A.ha);
         c.save(); c.globalAlpha = A.ha; drawHorseFull(c, dpr, q[0], q[1], s, face, A, A.mounted, dark, t); c.restore();
-      }
+      }]);
     }
-    const aliA = smooth(seg(p, .262, .29));
-    const aq = P(ali), ag = P([ali[0], .02, ali[2]]);
     if (A.m) {
       const q = P(A.m);
-      if (q) {
+      if (q) duelists.push([q[2], () => {
         const s = F / q[2], face = aq ? (aq[0] < q[0] ? -1 : 1) : 1;
         drawShadow(A.m[0], A.m[2], 1.9 * (1 - A.fall * .8), .35, A.ma);
         c.save(); c.globalAlpha = A.ma;
         const g = c.createRadialGradient(q[0], q[1] - s, 0, q[0], q[1] - s, s * 2.4); g.addColorStop(0, `rgba(24,4,3,${.4 * (1 - A.fall)})`); g.addColorStop(1, 'rgba(24,4,3,0)'); c.fillStyle = g; c.fillRect(q[0] - s * 3, q[1] - s * 4, s * 6, s * 6);
         drawMan(c, dpr, q[0], q[1], s, face, p, A.fall, dark, t);
         c.restore();
-      }
+      }]);
     }
+    // Ali, veiled, on foot: he steps out of the line, walks to the ground, circles facing the rider, raises Dhul-Fiqar as
+    // they close and strikes at the flash; then stands with the sword at his side
+    const ag = P([ali[0], 0, ali[2]]);
+    if (aliA > 0 && ag) duelists.push([ag[2], () => {
+      const foe = A.m ? P(A.m) : P(A.h), famb = c01(mix(1, .25, night) - .3 * storm);
+      let pose = 'stand', phase = 0;
+      if (p >= .27 && p < .314) { pose = 'walk'; phase = 41 * smooth(seg(p, .27, .314)) / 1.5; }
+      else if (p >= .314 && p < .44) { pose = 'walk'; phase = 13.5 * seg(p, .314, .44) / 1.2; }
+      else if (p >= .44 && p < FLASH + .05) { pose = 'fight'; phase = .5 * ease.in(seg(p, .44, FLASH)); }
+      const hd = Holy.draw(c, { who: 'ali', pose, phase, sword: true, flip: !!foe && foe[0] < ag[0], x: ag[0], y: ag[1], h: Math.max(22, 1.8 * F / ag[2]), t, amb: famb, alpha: aliA });
+      if (hd) { bc.fillStyle = `rgba(255,226,170,${.8 * aliA * (.22 + .45 * Math.max(night, storm * .5))})`; bc.beginPath(); bc.arc(hd.x, hd.y, Math.max(8, hd.r * 4), 0, TAU); bc.fill(); }
+    }]);
+    duelists.sort((u, v) => v[0] - u[0]).forEach(([, f]) => f());
     duelDust(true);
-    // the light: calm and warm, larger than any other; a pool of it on the ground
-    if (aliA > 0 && aq) {
-      c.globalCompositeOperation = 'lighter';
-      const s = F / Math.max(16, aq[2]), br = .93 + .07 * Math.sin(t * 1.2);
-      if (ag) { c.save(); c.translate(ag[0], ag[1]); c.scale(1, .2); const g = c.createRadialGradient(0, 0, 0, 0, 0, s * 4.5); g.addColorStop(0, `rgba(255,196,124,${.32 * aliA})`); g.addColorStop(1, 'rgba(255,196,124,0)'); c.fillStyle = g; c.fillRect(-s * 5, -s * 5, s * 10, s * 10); c.restore(); }
-      const glow = (r, col, a) => { const g = c.createRadialGradient(aq[0], aq[1], 0, aq[0], aq[1], r); g.addColorStop(0, col.replace('A', a)); g.addColorStop(1, col.replace('A', 0)); c.fillStyle = g; c.fillRect(aq[0] - r, aq[1] - r, r * 2, r * 2); };
-      glow(s * 3.6, 'rgba(255,186,104,A)', .16 * aliA * br); glow(s * 1.3, 'rgba(255,218,156,A)', .42 * aliA * br); glow(s * .36, 'rgba(255,250,236,A)', .95 * aliA);
-      bc.globalAlpha = .45 * aliA; bc.drawImage(st.glowS, aq[0] - s * 3, aq[1] - s * 3, s * 6, s * 6); bc.globalAlpha = 1;
-      c.globalCompositeOperation = 'source-over';
-    }
     // ----- wind: grit in the air; in the storm a flood of sand driven out of the east -----
     {
       const wv = [mix(-2, -44, storm), 0, mix(-5, -7, storm)], L = 160, Wz = 220, Hy = mix(14, 60, storm), T0 = t + p * 30;

@@ -390,7 +390,7 @@
         });
         c.globalCompositeOperation = 'source-over';
       }
-      // Ali's lights in the bloom (torches at night)
+      // Ali's army in the bloom (their torches at night); Ali himself is not drawn in this scene
       const glowA = .14 + .45 * night;
       bc.fillStyle = `rgba(240,200,120,${glowA})`; bc.beginPath();
       for (let i = 0; i < NA; i++) { const zr = SZa[i]; if (!zr) continue; const s = Math.max(2 * k, 4 * F / zr); bc.rect(SXa[i] - s, SYa[i] - s * 1.5, s * 2, s * 2); }

@@ -1,7 +1,9 @@
-// The Great Mosque of Kufa before dawn, 19 Ramadan 40 AH. A calm light leaves a house in the sleeping town, enters
-// the mosque, wakes the sleepers as it passes, crosses the courtyard and walks down the nave of the columned hall to
-// the mihrab. One red-gold flash and a crack of light; a dark shape at the edge, never a figure. The light stays,
-// lowered. A faint Kaaba appears in the niche. Dawn comes into the hall from the courtyard.
+// The Great Mosque of Kufa before dawn, 19 Ramadan 40 AH. Ali, a veiled figure with the gold disc behind the head
+// (scenes/holy.js; no face is ever drawn), leaves a house in the sleeping town, enters the mosque, wakes the sleepers
+// as he passes, crosses the courtyard and walks down the nave of the columned hall to the mihrab. He stands in
+// prayer, bows, prostrates; in the prostration, one red-gold flash and a crack of light; a dark shape at the edge,
+// never a figure. He is lowered to sit, still bright; no wound is shown. A faint Kaaba appears in the niche. Dawn
+// comes into the hall from the courtyard.
 // World in metres: x right (west), y up, z away from the camera (towards the qibla). Zero-pitch camera with a shift
 // lens, as in the Mabit scene. Above the roof line the town and the mosque are boxes; below it, the hall is drawn
 // row by row from the qibla wall forward, so columns hide what is behind them.
@@ -145,7 +147,8 @@
       const amb = {}; for (const k in AMB) amb[k] = mixc(AMB[k][0], AMB[k][1], Math.min(1, dawn + predawn));
       const fallen = smooth(seg(p, .376, .405));
       const kaabaA = smooth(seg(p, .64, .74));
-      // Ali: a calm warm light walking, then standing at the mihrab; after the blow, lowered, still bright
+      // Ali: walking, then at prayer in the mihrab; after the blow, lowered, still bright. The light at (ax, ay, az)
+      // stays as the warmth he carries: it shades the hall, its pools lie on the floor, the flash comes from it
       const sW = lerpKeys(WALK_T, p);
       const [ax, az] = walkS(WALK, sW);
       const ay = mix(1.55, .62, fallen), aliI = 1 - .28 * fallen + .5 * strike * (1 - fallen);
@@ -241,6 +244,23 @@
       };
       const ambOnly = (alb, a) => [tone(alb[0] * a[0]), tone(alb[1] * a[1]), tone(alb[2] * a[2])];
       const wakeOf = (s) => { const reach = s.z < ZH ? az - s.z + 3 : (az > s.z - 4 ? az - s.z + 4 : -1); return c01(reach / 5) * (sW > 70 ? 1 : 0); };
+      // Ali as a veiled figure (scenes/holy.js), 1.8 m, never under 22 css px: he walks (the stride fitted so the
+      // last step lands with the cloak still), then qiyam, ruku, qiyam, sujud in the mihrab, facing right with his
+      // back to the dark shape; the blow comes in the sujud, and as he falls he is lowered to sit (two draws crossfaded)
+      const PRAY = [[.345, 'stand'], [.352, 'ruku'], [.358, 'stand'], [.3615, 'sujud']];
+      const steps = Math.round(WALK.len / 1.5);
+      let aliHead = null;
+      const aliFig = () => {
+        const d = az - cz; if (d < .6 || aliOn <= 0) return;
+        const h = Math.max(22 * W / st.cv.clientWidth, 1.8 * F / d), x = X(ax, az), y = Y(0, az);
+        if (x < -h || x > W + h || y - h > H || y < 0) return;
+        const draw = (pose, a) => (a > .01 ? Holy.draw(c, { who: 'ali', pose, phase: sW / WALK.len * steps, x, y, h, t, amb: .28 + .5 * dawn, alpha: aliOn * a }) : null);
+        if (p < PRAY[0][0]) { aliHead = draw('walk', 1); return; }
+        let i = PRAY.length - 1; while (i > 0 && p < PRAY[i][0]) i--;
+        const k = c01((p - PRAY[i][0]) / .0015), was = i ? PRAY[i - 1][1] : 'walk';
+        const a = draw(was, (1 - k) * (1 - fallen)), b = draw(PRAY[i][1], k * (1 - fallen)), s = draw('sit', fallen);
+        aliHead = fallen > .5 ? s : k > .5 ? b : a;
+      };
 
       if (cy >= 7.8) exterior(); else interior();
 
@@ -252,10 +272,11 @@
           const [qx, qz] = walkS(WALK, sW - k * 2.2), dq = qz - cz;
           if (dq > 2) halo(X(qx, qz), Y(.5, qz), 2.8 * F / dq, st.pale, .18 * (1 - k / 10) * aliOn);
         }
-        const big = Math.min(W * .3, 9 * s), mid = Math.min(W * .14, 2.4 * s), core = Math.min(W * .04, .7 * s);
-        halo(sx, sy, big, st.pale, .32 * aliOn * aliI * Math.min(1, W * .12 / big));
-        halo(sx, sy, mid, st.pale, .6 * aliOn * aliI);
-        halo(sx, sy, Math.max(core, 3), st.glow, .95 * aliOn);
+        if (aliHead) { // the warmth he carries, and a soft bloom at the disc, more at night
+          const big = Math.min(W * .3, 9 * s);
+          halo(aliHead.x, aliHead.y, big, st.pale, .22 * aliOn * aliI * Math.min(1, W * .12 / big));
+          halo(aliHead.x, aliHead.y, Math.max(8, aliHead.r * 6), st.pale, (.3 + .2 * (1 - dawn)) * aliOn * aliI);
+        }
         if (flash > .01) { halo(sx, sy, Math.min(W * 1.2, 30 * s), st.red, .9 * flash); halo(sx, sy, Math.min(W * .4, 6 * s), st.glow, flash); }
       }
       c.globalCompositeOperation = 'source-over';
@@ -305,6 +326,7 @@
         if (aliOn > 0) pool(ax, az, 12, st.pale, .3 * aliOn);
         c.globalCompositeOperation = 'source-over';
         for (const [, b] of items) (b.h ? palm(b) : drawBox(b));
+        aliFig(); // over the roofs: from this height the lanes would hide him, as they never hid the light
         // the sleepers who wake in the courtyard: small lights at the floor
         c.globalCompositeOperation = 'lighter';
         st.sleep.forEach((s) => { const w = wakeOf(s); if (w <= 0 || s.z > ZH) return; const d = s.z - cz; if (d < 2) return; halo(X(s.x, s.z), Y(.5 + .4 * w, s.z), Math.max(2, .9 * F / d), st.fire, .7 * w * s.a); });
@@ -436,7 +458,7 @@
         lamps.forEach((l) => items.push([l.z, () => lamp(l)]));
         st.sleep.forEach((s) => { const w = wakeOf(s); if (w > 0) items.push([s.z, () => sleeper(s, w)]); });
         if (shapeA > 0) items.push([shapeZ, () => shadowShape()]);
-        if (aliOn > 0) items.push([az, () => aliCore()]);
+        if (aliOn > 0) items.push([az, aliFig]);
         items.sort((m, n) => n[0] - m[0]);
         let ii = 0;
         for (const rz of ROWS) {
@@ -542,12 +564,6 @@
         const d = shapeZ - cz; if (d < .6) return;
         const s = F / d, x = X(shapeX, shapeZ), y = Y(1.05, shapeZ);
         c.globalAlpha = .9 * shapeA; c.drawImage(st.dark, x - .55 * s, y - 1.2 * s, 1.1 * s, 2.4 * s); c.globalAlpha = 1;
-      }
-      function aliCore() {
-        const d = az - cz; if (d < .6) return;
-        c.globalCompositeOperation = 'lighter';
-        halo(X(ax, az), Y(ay, az), Math.min(W * .3, 1.6 * F / d), st.pale, .7 * aliOn * aliI);
-        c.globalCompositeOperation = 'source-over';
       }
     },
   };

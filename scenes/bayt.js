@@ -2,10 +2,11 @@
 // a doorway with a woollen curtain onto a small court with a well, a high window on the left. By day the camera goes
 // round four corners of the room, each lit in turn: the waterskin dripping by the door, the hand quern turning with
 // flour at its lip, the palm-frond broom sweeping in the shaft of sun, the pot on three stones over the fire. Fatima
-// is a soft gold light beside each; the things move on their own. Then night in the same room: Ali's light comes
-// home, the Prophet's light comes in at the door and sits between them, and a ring of a hundred beads on the
+// is at each in turn: her hand on the waterskin, turning the quern, sweeping, tending the pot. Then night in the same
+// room: Ali comes home, the Prophet comes in at the door and sits between them, and a ring of a hundred beads on the
 // sheepskin lights 34 + 33 + 33 in step with the counts on the page.
-// World in metres: x right, y up, z from the front of the room to the back wall. Nobody is drawn; the three are lights.
+// World in metres: x right, y up, z from the front of the room to the back wall. The three are veiled figures with a
+// gold disc behind the head (scenes/holy.js); no face is drawn.
 (() => {
   const rgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
   const mixc = (a, b, k) => [mix(a[0], b[0], k), mix(a[1], b[1], k), mix(a[2], b[2], k)];
@@ -70,17 +71,21 @@
     [.95, .95, 1.75, -1.55, .25, .22, .7, 1.0, .5, .38, .38],
     [1.05, .95, 1.8, -1.6, .25, .22, .7, 1.0, .5, .38, .38],
   ];
-  // Fatima's light beside each task in turn, then at the sheepskin for the night
+  // where each of the three is: [p, ground x, head height (their light on the room), ground z]. Fatima at each task in
+  // turn (stands at the waterskin, sits behind the quern, stands with the broom, sits behind the pot; each beside the
+  // task's label, not under it), then by the sheepskin
   const FAT = [
-    [-.05, -1.05, .82, 2.85], [.035, -1.05, .82, 2.85], [.1, -1.1, .84, 2.9],
-    [.125, -1.4, .5, 2.12], [.185, -1.4, .5, 2.12],
-    [.205, -.42, .76, 1.62], [.265, -.42, .76, 1.62],
-    [.285, 1.22, .52, 2.85], [.345, 1.22, .52, 2.85],
-    [.39, -.14, .5, .36], [1.05, -.14, .5, .36],
+    [-.05, -1.2, 1.5, 3.15], [.035, -1.2, 1.5, 3.15], [.1, -1.22, 1.5, 3.1],
+    [.125, -2.15, .86, 2.8], [.185, -2.15, .86, 2.8],
+    [.205, -1.0, 1.5, 1.45], [.265, -1.0, 1.5, 1.45],
+    [.285, 1.35, .86, 3.05], [.345, 1.35, .86, 3.05],
+    [.39, -.48, .86, .54], [1.05, -.48, .86, .54],
   ];
-  // Ali's light comes home at dusk; the Prophet's light comes in at the door after it
-  const ALI = [[.33, -3.6, 1.0, 8.4], [.36, -1.5, .98, 3.9], [.385, -.4, .82, 1.85], [.41, .66, .52, .36], [1.05, .66, .52, .36]];
-  const PRO = [[.4, -3.9, 1.15, 9.2], [.44, -1.5, 1.1, 3.9], [.47, -.45, .98, 1.9], [.5, .28, .62, .84], [1.05, .28, .62, .84]];
+  const FPOSE = [[.1, 'stand'], [.125, 'walk'], [.185, 'sit'], [.205, 'walk'], [.265, 'stand'], [.285, 'walk'], [.345, 'sit'], [.39, 'walk'], [9, 'sit']];
+  // Ali comes home at dusk, in at the door past the basket; the Prophet comes in after him and sits between them,
+  // behind the ring of beads, which stays clear in front of the three
+  const ALI = [[.33, -3.6, 1.65, 8.4], [.36, -1.5, 1.65, 3.9], [.372, -1.45, 1.65, 3.0], [.392, -.6, 1.65, 2.2], [.41, .66, .93, 1.03], [1.05, .66, .93, 1.03]];
+  const PRO = [[.4, -3.9, 1.72, 9.2], [.44, -1.5, 1.72, 3.9], [.455, -1.45, 1.72, 3.0], [.475, -.7, 1.72, 2.2], [.5, -.08, .97, 1.18], [1.05, -.08, .97, 1.18]];
   const GROUPS = [[0, 34, .56], [34, 67, .67], [67, 100, .78]];
   const BCOL = [[255, 214, 130], [121, 201, 162], [236, 226, 204]];
 
@@ -96,7 +101,6 @@
       st.skyPool = pool(110, 140, 210);
       st.soot = sprite([[0, 'rgba(12,8,5,.8)'], [.5, 'rgba(12,8,5,.38)'], [1, 'rgba(12,8,5,0)']], 128);
       st.shadow = sprite([[0, 'rgba(8,5,3,.62)'], [.5, 'rgba(8,5,3,.3)'], [1, 'rgba(8,5,3,0)']], 64);
-      st.glow = sprite([[0, 'rgba(255,255,255,1)'], [.18, 'rgba(255,255,255,.55)'], [.45, 'rgba(255,255,255,.16)'], [1, 'rgba(255,255,255,0)']]);
       st.pale = sprite([[0, 'rgba(255,246,222,1)'], [.2, 'rgba(255,236,196,.5)'], [.55, 'rgba(240,214,160,.12)'], [1, 'rgba(240,214,160,0)']]);
       st.gold = sprite([[0, 'rgba(255,240,200,1)'], [.2, 'rgba(250,214,140,.5)'], [.55, 'rgba(230,180,100,.12)'], [1, 'rgba(230,180,100,0)']]);
       st.fire = sprite([[0, 'rgba(255,214,150,1)'], [.25, 'rgba(255,150,60,.5)'], [.6, 'rgba(220,90,30,.12)'], [1, 'rgba(200,70,20,0)']]);
@@ -168,6 +172,10 @@
       const sweep = p * 120 + t * 2.4 * w[2]; // the broom's strokes
       const beadK = (i) => { const [g0, g1, a0] = GROUPS.find(([a, b]) => i >= a && i < b); const a = a0 + ((i - g0) / (g1 - g0)) * .09; return smooth(seg(p, a, a + .012)); };
       let litN = 0; for (let i = 0; i < 100; i++) litN += beadK(i);
+      // the broom: in her hands in its turn, sweeping; out of it, leaning against the wall under the window
+      const k3 = smooth(seg(p, .18, .2)) * (1 - smooth(seg(p, .27, .29))), s1 = Math.sin(sweep) * k3, v1 = Math.cos(sweep) * k3;
+      const bx = mix(X0 + .34, BROOM[0] + .16 * s1, k3), bz = mix(1.95, BROOM[1], k3);
+      const T = [mix(X0 + .05, BROOM[0] - .32 - .04 * s1, k3), mix(.86, .74, k3), mix(1.92, BROOM[1] - .12, k3)], M = [mix(T[0], bx, .45), mix(T[1], .02, .45), mix(T[2], bz, .45)];
 
       // ---------- lights ----------
       const fl = (ph, k = 1) => .86 + .14 * k * Math.sin(t * 7.3 + ph) * Math.sin(t * 4.1 + ph * 2.1);
@@ -283,6 +291,16 @@
       items.push([dist(BROOM[0], BROOM[1]), () => broom()]);
       items.push([dist(HEARTH[0], HEARTH[1]), () => hearth()]);
       items.push([dist(1.95, -.9), () => bolster(1.95, -.9)]);
+      // ---------- the three: veiled figures (scenes/holy.js) ----------
+      const famb = mix(.7, .3, night), heads = {};
+      const fPose = FPOSE.find(([q]) => p < q)[1];
+      // her hands at each task: the waterskin, the quern's handle going round, the broom's handle, the rim of the pot
+      const fHands = fPose === 'walk' || p >= .345 ? undefined : p < .1 ? [[QB[0] - .06, 1.42, Z1 - .18]]
+        : p < .185 ? [[QUERN[0] + Math.cos(theta) * .19, .39, QUERN[1] + Math.sin(theta) * .19]]
+          : p < .265 ? [T, M] : [[HEARTH[0] - .12, .43, HEARTH[1] + .06]];
+      items.push([dist(fp[0], fp[2]) - (fPose === 'sit' && p < .2 ? .3 : 0), () => { heads.fat = figure('fatima', fp[0], fp[2], 1.65, { pose: fPose, phase: p * 70 }, fHands); }]); // at the quern she draws after it: her hand turns its handle
+      if (aliA > 0) items.push([dist(ap[0], ap[2]), () => { heads.ali = figure('ali', ap[0], ap[2], 1.8, { pose: p < .41 ? 'walk' : 'sit', phase: p * 70, alpha: aliA }); }]);
+      if (proA > 0) items.push([dist(pp[0], pp[2]), () => { heads.pro = figure('prophet', pp[0], pp[2], 1.85, { pose: p < .5 ? 'walk' : 'sit', phase: p * 70 + .5, alpha: proA }); }]);
       items.sort((a, b) => b[0] - a[0]);
       for (const [d, fn] of items) if (d > NEAR) fn();
 
@@ -306,10 +324,14 @@
       c.globalAlpha = 1;
       c.globalCompositeOperation = 'source-over';
 
-      // ---------- the three lights ----------
-      holy(fp, .15, st.gold, 1, false);
-      if (aliA > 0) holy(ap, .16, st.gold, aliA, ap[2] > Z1);
-      if (proA > 0) holy(pp, .25, st.pale, proA * (1 + .3 * done), pp[2] > Z1);
+      // ---------- a soft warm bloom at each disc, and its light on the floor beneath (more at night) ----------
+      c.globalCompositeOperation = 'lighter';
+      [[heads.fat, fp, st.gold, 1], [heads.ali, ap, st.gold, aliA], [heads.pro, pp, st.pale, proA * (1 + .3 * done)]].forEach(([q, P3, img, a]) => {
+        if (!q || P3[2] > Z1) return;
+        planeSprite([P3[0], .006, P3[2]], [1, 0, 0], [0, 0, 1], .55, img, .25 * a);
+        halo(q.x, q.y, Math.min(H * .5, 7 * q.r), img, (.12 + .1 * night) * a);
+      });
+      c.globalCompositeOperation = 'source-over';
 
       // ---------- the labels of the four tasks ----------
       labels();
@@ -586,10 +608,7 @@
         c.globalCompositeOperation = 'source-over';
       }
       function broom() { // a short broom of palm-frond ribs, bound at the top, sweeping on its own in the patch of sun
-        // out of its turn it leans against the wall under the window
-        const k3 = smooth(seg(p, .18, .2)) * (1 - smooth(seg(p, .27, .29))), s1 = Math.sin(sweep) * k3, v1 = Math.cos(sweep) * k3;
-        const bx = mix(X0 + .34, BROOM[0] + .16 * s1, k3), bz = mix(1.95, BROOM[1], k3);
-        const T = [mix(X0 + .05, BROOM[0] - .32 - .04 * s1, k3), mix(.86, .74, k3), mix(1.92, BROOM[1] - .12, k3)], M = [mix(T[0], bx, .45), mix(T[1], .02, .45), mix(T[2], bz, .45)];
+        // out of its turn it leans against the wall under the window (k3, s1, v1, bx, bz, T, M: see the beats)
         const q0 = sc(...T), q1 = sc(...M); if (!q0 || !q1) return;
         const e = lit(...M, -syw, .3, -cyw), sun = c01(1 - Math.hypot(bx - PC[0], bz - PC[2]) / .5) * shaftA;
         const colB = shadeOf([.66, .52, .3], e.map((v) => v + 1.2 * sun)), colD = shadeOf([.4, .3, .16], e);
@@ -704,18 +723,18 @@
         for (let k = 0; k < 8; k++) { const u = (t * .12 + k / 8) % 1, q = sc(x + .05 * Math.sin(k * 2.1 + u * 3), .44 + u * .5, z + .04 * Math.cos(k * 1.3)); if (q) halo(q[0], q[1], (.04 + .14 * u) * F / q[2], st.pale, .07 * Math.sin(Math.PI * u) * fireI); }
         c.globalCompositeOperation = 'source-over';
       }
-      function holy(P3, R, img, a, outside) { // a light, never a figure; a pool of it on the floor beneath
-        const q = sc(...P3); if (!q || a <= 0) return;
-        const s = F / q[2], br = .94 + .06 * Math.sin(t * 1.3 + P3[0] * 3);
+      // a veiled figure on its ground point, sheared to keep the room's verticals; m is the standing height in metres;
+      // hands are 3D points, turned into holy.js arm targets; out in the court it shows only through the door
+      function figure(who, x, z, m, o, hands) {
+        const a = sc(x, 0, z), b = sc(x, 1, z); if (!a || !b) return null;
+        const kx = (b[0] - a[0]) / ((b[1] - a[1]) || -1), h = m * Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const arms = hands && hands.map((P) => { const q = sc(...P); return q ? [(q[0] - kx * (q[1] - a[1]) - a[0]) / h, (q[1] - a[1]) / h] : [.1, -.4]; });
         c.save();
-        if (outside) { c.beginPath(); if (!addPoly(doorPts)) { c.restore(); return; } c.clip(); }
-        c.globalCompositeOperation = 'lighter';
-        if (!outside) planeSprite([P3[0], .006, P3[2]], [1, 0, 0], [0, 0, 1], .55, img, .25 * a);
-        halo(q[0], q[1], Math.min(H * .8, R * 14 * s), img, .1 * a * br);
-        halo(q[0], q[1], Math.min(H * .5, R * 6 * s), img, .2 * a * br);
-        halo(q[0], q[1], R * 2 * s, img, .55 * a * br);
-        halo(q[0], q[1], R * .5 * s, st.glow, Math.min(1, .9 * a));
+        if (z > Z1 + .05) { c.beginPath(); if (!addPoly(doorPts)) { c.restore(); return null; } c.clip(); }
+        c.setTransform(1, 0, kx, 1, -kx * a[1], 0);
+        const hd = Holy.draw(c, { who, x: a[0], y: a[1], h, t, amb: famb, arms, ...o });
         c.restore();
+        return hd && { x: hd.x + kx * (hd.y - a[1]), y: hd.y, r: hd.r };
       }
       function labels() { // the four tasks, each by its corner while it is lit
         const pos = [[QB[0], QB[2] + .28, Z1 - .15], [QUERN[0], .7, QUERN[1]], [BROOM[0] - .2, 1.15, BROOM[1]], [HEARTH[0], .85, HEARTH[1]]];

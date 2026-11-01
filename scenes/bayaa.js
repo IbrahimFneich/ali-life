@@ -1,7 +1,9 @@
 // البيعة: Medina, Dhu al-Hijja 35 AH. Late golden afternoon over flat mud roofs, palm groves and the black harra.
-// From every lane a crowd of cloaked, faceless figures streams to the mosque and presses on one calm light in the
-// courtyard, with the two ringed lights of al-Hasan and al-Husayn beside it. The camera comes down off the roofs
-// into the press, then rises and turns west as the crowd sits in rings around him and the city goes to dusk.
+// From every lane a crowd of cloaked, faceless figures streams to the mosque and presses on Ali in the courtyard,
+// with al-Hasan and al-Husayn standing beside him: the three are veiled figures with the gold disc behind the head
+// (scenes/holy.js; no face is ever drawn), grown men now, sorted into the crowd by distance. The camera comes down
+// off the roofs into the press, then rises and turns west as the crowd sits in rings around him and the city goes
+// to dusk.
 // World in metres: x east, y up, z north. The mosque is centred on the origin: an enclosure of mud-brick walls, the
 // roofed hall on the south (qibla) side, a shallow arcade on the north, an open courtyard. No minaret, no dome.
 // Pinhole camera with eye/look keys; painter order by distance, with people and palms bucketed by distance.
@@ -50,7 +52,7 @@
 
   // ---------- the place ----------
   const WH = 5.2; // wall height
-  const ALI = [0, -5]; // his light, in the courtyard before the roofed hall
+  const ALI = [0, -5]; // where he stands, in the courtyard before the roofed hall
   const IMAMS = [[-1.35, -.4], [1.35, -.4]]; // al-Hasan and al-Husayn, relative to him
   const GATES = [[0, 37.5, 0, 31.5], [42.5, 2, 36.5, 2], [-42.5, 2, -36.5, 2]]; // outer x z, inner x z
   const LANES = [ // [gate, points from the gate outwards]
@@ -440,7 +442,7 @@
         for (let i = 0; i < 1400; i++) { const x = -38 + rr() * 76, z = -15 + rr() * 45, zc = CZ(x, 0, z); if (zc < 1.5 || zc > 60) continue; const s = Math.max(1, .05 * F / zc); c.rect(cx + F * CX(x, 0, z) / zc, cy - F * CY(x, 0, z) / zc, s * 1.6, s); }
         c.fill();
       }
-      // his light on the ground
+      // the warmth he carries, on the ground
       const pressA = smooth(seg(p, .33, .43)) * (1 - smooth(seg(p, .5, .58)));
       const settle = (i) => ease.io(seg(p, .54 + st.ds[i], .64 + st.ds[i]));
       const aliI = .55 + .45 * dusk;
@@ -580,7 +582,7 @@
       const aliCol = [255, 206, 140];
       const sunSide = Math.sign(sunScr[0] - cx) || 1;
       const aliScr = (() => { const zc = CZ(ALI[0], 1.5, ALI[1]); return zc > .5 ? cx + F * CX(ALI[0], 1.5, ALI[1]) / zc : cx; })();
-      const flush = (b) => {
+      const flushCrowd = (b) => {
         const i = head[b]; if (i < 0) return;
         const dB = Math.exp((b + .5) / LB), fogB = fog(dB);
         // palms first: they stand on the ground among the houses
@@ -642,6 +644,18 @@
         if (!full) [[32, .9], [16, .5]].forEach(([bit, a]) => { open(rgb(mixc(aliCol, fogC, fogB * .5), a * mix(.25, .55, dusk)), false); each((q) => FK[q] & bit, fig()); done(); });
         c.globalAlpha = 1;
       };
+      // the three, veiled figures (scenes/holy.js), each drawn after the crowd of its distance bucket; al-Hasan and
+      // al-Husayn are jostled by the press as the lights were. Never under 18 css px, so they are found from the roofs
+      const jigOf = (j) => [jig * (.32 * Math.sin(p * 230 + j * 2.1) + .18 * Math.sin(p * 97 + j)), jig * (.26 * Math.sin(p * 170 + j * 4) + .2)];
+      const holy = [['ali', ALI[0], ALI[1], 1.8], ...IMAMS.map(([dx, dz], j) => { const [jx, jz] = jigOf(j); return [j ? 'husayn' : 'hasan', ALI[0] + dx * (1 - .25 * jig) + jx, ALI[1] + dz + jz, 1.78]; })]
+        .map(([who, x, z, m]) => {
+          const zc = CZ(x, 0, z); if (zc < .9) return null;
+          const sx = cx + F * CX(x, 0, z) / zc, sy = cy - F * CY(x, 0, z) / zc, zt = CZ(x, m, z), yt = cy - F * CY(x, m, z) / Math.max(.1, zt);
+          const d = Math.hypot(x - ex, ey - .9, z - ez);
+          return { who, x: sx, y: sy, h: Math.max(18 * k, sy - yt, .6 * F / zc * m), d, b: bucket(d), hd: null };
+        }).filter(Boolean).sort((m, n) => n.d - m.d);
+      const holyAmb = mix(1, .3, dusk);
+      const flush = (b) => { flushCrowd(b); holy.forEach((o) => { if (o.b === b) o.hd = Holy.draw(c, { who: o.who, pose: 'stand', x: o.x, y: o.y, h: o.h, t, seed: o.d, amb: holyAmb }); }); };
       function palmNear(j, fogB) {
         const [x, z, h, lean, ph] = palms[j], s = st.ps[j], X0 = st.px[j], Y0 = st.py[j], tx = st.pt[j * 2], ty = st.pt[j * 2 + 1];
         const trunk = mixc(mixc([60, 46, 34], [26, 22, 22], dusk), fogC, fogB);
@@ -768,34 +782,13 @@
         }
         c.fill();
       }
-      // the three lights: his, and the two beside him, ringed
-      const ringA = 1;
-      const imams = IMAMS.map(([dx, dz], j) => {
-        const jx = jig * (.32 * Math.sin(p * 230 + j * 2.1) + .18 * Math.sin(p * 97 + j)), jz = jig * (.26 * Math.sin(p * 170 + j * 4) + .2);
-        return [ALI[0] + dx * (1 - .25 * jig) + jx, 1.22, ALI[1] + dz + jz];
-      });
-      const lights = [[ALI[0], 1.5, ALI[1], 1.35, 1], ...imams.map((q) => [q[0], q[1], q[2], .8, 0])];
-      const breathe = 1 + .04 * Math.sin(t * 1.3);
-      lights.forEach(([x, y, z, sz, main], j) => {
-        const zc = CZ(x, y, z); if (zc < .6) return;
-        const X0 = cx + F * CX(x, y, z) / zc, Y0 = cy - F * CY(x, y, z) / zc, s = F / zc;
-        const r = Math.max(1.5 * k, .105 * s) * sz * breathe; // the core
-        const inner = Math.max(r * 3.4, (main ? .5 : .3) * s * sz), outer = Math.min(H * .5, Math.max(r * mix(11, 18, dusk), 2.6 * s * sz) * mix(1, 1.35, dusk));
-        halo(X0, Y0, outer, st.warm, (main ? .32 : .2) * mix(.85, 1.15, dusk));
-        halo(X0, Y0, inner, st.pale, main ? .62 : .5);
-        halo(X0, Y0, r * 2.2, st.glow, .95);
-        bc.fillStyle = main ? 'rgba(255,226,170,.9)' : 'rgba(255,230,190,.65)'; bc.beginPath(); bc.arc(X0, Y0, r * 2.6, 0, TAU); bc.fill();
-        if (!main) { // the ring that marks an Imam
-          c.globalCompositeOperation = 'source-over';
-          const rr2 = Math.max(5.5 * k, .44 * s);
-          c.strokeStyle = 'rgba(40,26,12,.35)'; c.lineWidth = Math.max(2.4 * k, .05 * s);
-          c.beginPath(); c.arc(X0, Y0, rr2, 0, TAU); c.stroke();
-          c.strokeStyle = `rgba(250,226,156,${.95 * ringA})`; c.lineWidth = Math.max(1.1 * k, .02 * s);
-          c.beginPath(); c.arc(X0, Y0, rr2, 0, TAU); c.stroke();
-          c.strokeStyle = `rgba(243,217,143,${.2 * ringA})`; c.lineWidth = Math.max(3 * k, .09 * s);
-          c.beginPath(); c.arc(X0, Y0, rr2, 0, TAU); c.stroke();
-          c.globalCompositeOperation = 'lighter';
-        }
+      // the warmth round the three, and a soft bloom at each disc, more as the dusk comes
+      holy.forEach(({ who, hd }) => {
+        if (!hd) return;
+        const main = who === 'ali', R0 = hd.r * 2.6;
+        if (main) halo(hd.x, hd.y, Math.min(H * .5, Math.max(R0 * 6, 18 * k) * mix(1, 1.6, dusk)), st.warm, .26 * mix(.85, 1.15, dusk));
+        halo(hd.x, hd.y, Math.max(R0 * 2.4, 6 * k), st.pale, (main ? .14 : .1) * mix(.6, 2.2, dusk));
+        if (dusk > .05) { bc.fillStyle = `rgba(255,226,170,${(main ? .5 : .35) * dusk})`; bc.beginPath(); bc.arc(hd.x, hd.y, Math.max(R0, 3 * k), 0, TAU); bc.fill(); }
       });
       // dust in the low sun over the moving crowd
       const dustA = sunI * (1 - dusk) * (.5 + .5 * jig) * (1 - smooth(seg(p, .5, .6)));

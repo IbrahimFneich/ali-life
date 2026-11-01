@@ -1,9 +1,9 @@
 // يوم الدار: a hall of the clan in Mecca at night, lit by clay oil lamps. The men of Banu Abd al-Muttalib sit
-// in a wide ring round a shared meal; the Prophet is a calm light at the head, Ali the smallest light in the
-// ring. Asked three times: the ring stays still, the lamps gutter, only Ali's light rises; the third time it
-// crosses to stand beside the Prophet's light. Through the door, down the valley, the Kaaba under the stars.
-// World in metres: x right, y up, z from the door wall towards the head of the room. Faceless cloaked figures
-// only; the Prophet and Ali are lights, never figures.
+// in a wide ring round a shared meal; the Prophet sits at the head, Ali, the youngest (about 13), in the ring.
+// Asked three times: the ring stays still, the lamps gutter, only Ali stands; the third time he crosses, stands
+// beside the Prophet and is told to sit. Through the door, down the valley, the Kaaba under the stars.
+// World in metres: x right, y up, z from the door wall towards the head of the room. The men are faceless cloaked
+// figures; the Prophet and Ali are veiled figures with a gold disc behind the head (scenes/holy.js), no face drawn.
 (() => {
   const rgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
   const tone = (x) => 255 * (1 - Math.exp(-1.2 * x));
@@ -87,7 +87,6 @@
       st.skyPool = pool(110, 140, 210);
       st.shadow = sprite([[0, 'rgba(8,5,3,.62)'], [.5, 'rgba(8,5,3,.3)'], [1, 'rgba(8,5,3,0)']], 64);
       st.ringS = sprite([[0, 'rgba(255,230,190,.06)'], [.55, 'rgba(255,230,190,.08)'], [.8, 'rgba(255,230,190,.4)'], [.9, 'rgba(255,230,190,.16)'], [1, 'rgba(255,230,190,0)']], 256);
-      st.glow = sprite([[0, 'rgba(255,255,255,1)'], [.18, 'rgba(255,255,255,.55)'], [.45, 'rgba(255,255,255,.16)'], [1, 'rgba(255,255,255,0)']]);
       st.pale = sprite([[0, 'rgba(255,246,222,1)'], [.2, 'rgba(255,236,196,.5)'], [.55, 'rgba(240,214,160,.12)'], [1, 'rgba(240,214,160,0)']]);
       st.gold = sprite([[0, 'rgba(255,240,200,1)'], [.2, 'rgba(250,214,140,.5)'], [.55, 'rgba(230,180,100,.12)'], [1, 'rgba(230,180,100,0)']]);
       st.fire = sprite([[0, 'rgba(255,214,150,1)'], [.25, 'rgba(255,150,60,.5)'], [.6, 'rgba(220,90,30,.12)'], [1, 'rgba(200,70,20,0)']]);
@@ -211,10 +210,14 @@
       const go = smooth(seg(p, .775, .845));
       const sit = smooth(seg(p, .872, .905));
       const aliXZ = go > 0 ? walk(st.aliPath, go) : st.aliSeat;
-      const aliY = mix(mix(.6, 1.34, rise), .72, sit) + .03 * Math.sin(Math.PI * go);
+      const aliY = mix(mix(.765, 1.365, rise), .765, sit) + .03 * Math.sin(Math.PI * go);
       const aliI = .8 + .45 * rise * (1 - sit) + .2 * sit;
       const meal = 1 - .35 * smooth(seg(p, .36, .44));
       const after = smooth(seg(p, .86, .95));
+      // Ali (h 1.5 m) sits, stands at each asking, walks across, stands beside the Prophet, sits when told; the pose
+      // switches at the midpoint of each move (one figure, one disc), while his light and bloom move smoothly
+      const aliPose = rise * (1 - sit) < .5 ? 'sit' : go > 0 && go < 1 ? 'walk' : 'stand';
+      const famb = .42 - .1 * G; // lamplight at night; dims when the lamps gutter
 
       // ---------- lights ----------
       const L = [];
@@ -325,8 +328,9 @@
       st.bowls.forEach((b) => items.push([dist(b[0], b[1]) + .3, () => bowl(b)]));
       items.push([dist(0, RING[1]) + .35, () => platter()]);
       MEAL_LAMPS.forEach(([x, z], i) => items.push([dist(x, z) + .2, () => clayLamp(x, .04, z, 1, L[NICHE.length + 2 + i], i + 20)]));
-      items.push([dist(PRO[0], PRO[2]) - .3, () => holy(PRO[0], PRO[1], PRO[2], .34, st.pale, 1 + .35 * after)]);
-      items.push([dist(aliXZ[0], aliXZ[1]) - .2, () => holy(aliXZ[0], aliY, aliXZ[1], .2 + .05 * rise, st.gold, aliI * .9)]);
+      const heads = {};
+      items.push([dist(PRO[0], PRO[2]), () => { heads.pro = figure('prophet', PRO[0], PRO[2], 1.85, 24, { pose: 'sit' }); }]);
+      items.push([dist(aliXZ[0], aliXZ[1]), () => { heads.ali = figure('ali', aliXZ[0], aliXZ[1], 1.5, 20, { pose: aliPose, phase: go * st.aliPath.len / 1.4 }); }]);
       if (go > .02) items.push([dist(st.aliSeat[0], st.aliSeat[1]) + .1, () => { // the place he left
         const s0 = sc(st.aliSeat[0], .08, st.aliSeat[1]); if (!s0) return;
         c.globalAlpha = .7 * smooth(c01(go * 6)); planeSprite([st.aliSeat[0], .01, st.aliSeat[1]], [1, 0, 0], [0, 0, 1], .5, st.shadow, .6); c.globalAlpha = 1;
@@ -334,7 +338,7 @@
       items.sort((a, b) => b[0] - a[0]);
       for (const [d, fn] of items) if (d > NEAR) fn();
 
-      // ---------- the air: lamp halos, the two lights, motes ----------
+      // ---------- the air: lamp halos, a soft bloom at each disc, motes ----------
       c.globalCompositeOperation = 'lighter';
       L.forEach((l) => {
         if (l.k !== 'lamp') return;
@@ -342,10 +346,11 @@
         const R = Math.min(H * .16, .65 * F / q[2]);
         halo(q[0], q[1], R, st.fire, .3 * l.i);
       });
-      { const q = sc(PRO[0], PRO[1], PRO[2]);
-        if (q) { const k = 1 + .3 * after + .2 * Math.max(...pulse.map((v) => Math.sin(Math.PI * v))); halo(q[0], q[1], Math.min(H * .9, 3.6 * F / q[2]) * k, st.pale, .2); halo(q[0], q[1], 1.1 * F / q[2] * k, st.pale, .4); halo(q[0], q[1], .2 * F / q[2], st.glow, .85); } }
-      { const q = sc(aliXZ[0], aliY, aliXZ[1]);
-        if (q) { halo(q[0], q[1], Math.min(H * .6, 2.2 * F / q[2]) * (.75 + .4 * rise + .25 * sit), st.gold, .2 * aliI); halo(q[0], q[1], .5 * F / q[2], st.gold, .42 * aliI); halo(q[0], q[1], .08 * F / q[2], st.glow, .9); } }
+      { const q = heads.pro; // the head radius is .133 m at h 1.85: 27 r spans the old 3.6 m glow
+        if (q) { const k = 1 + .3 * after + .2 * Math.max(...pulse.map((v) => Math.sin(Math.PI * v))); halo(q.x, q.y, Math.min(H * .9, 27 * q.r) * k, st.pale, .2); halo(q.x, q.y, 5 * q.r * k, st.pale, .14); } }
+      { const q = heads.ali; // the bloom follows his light, which moves smoothly while the pose switches
+        const hy = q && sc(aliXZ[0], aliY, aliXZ[1]);
+        if (q && hy) { halo(hy[0], hy[1], Math.min(H * .6, 20 * q.r) * (.75 + .4 * rise + .25 * sit), st.gold, .11 * aliI); halo(hy[0], hy[1], 5 * q.r, st.gold, .12 * aliI); } }
       // dust turning slowly in the lamplight
       c.fillStyle = 'rgba(255,214,160,1)';
       st.motes.forEach(([x0, y0, z0, ph, m]) => {
@@ -590,12 +595,15 @@
         c.fillStyle = rgb(shadeOf([.36, .24, .14], e)); c.beginPath(); c.ellipse(b[0], b[1], .13 * s, .035 * s, 0, 0, TAU); c.fill();
         clayLamp(x - .05, 1.37, z, 1, L[NICHE.length + i], i + 10);
       }
-      function holy(x, y, z, R, img, a) {
-        const q = sc(x, y, z); if (!q) return;
-        c.globalCompositeOperation = 'lighter';
-        halo(q[0], q[1], R * F / q[2] * 1.4, img, .5 * a);
-        halo(q[0], q[1], R * F / q[2] * .45, st.glow, Math.min(1, .8 * a));
-        c.globalCompositeOperation = 'source-over';
+      // the Prophet and Ali: veiled figures (scenes/holy.js) on their ground point, sheared like the men's billboards
+      // so they keep the room's verticals; m is the standing height in metres, min the smallest readable px height
+      function figure(who, x, z, m, min, o) {
+        const a = sc(x, 0, z), b = sc(x, 1, z); if (!a || !b) return null;
+        const kx = (b[0] - a[0]) / ((b[1] - a[1]) || -1), h = Math.max(min, m * Math.hypot(b[0] - a[0], b[1] - a[1]));
+        c.setTransform(1, 0, kx, 1, -kx * a[1], 0);
+        const hd = Holy.draw(c, { who, x: a[0], y: a[1], h, t, amb: famb, ...o });
+        c.setTransform(1, 0, 0, 1, 0, 0);
+        return hd && { x: hd.x + kx * (hd.y - a[1]), y: hd.y, r: hd.r };
       }
       // a seated man wrapped in his cloak, turban or headcloth; faceless. A billboard that keeps the room's verticals.
       function man(m) {

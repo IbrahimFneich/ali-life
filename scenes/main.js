@@ -396,7 +396,9 @@ S.book = {
 };
 
 // The shrine at al-Ghari: the night burial, the hidden years, the grave made known, then the golden dome rising
-// at dawn and pilgrims streaming in from every road. Architecture only; people are points of light.
+// at dawn and pilgrims streaming in from every road. In the night burial al-Hasan and al-Husayn carry his bier: they
+// are veiled figures with the gold disc behind the head (scenes/holy.js; no face is ever drawn), the bier is draped
+// in green and the body is never drawn. The pilgrims are points of light.
 S.shrine = {
   init(host, st) {
     st.cv = host.querySelector('canvas');
@@ -431,13 +433,30 @@ S.shrine = {
     gg.addColorStop(0, mixC('#15120c', '#c9ad80', lit * .85)); gg.addColorStop(1, mixC('#0a0907', '#8f7a58', lit * .7));
     c.fillStyle = gg; c.fillRect(0, gy, W, H - gy);
     const glow = (x, y, rad, col, a) => { const q = c.createRadialGradient(x, y, 0, x, y, rad); q.addColorStop(0, rgba(col, a)); q.addColorStop(1, rgba(col, 0)); c.fillStyle = q; c.fillRect(x - rad, y - rad, rad * 2, rad * 2); };
-    // the night procession
+    // the bier: a litter on two poles, draped in green with a gold edge; under the cloth nothing is shown
+    const bier = (x, y, len, fh, a) => {
+      c.save(); c.globalAlpha = a;
+      c.strokeStyle = '#2a1d12'; c.lineWidth = Math.max(1.5, fh * .03); c.beginPath(); c.moveTo(x - len / 2, y); c.lineTo(x + len / 2, y); c.stroke();
+      const bl = len * .62, bh = fh * .16;
+      c.beginPath(); c.moveTo(x - bl / 2, y); c.quadraticCurveTo(x - bl / 2, y - bh, x - bl * .3, y - bh); c.lineTo(x + bl * .3, y - bh * .9); c.quadraticCurveTo(x + bl / 2, y - bh * .9, x + bl / 2, y);
+      c.lineTo(x + bl / 2 + fh * .02, y + bh * .45); c.lineTo(x - bl / 2 - fh * .02, y + bh * .45); c.closePath();
+      const q = c.createLinearGradient(0, y - bh, 0, y + bh * .45); q.addColorStop(0, '#2c6a50'); q.addColorStop(1, '#123326'); c.fillStyle = q; c.fill();
+      c.strokeStyle = 'rgba(226,184,80,.85)'; c.lineWidth = Math.max(1, fh * .012); c.beginPath(); c.moveTo(x - bl / 2 - fh * .02, y + bh * .45); c.lineTo(x + bl / 2 + fh * .02, y + bh * .45); c.stroke();
+      c.restore();
+    };
+    // the night procession: al-Hasan in front, al-Husayn behind, the bier on their shoulders between them
     const pa = seg(p, .02, .06) * (1 - seg(p, .19, .24));
     if (pa > 0) {
-      const px = mix(W * 1.05, cx + 30 * u, ease.out(seg(p, .02, .15)));
+      const go = ease.out(seg(p, .02, .15)), px = mix(W * 1.05, cx + 30 * u, go), fh = Math.max(36 * W / cv.clientWidth, 44 * u), half = fh * .62;
       c.globalCompositeOperation = 'lighter';
-      glow(px, gy - 14 * u, 70 * u, PAL.goldHi, .35 * pa);
-      [0, 1, 2].forEach((k) => glow(px + (k - 1) * 22 * u, gy - 8 * u, 9 * u, PAL.goldHi, .9 * pa));
+      glow(px, gy - fh * .6, 70 * u + fh, PAL.goldHi, .3 * pa);
+      c.globalCompositeOperation = 'source-over';
+      const bear = (who, x, sd) => Holy.draw(c, { who, pose: go < 1 ? 'walk' : 'stand', phase: go * 9 + (sd > 0 ? .5 : 0), x, y: gy + 2 * u, h: fh, t, amb: .3, alpha: pa, arms: [[sd * .12, -.84]] });
+      const hb = bear('husayn', px + half, -1);
+      bier(px, gy + 2 * u - fh * .84, half * 2.3, fh, pa);
+      const ha = bear('hasan', px - half, 1);
+      c.globalCompositeOperation = 'lighter';
+      [ha, hb].forEach((hd) => hd && glow(hd.x, hd.y, hd.r * 5, PAL.goldHi, .35 * pa));
       c.globalCompositeOperation = 'source-over';
     }
     // the grave made known
@@ -567,7 +586,8 @@ S.line = {
 };
 
 // The brotherhood: the courtyard of the Prophet's mosque in Medina, full of people. They pair off two by two
-// until one is left standing alone; then the Prophet's light crosses the courtyard to him.
+// until one is left standing alone, Ali; then the Prophet crosses the courtyard to him, stands beside him and takes his
+// hand. The two are veiled figures with the gold disc behind the head (scenes/holy.js; no face is ever drawn).
 S.pairs = {
   init(host, st) {
     st.cv = host.querySelector('canvas');
@@ -594,7 +614,7 @@ S.pairs = {
     });
     st.palms = Array.from({ length: 9 }, (_, i) => [-1.6 + i * .4 + (r() - .5) * .15, .8 + r() * .5]);
     st.ali = { x0: -.2, d0: 2.1, x1: -.55, d1: 1.62 };
-    st.prophet = { x0: 0, d0: 3.55, x1: -.47, d1: 1.64 };
+    st.prophet = { x0: 0, d0: 3.55, x1: -.522, d1: 1.64 }; // he comes to stand at Ali's side, near enough to take his hand
   },
   frame(p, t, host, st) {
     const cv = st.cv;
@@ -632,7 +652,10 @@ S.pairs = {
     const list = st.people.map((q) => { const k = m(seg(p, q.at, q.at + .09)); const sw = Math.sin(t * 1.3 + q.ph) * .004 * (1 - k * .5); return { q, X: mix(q.x0, q.x1, k) + sw, D: mix(q.d0, q.d1, k), k }; });
     const ak = m(seg(p, .02, .14)), aX = mix(st.ali.x0, st.ali.x1, ak), aD = mix(st.ali.d0, st.ali.d1, ak);
     const pk = m(seg(p, .5, .68)), pX = mix(st.prophet.x0, st.prophet.x1, pk), pD = mix(st.prophet.d0, st.prophet.d1, pk);
-    list.push({ ali: true, X: aX, D: aD }, { prophet: true, X: pX, D: pD });
+    list.push({ ali: true, X: aX, D: aD, k: ak, steps: 5 }, { prophet: true, X: pX, D: pD, k: pk, steps: 10 });
+    // the bond: they take each other's hand, the sleeves meeting between them
+    const bk = seg(p, .66, .74), [ax2] = proj(aX, aD), [px2] = proj(pX, pD), held = smooth(bk);
+    const heads = [];
     list.sort((a2, b2) => b2.D - a2.D);
     const byPair = new Map();
     list.forEach((o) => {
@@ -647,19 +670,18 @@ S.pairs = {
         const prev = byPair.get(q.pair);
         if (prev && o.k > .6) { const a = seg(o.k, .6, 1) * .6; const [x0, y0] = proj(prev.X, prev.D); c.strokeStyle = `rgba(243,217,143,${a.toFixed(3)})`; c.lineWidth = Math.max(1, 1.6 * s); c.beginPath(); c.moveTo(x0, y0 - 12 * s); c.lineTo(x, y - 12 * s); c.stroke(); }
         else byPair.set(q.pair, o);
-      } else {
-        const big = o.prophet ? 1.35 : 1.15, col = o.prophet ? '255,251,233' : '243,217,143';
-        c.globalCompositeOperation = 'lighter';
-        const R = 70 * s * big, gl = c.createRadialGradient(x, y - 18 * s, 0, x, y - 18 * s, R);
-        gl.addColorStop(0, `rgba(${col},.95)`); gl.addColorStop(.15, `rgba(${col},.55)`); gl.addColorStop(1, `rgba(${col},0)`);
-        c.fillStyle = gl; c.fillRect(x - R, y - 18 * s - R, R * 2, R * 2);
-        const gr = c.createRadialGradient(x, y, 0, x, y, R * .9); gr.addColorStop(0, `rgba(${col},.45)`); gr.addColorStop(1, `rgba(${col},0)`);
-        c.fillStyle = gr; c.beginPath(); c.ellipse(x, y, R * .9, R * .25, 0, 0, TAU); c.fill();
-        c.globalCompositeOperation = 'source-over';
+      } else { // the Prophet or Ali: walking to his place, then standing; 1.85 / 1.8 m against the crowd's 1.7, never under 24 css px
+        const h = Math.max(24 * W / cv.clientWidth, 30 * s * (o.prophet ? 1.09 : 1.06)), other = o.prophet ? ax2 : px2;
+        c.fillStyle = 'rgba(50,34,16,.3)'; c.beginPath(); c.ellipse(x + 12 * s, y + 1.5 * s, 13 * s, 3 * s, -.1, 0, TAU); c.fill();
+        const reach = held > 0 ? [[mix(Math.sign(other - x) * .1, (other - x) / 2 / h, held), mix(-.4, -.47, held)]] : [];
+        heads.push(Holy.draw(c, { who: o.prophet ? 'prophet' : 'ali', pose: o.k > 0 && o.k < 1 ? 'walk' : 'stand', phase: o.k * o.steps, x, y, h, t, amb: .9, seed: o.prophet ? 2 : 0, arms: reach }));
       }
     });
+    // a soft warm bloom at each disc, and a wider warmth round them so the two are found in the crowd
+    c.globalCompositeOperation = 'lighter';
+    heads.forEach((hd) => { if (!hd) return; [[hd.r * 5, .35], [hd.r * 16, .16]].forEach(([R, a]) => { const q = c.createRadialGradient(hd.x, hd.y, 0, hd.x, hd.y, R); q.addColorStop(0, `rgba(255,240,200,${a})`); q.addColorStop(1, 'rgba(255,240,200,0)'); c.fillStyle = q; c.fillRect(hd.x - R, hd.y - R, R * 2, R * 2); }); });
+    c.globalCompositeOperation = 'source-over';
     // the bond between the Prophet and Ali
-    const bk = seg(p, .66, .74);
     if (bk > 0) {
       const [x1, y1] = proj(aX, aD), [x2, y2] = proj(pX, pD);
       c.globalCompositeOperation = 'lighter';
@@ -794,7 +816,8 @@ S.mtq = {
 };
 
 // Yemen: terraced mountains at sunrise. The Prophet's prayer for him comes as a wash of light from the north,
-// then his light travels the mountain road down to the valley towns.
+// then Ali walks the mountain road down to the valley towns, a veiled figure with the gold disc behind the head
+// (scenes/holy.js; no face is ever drawn), the warm light round him.
 S.yemen = {
   init(host, st) {
     st.cv = host.querySelector('canvas'); st.bg = null;
@@ -830,16 +853,20 @@ S.yemen = {
     // the prayer: a wash of light from the north
     const pr = seg(p, .34, .42) * (1 - seg(p, .55, .68));
     if (pr > 0) { c.globalCompositeOperation = 'lighter'; const g = c.createRadialGradient(W * .2, -H * .1, 0, W * .2, -H * .1, H * 1.4); g.addColorStop(0, `rgba(255,244,214,${(.55 * pr).toFixed(3)})`); g.addColorStop(1, 'rgba(255,244,214,0)'); c.fillStyle = g; c.fillRect(0, 0, W, H); c.globalCompositeOperation = 'source-over'; }
-    // his light on the road: from the northern pass down to the valley
+    // the road: from the northern pass down to the valley
     const road = [[.12, .4], [.3, .5], [.22, .6], [.45, .66], [.62, .74], [.5, .84]];
     const k = seg(p, .42, .95) * (road.length - 1), i = Math.min(road.length - 2, Math.floor(k)), f = k - i;
     const [x0, y0] = road[i], [x1, y1] = road[i + 1];
     const x = mix(x0, x1, f) * W, y = mix(y0, y1, f) * H, s = H / 900;
     c.strokeStyle = 'rgba(243,217,143,.35)'; c.lineWidth = 2 * s; c.setLineDash([6 * s, 8 * s]); c.beginPath(); road.forEach(([rx, ry], n) => (n ? c.lineTo(rx * W, ry * H) : c.moveTo(rx * W, ry * H))); c.stroke(); c.setLineDash([]);
+    // Ali on the road: walking while he travels it (the stride fitted to each stretch), standing at either end
+    const fh = 30 * s, moving = k > 0 && k < road.length - 1;
     c.globalCompositeOperation = 'lighter';
-    const gl = c.createRadialGradient(x, y, 0, x, y, 60 * s); gl.addColorStop(0, 'rgba(255,240,200,.95)'); gl.addColorStop(.25, 'rgba(243,217,143,.5)'); gl.addColorStop(1, 'rgba(243,217,143,0)');
-    c.fillStyle = gl; c.fillRect(x - 60 * s, y - 60 * s, 120 * s, 120 * s);
+    const gl = c.createRadialGradient(x, y - fh * .5, 0, x, y - fh * .5, 60 * s); gl.addColorStop(0, 'rgba(255,240,200,.45)'); gl.addColorStop(.3, 'rgba(243,217,143,.22)'); gl.addColorStop(1, 'rgba(243,217,143,0)');
+    c.fillStyle = gl; c.fillRect(x - 60 * s, y - fh * .5 - 60 * s, 120 * s, 120 * s);
     c.globalCompositeOperation = 'source-over';
+    const hd = Holy.draw(c, { who: 'ali', pose: moving ? 'walk' : 'stand', phase: k * 4, x, y, h: fh, t, amb: .85 });
+    if (hd) { c.globalCompositeOperation = 'lighter'; const q = c.createRadialGradient(hd.x, hd.y, 0, hd.x, hd.y, hd.r * 5); q.addColorStop(0, 'rgba(255,226,170,.35)'); q.addColorStop(1, 'rgba(255,226,170,0)'); c.fillStyle = q; c.fillRect(hd.x - hd.r * 5, hd.y - hd.r * 5, hd.r * 10, hd.r * 10); c.globalCompositeOperation = 'source-over'; }
   },
 };
 
@@ -924,12 +951,44 @@ S.cover = {
 };
 
 // Birth: the sky over the Kaaba. Night, the wall opens; three days pass as a time-lapse; the fourth dawn.
+// «ثم خرجت بعد الرابع وبيدها أمير المؤمنين»: the orb that comes out of the wall shows Fatima bint Asad with the newborn
+// in her arms, painted once into the orb's background: she is a faceless dark silhouette (not one of the five); he is
+// a white swaddled bundle, the face wrapped, a small gold disc behind his head in the colours of scenes/holy.js.
+function kbNewborn() {
+  const n = 512, o = document.createElement('canvas'); o.width = o.height = n;
+  const c = o.getContext('2d'), x = n / 2, y = n * .86, h = n * .66, hy = y - h * .9;
+  const halo = c.createRadialGradient(x, n * .5, 0, x, n * .5, n * .5);
+  halo.addColorStop(0, 'rgba(255,246,222,.85)'); halo.addColorStop(.3, 'rgba(243,217,143,.55)'); halo.addColorStop(.68, 'rgba(243,217,143,0)');
+  c.fillStyle = halo; c.fillRect(0, 0, n, n);
+  c.beginPath(); c.moveTo(x - h * .05, hy - h * .07); // her chador, from the head to the ground
+  c.quadraticCurveTo(x - h * .12, hy - h * .05, x - h * .13, hy + h * .1);
+  c.bezierCurveTo(x - h * .2, y - h * .45, x - h * .22, y - h * .15, x - h * .24, y);
+  c.quadraticCurveTo(x, y + h * .02, x + h * .24, y);
+  c.bezierCurveTo(x + h * .22, y - h * .15, x + h * .2, y - h * .45, x + h * .13, hy + h * .1);
+  c.quadraticCurveTo(x + h * .12, hy - h * .05, x + h * .05, hy - h * .07);
+  c.quadraticCurveTo(x, hy - h * .1, x - h * .05, hy - h * .07); c.closePath();
+  const q = c.createLinearGradient(x - h * .24, 0, x + h * .24, 0); q.addColorStop(0, '#120e14'); q.addColorStop(1, '#2c2129');
+  c.fillStyle = q; c.fill(); c.strokeStyle = 'rgba(255,224,170,.7)'; c.lineWidth = n * .006; c.stroke();
+  const bx = x + h * .01, by = y - h * .57, hx = bx + h * .13, hb = by - h * .045, R = h * .09; // the bundle, his head to the right
+  const dq = c.createRadialGradient(hx, hb, 0, hx, hb, R); dq.addColorStop(0, '#f8e6a8'); dq.addColorStop(.72, '#d9ad52'); dq.addColorStop(1, '#a87c2c');
+  c.beginPath(); c.arc(hx, hb, R, 0, TAU); c.fillStyle = dq; c.fill(); c.strokeStyle = '#fbe7ad'; c.lineWidth = R * .06; c.stroke();
+  c.strokeStyle = 'rgba(120,85,30,.45)'; c.lineWidth = R * .02; c.beginPath(); c.arc(hx, hb, R * .84, 0, TAU); c.stroke();
+  const wq = c.createLinearGradient(0, by - h * .06, 0, by + h * .06); wq.addColorStop(0, '#fbf6ea'); wq.addColorStop(1, '#d8cfbc'); c.fillStyle = wq;
+  c.beginPath(); c.ellipse(bx, by, h * .17, h * .06, -.28, 0, TAU); c.fill();
+  c.beginPath(); c.arc(hx, hb, h * .052, 0, TAU); c.fill(); // the wrapped head
+  c.strokeStyle = 'rgba(150,135,110,.5)'; c.lineWidth = n * .003; c.beginPath();
+  for (let k = -1; k <= 1; k++) { c.moveTo(bx - h * .05 + k * h * .045, by - h * .04); c.quadraticCurveTo(bx - h * .035 + k * h * .045, by, bx - h * .055 + k * h * .045, by + h * .04); }
+  c.stroke();
+  c.fillStyle = '#251b22'; c.beginPath(); c.ellipse(bx - h * .02, by + h * .045, h * .18, h * .035, -.2, 0, Math.PI); c.fill(); // her sleeves under him
+  return o.toDataURL();
+}
 S.kaaba = {
   init(host, st) {
     st.cv = host.querySelector('canvas');
     st.day = host.querySelector('#kb-day');
     st.seam = host.querySelector('.kb-seam');
     st.orb = host.querySelector('.kb-orb');
+    if (st.orb) st.orb.style.background = `url(${kbNewborn()}) center / contain no-repeat`;
     const r = rng(4);
     st.stars = Array.from({ length: 320 }, () => [r(), r() * .7, r()]);
     const ridge = (seed, base, amp) => { const q = rng(seed); let v = 0; return Array.from({ length: 41 }, (_, i) => { v += (q() - .5) * amp; v *= .8; return base + v + Math.sin(i * .45 + seed) * amp * .5; }); };

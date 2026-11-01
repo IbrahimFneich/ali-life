@@ -2,7 +2,8 @@
 // A scene registers S.name = { init(el, st), frame(p, t, el, st) }. app.js calls frame with the pinned-scene
 // progress p (about -0.05 → 1.05) and time t in seconds while the scene is on screen. With reduced motion it
 // calls frame once with p = data-rest and t = 0. Everything a frame draws must follow from p (scroll runs both
-// ways); t is only for ambient flicker. People are never drawn as figures: they are points of light.
+// ways); t is only for ambient flicker. No face is ever drawn: people are faceless silhouettes or small lights, and
+// the five of the Kisa are veiled figures with a gold disc, drawn only by scenes/holy.js (Holy.draw).
 window.SCENES = {};
 const S = window.SCENES;
 const TAU = Math.PI * 2;

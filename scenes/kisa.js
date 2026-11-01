@@ -1,9 +1,10 @@
 // المباهلة والكساء. Part one: a morning plain outside Medina; the delegation of Najran waits before its camp,
-// banners up. The Prophet's light comes out holding Ali's light by the hand, al-Hasan and al-Husayn walking
-// in front, Fatima behind. The delegation wavers and draws back to its tents. Part two: the house of Umm Salama;
-// a woven Yemeni cloak settles over the five lights and their light fills the room.
+// banners up. The Prophet comes out holding Ali by the hand, al-Hasan and al-Husayn walking in front, Fatima
+// behind. The delegation wavers and draws back to its tents. Part two: the house of Umm Salama; a woven Yemeni
+// cloak settles over the five, seated, their heads and discs above it, and their light fills the room.
 // World in metres: x right, y up, z forward (towards the camp in part one, towards the back wall in part two).
-// People of the delegation are faceless cloaked figures; the five are only ever lights.
+// People of the delegation are faceless cloaked figures; the five are veiled figures with a gold disc behind the
+// head (scenes/holy.js); no face is drawn.
 (() => {
   const rgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
   const mixc = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
@@ -34,17 +35,17 @@
   const SUN = (() => { const v = [-.6, .095, 1]; const n = Math.hypot(...v); return v.map((q) => q / n); })();
   const HAZE = [226, 172, 118], SKYTOP = [30, 46, 80];
   const gz = (p) => mix(-36, 38, ease.io(seg(p, .015, .43))); // the five walk out to a halt before the delegation
-  // the five: offset across, offset along the walk, height of the light, radius (m), colour, Imam ring
+  // the five: offset across, offset along the walk, head height standing (m), bloom radius (m), colour
   const FIVE = [
-    { dx: -.62, dz: 2.2, y: .86, r: .17, c: [255, 214, 130], ring: true },
-    { dx: .62, dz: 2.2, y: .86, r: .17, c: [255, 214, 130], ring: true },
-    { dx: -.5, dz: 0, y: 1.3, r: .26, c: [255, 246, 222] },
-    { dx: .5, dz: 0, y: 1.24, r: .2, c: [255, 232, 186] },
-    { dx: 0, dz: -2.0, y: 1.14, r: .2, c: [255, 238, 222] },
+    { dx: -.62, dz: 2.2, y: 1.06, r: .17, c: [255, 214, 130] },
+    { dx: .62, dz: 2.2, y: 1.02, r: .17, c: [255, 214, 130] },
+    { dx: -.5, dz: 0, y: 1.68, r: .26, c: [255, 246, 222] },
+    { dx: .5, dz: 0, y: 1.64, r: .2, c: [255, 232, 186] },
+    { dx: 0, dz: -2.0, y: 1.5, r: .2, c: [255, 238, 222] },
   ];
+  const WHO = ['hasan', 'husayn', 'prophet', 'ali', 'fatima'], HM = [1.2, 1.15, 1.85, 1.8, 1.65]; // standing heights (m): the two Imams are children
   const ORDER = [2, 3, 4, 0, 1]; // the labels: the Prophet, Ali, Fatima, al-Hasan, al-Husayn
-  const SPR = (st, L, i) => (i === 2 ? st.pale : L.ring ? st.imam : st.gold);
-  const GAIN = (L) => (L.ring ? 1.3 : 1);
+  const SPR = (st, i) => (i === 2 ? st.pale : st.gold);
   // the tracking shot rides alongside the walk, a little behind and to the right, so the order reads across the frame
   const TRK = (p) => [p, 4.74, 1.6, gz(p) - 4.33, -.4, 1.0, gz(p) + 1.8, 1.0, .42];
   const CAM1 = [
@@ -83,7 +84,6 @@
       const r = rng(61);
       st.glow = sprite([[0, 'rgba(255,255,255,1)'], [.18, 'rgba(255,255,255,.55)'], [.45, 'rgba(255,255,255,.16)'], [1, 'rgba(255,255,255,0)']]);
       st.pale = sprite([[0, 'rgba(255,246,222,1)'], [.2, 'rgba(255,236,196,.5)'], [.55, 'rgba(240,214,160,.12)'], [1, 'rgba(240,214,160,0)']]);
-      st.imam = sprite([[0, 'rgba(255,244,206,1)'], [.16, 'rgba(255,214,120,.75)'], [.5, 'rgba(240,176,80,.2)'], [1, 'rgba(230,160,70,0)']]);
       st.gold = sprite([[0, 'rgba(255,240,200,1)'], [.2, 'rgba(250,214,140,.5)'], [.55, 'rgba(230,180,100,.12)'], [1, 'rgba(230,180,100,0)']]);
       st.sun = sprite([[0, 'rgba(255,250,232,1)'], [.06, 'rgba(255,240,200,.9)'], [.2, 'rgba(255,214,150,.3)'], [.5, 'rgba(255,200,140,.08)'], [1, 'rgba(255,190,130,0)']], 256);
       st.dust = sprite([[0, 'rgba(214,190,150,.5)'], [.5, 'rgba(214,190,150,.2)'], [1, 'rgba(214,190,150,0)']], 64);
@@ -186,12 +186,19 @@
         c.setTransform(1, 0, 0, 1, 0, 0);
         c.globalAlpha = 1;
       };
-      const ring = (q, R, a) => { // the two Imams: a thin, soft halo ring close round the light
-        if (R < 1.5 || a <= 0) return;
-        c.globalCompositeOperation = 'lighter';
-        c.strokeStyle = `rgba(255,214,140,${(.08 * a).toFixed(3)})`; c.lineWidth = Math.max(1, R * .4); c.beginPath(); c.arc(q[0], q[1], R * 1.3, 0, TAU); c.stroke();
-        c.strokeStyle = `rgba(255,232,170,${(.34 * a).toFixed(3)})`; c.lineWidth = Math.max(1, Math.min(2.5, R * .08)); c.stroke();
-        c.globalCompositeOperation = 'source-over';
+      // one of the five: a veiled figure (scenes/holy.js) on its ground point, sheared to keep the view's verticals, never
+      // under 22 css px; m is the standing height in metres; hands are 3D points turned into holy.js arm targets;
+      // clipY keeps only what is above that screen line (the head, veil and disc over the cloak)
+      const figure = (i, x, z, o, hands, clipY) => {
+        const a = sc(x, 0, z), b = sc(x, 1, z); if (!a || !b) return null;
+        const kx = (b[0] - a[0]) / ((b[1] - a[1]) || -1), h = Math.max(22 * W / (st.cv.clientWidth || W), HM[i] * Math.hypot(b[0] - a[0], b[1] - a[1]));
+        const arms = hands && hands.map((P) => { const q = sc(...P); return q ? [(q[0] - kx * (q[1] - a[1]) - a[0]) / h, (q[1] - a[1]) / h] : [.1, -.4]; });
+        c.save();
+        if (clipY !== undefined) { c.beginPath(); c.rect(0, 0, W, clipY); c.clip(); }
+        c.setTransform(1, 0, kx, 1, -kx * a[1], 0);
+        const hd = Holy.draw(c, { who: WHO[i], x: a[0], y: a[1], h, t, child: i < 2, ...o, arms });
+        c.restore();
+        return hd && { x: hd.x + kx * (hd.y - a[1]), y: hd.y, r: hd.r };
       };
       c.setTransform(1, 0, 0, 1, 0, 0);
       c.globalCompositeOperation = 'source-over';
@@ -202,7 +209,7 @@
       // the two parts meet in a bloom that grows out of the five lights, so the cut is never seen
       const bloom = smooth(seg(p, .628, .665)) * (1 - smooth(seg(p, .665, .695)));
       if (bloom > .002) {
-        const o = inside ? sc(0, .8, 4.62) : sc(FIVE[2].dx, FIVE[2].y, gz(p) + FIVE[2].dz), bx = o ? o[0] : CX, by = o ? o[1] : CY;
+        const o = inside ? sc(0, .94, 4.62) : sc(FIVE[2].dx, FIVE[2].y, gz(p) + FIVE[2].dz), bx = o ? o[0] : CX, by = o ? o[1] : CY; // from the Prophet's disc
         const R = Math.hypot(W, H) * mix(.12, 1.25, bloom ** .7), g = c.createRadialGradient(bx, by, 0, bx, by, R), a = .98 * bloom ** .6;
         g.addColorStop(0, `rgba(255,244,222,${a.toFixed(3)})`); g.addColorStop(.55, `rgba(255,236,204,${(a * bloom ** 2).toFixed(3)})`); g.addColorStop(1, 'rgba(255,230,196,0)');
         c.globalCompositeOperation = bloom > .8 ? 'source-over' : 'lighter'; c.fillStyle = g; c.fillRect(0, 0, W, H); c.globalCompositeOperation = 'source-over';
@@ -270,7 +277,9 @@
           const bob = .025 * Math.sin((G + L.dz) * 4.1 + i) * walking;
           return { x: L.dx, y: L.y + bob, z: G + L.dz, L, i };
         });
-        lights.forEach((l) => { const q = cs(l.x, l.y, l.z); if (q[2] > NEAR) items.push([q[2], () => core(l, q)]); });
+        // all five walk to the halt, then stand; the Prophet holds Ali by the hand: each reaches to the point between them
+        const held = [(lights[2].x + lights[3].x) / 2, .98 + lights[2].y - FIVE[2].y, lights[2].z], heads = [];
+        lights.forEach((l) => { const q = cs(l.x, 0, l.z); if (q[2] > NEAR) items.push([q[2], () => { heads[l.i] = figure(l.i, l.x, l.z, { pose: p < .43 ? 'walk' : 'stand', phase: (G + l.L.dz) / 1.3 + l.i * .23, amb: .95 }, l.i === 2 || l.i === 3 ? [held] : undefined); }]); });
         items.sort((a, b) => b[0] - a[0]);
         // shadows and pools on the ground first
         c.globalCompositeOperation = 'source-over';
@@ -291,37 +300,22 @@
         const hg = c.createLinearGradient(0, hz - F * .06, 0, hz + F * .12);
         hg.addColorStop(0, 'rgba(226,210,180,0)'); hg.addColorStop(.45, 'rgba(226,210,180,.35)'); hg.addColorStop(1, 'rgba(226,210,180,0)');
         c.fillStyle = hg; c.fillRect(0, 0, W, H);
-        // the five in the air: halos, the hand held, the rings of the two Imams
+        // a soft warm bloom at each disc in the morning light
         c.globalCompositeOperation = 'lighter';
-        lights.forEach((l) => {
-          const q = sc(l.x, l.y, l.z); if (!q) return;
-          const R = l.L.r * F / q[2];
-          halo(q[0], q[1], Math.min(H * .7, R * 10), SPR(st, l.L, l.i), .26 * GAIN(l.L));
-          halo(q[0], q[1], R * 3.4, SPR(st, l.L, l.i), .55 * GAIN(l.L));
-        });
-        { // the hand held: a faint thread of light joining the two, a little below their lights
-          const a = sc(lights[2].x + .16, 1.08, lights[2].z), b = sc(lights[3].x - .16, 1.05, lights[3].z);
-          if (a && b) { const w = .04 * F / a[2]; [[w * 2, .05], [w * .8, .12], [w * .3, .3]].forEach(([lw, al]) => { c.strokeStyle = `rgba(255,236,190,${al})`; c.lineWidth = Math.max(1, lw); c.lineCap = 'round'; c.beginPath(); c.moveTo(a[0], a[1]); c.quadraticCurveTo((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + w * .6, b[0], b[1]); c.stroke(); }); } }
+        heads.forEach((q, i) => { if (q) halo(q.x, q.y, Math.min(H * .7, 6 * q.r), SPR(st, i), .16); });
         c.globalCompositeOperation = 'source-over';
-        lights.forEach((l) => { if (!l.L.ring) return; const q = sc(l.x, l.y, l.z); if (q) ring(q, l.L.r * F / q[2], 1); });
-        // labels follow the lights while they walk
+        // labels follow the five while they walk: above the disc, or for the two Imams in front, below their feet (the
+        // head of a child is 9.86 r above its ground point), clear of the delegation on the horizon
         const la = c01(Math.min(seg(p, .22, .26), 1 - seg(p, .36, .4)));
         st.names.forEach((li, k) => {
-          const l = lights[ORDER[k]], q = sc(l.x, l.y, l.z);
+          const q = heads[ORDER[k]];
           if (!q || la <= 0 || phone) { li.style.opacity = 0; return; }
-          const css = st.cv.clientWidth / W, below = k === 2 ? -1 : 1;
+          const css = st.cv.clientWidth / W, y = k > 2 ? (q.y + q.r * 9.86) * css + 14 : (q.y - q.r * 2.9) * css - 14;
           li.style.opacity = la.toFixed(3);
-          li.style.transform = `translate(${(q[0] * css).toFixed(1)}px, ${(q[1] * css + below * Math.min(44, l.L.r * F / q[2] * css * 1.6 + 14)).toFixed(1)}px) translate(-50%, -50%)`;
+          li.style.transform = `translate(${(q.x * css).toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`;
         });
 
         // --- drawers ---
-        function core(l, q) {
-          const R = l.L.r * F / q[2];
-          c.globalCompositeOperation = 'lighter';
-          halo(q[0], q[1], R * 1.6, SPR(st, l.L, l.i), .8 * GAIN(l.L));
-          halo(q[0], q[1], R * .7, st.glow, 1);
-          c.globalCompositeOperation = 'source-over';
-        }
         function palm(pm, d) {
           const b = sc(pm.x, 0, pm.z), tp = sc(pm.x + pm.lean * pm.h, pm.h, pm.z); if (!b || !tp) return;
           const s = F / d, col = rgb(hazed([58, 62, 40], d));
@@ -518,18 +512,21 @@
         c.restore();
         c.globalCompositeOperation = 'source-over';
         jar(2.2, 5.3); jar(2.5, 4.85, .78);
-        // the five, then the cloak over them
-        const order = P5.slice().sort((a, b) => cs(b.x, b.y, b.z)[2] - cs(a.x, a.y, a.z)[2]);
+        // the five seated, far to near; the cloak over them; then each one again above the cloth from the shoulders up
+        // (the whole figure while the cloak has not reached it), so the heads, veils and discs show over the cloak
+        const order = P5.slice().sort((a, b) => cs(b.x, b.y, b.z)[2] - cs(a.x, a.y, a.z)[2]), heads = [];
+        const seated = { pose: 'sit', amb: .6 };
+        order.forEach((l) => figure(l.i, l.x, l.z, { ...seated, glow: 0 }));
         cloak(P5, sc0, glowUp);
-        order.forEach((l) => { const q = sc(l.x, l.y, l.z); if (!q || l.cover > .98) return; const R = l.L.r * F / q[2], a = 1 - l.cover; c.globalCompositeOperation = 'lighter'; halo(q[0], q[1], R * 2.4, SPR(st, l.L, l.i), .75 * a * GAIN(l.L)); halo(q[0], q[1], R * .8, st.glow, a); c.globalCompositeOperation = 'source-over'; });
+        order.forEach((l) => { const g = sc(l.x, 0, l.z), sh = sc(l.x, .4 * HM[l.i], l.z); if (g && sh) heads[l.i] = figure(l.i, l.x, l.z, seated, undefined, mix(g[1], sh[1], l.cover)); });
         // the air of the room: the window's shaft, the radiance, motes
         c.globalCompositeOperation = 'lighter';
         { const a = sc((WIN[0] + WIN[1]) / 2, (WIN[2] + WIN[3]) / 2, RZ1), b = sc(WIN[0] - .25, .05, 2.6);
           if (a && b) [[1, .05], [.7, .05], [.45, .06]].forEach(([w, al]) => { const g = c.createLinearGradient(a[0], a[1], b[0], b[1]); g.addColorStop(0, `rgba(255,248,230,${al})`); g.addColorStop(1, 'rgba(255,248,230,0)'); c.fillStyle = g; const w1 = .28 * w * F / a[2], w2 = .9 * w * F / b[2]; c.beginPath(); c.moveTo(a[0] - w1, a[1]); c.lineTo(a[0] + w1, a[1]); c.lineTo(b[0] + w2, b[1]); c.lineTo(b[0] - w2, b[1]); c.closePath(); c.fill(); }); }
-        P5.forEach((l) => {
-          const q = sc(l.x, l.y, l.z); if (!q) return;
+        P5.forEach((l) => { // their light fills the room, from each disc
+          const q = sc(l.x, l.y, l.z), hd = heads[l.i]; if (!q) return;
           const R = l.L.r * F / q[2];
-          halo(q[0], q[1], Math.min(H * .55, R * (5 + 6 * glowUp)), l.i === 2 ? st.pale : st.gold, (.08 + .04 * glowUp) * (1 - .4 * l.cover * (1 - glowUp)));
+          halo(hd ? hd.x : q[0], hd ? hd.y : q[1], Math.min(H * .55, R * (5 + 6 * glowUp)), SPR(st, l.i), (.08 + .04 * glowUp) * (1 - .4 * l.cover * (1 - glowUp)));
         });
         st.motes.forEach(([x0, y0, z0, ph, m]) => {
           const x = x0 + .2 * Math.sin(t * .12 + ph), y = y0 + .15 * Math.sin(t * .08 + ph * 2), z = z0 + .15 * Math.cos(t * .1 + ph);
@@ -541,7 +538,6 @@
         });
         c.globalAlpha = 1;
         c.globalCompositeOperation = 'source-over';
-        P5.forEach((l) => { if (!l.L.ring) return; const q = sc(l.x, l.y, l.z); if (q) ring(q, l.L.r * F / q[2], 1 - l.cover); });
         st.names.forEach((li) => { li.style.opacity = 0; });
 
         function jar(x, z, k = 1) {
@@ -557,7 +553,7 @@
         // the woven cloak: a cloth grid draped over the five; threads follow every fold
         function cloak(P5, k0, glowUp) {
           const { x0, x1, z0, z1, nu, nv, ox, oz } = CLOTH;
-          const domes = P5.map((l) => [l.x, l.z, (.44 + .1 * (l.i === 2)) * (.3 + .7 * l.cover), l.i === 2 ? .66 : .6]);
+          const domes = P5.map((l) => [l.x, l.z, .4 * HM[l.i] * (.3 + .7 * l.cover), l.i === 2 ? .66 : .6]); // up to each one's shoulders
           const V = [], dom = [];
           for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) {
             const u = i / nu, v = j / nv;

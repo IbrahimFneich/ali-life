@@ -1,7 +1,8 @@
-// ليلة المبيت: Mecca at night seen from above. Torches from every clan ring one house; a calm light leaves
-// through the ring; at dawn they rush in, the wool izar is thrown back and a single light rises from the bed.
+// ليلة المبيت: Mecca at night seen from above. Torches from every clan ring one house; the Prophet walks out
+// through the ring; at dawn they rush in, the wool izar is thrown back and Ali, under it, sits up and stands.
 // World in metres: x right (west), y up, z away from the camera (south). Zero-pitch camera with a shift lens,
-// so verticals stay vertical and painter order is plain distance. Nobody is drawn: people are lights.
+// so verticals stay vertical and painter order is plain distance. The watchers are their torches; the Prophet and
+// Ali are veiled figures with a gold disc behind the head (scenes/holy.js); no face is drawn.
 (() => {
   const rgb = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
   const mixc = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
@@ -78,7 +79,6 @@
       st.cv = el.querySelector('canvas');
       st.ctx = st.cv.getContext('2d');
       const r = rng(632);
-      st.glow = sprite([[0, 'rgba(255,255,255,1)'], [.18, 'rgba(255,255,255,.55)'], [.45, 'rgba(255,255,255,.16)'], [1, 'rgba(255,255,255,0)']]);
       st.fire = sprite([[0, 'rgba(255,214,150,1)'], [.25, 'rgba(255,150,60,.55)'], [.6, 'rgba(220,90,30,.14)'], [1, 'rgba(200,70,20,0)']]);
       st.pale = sprite([[0, 'rgba(255,246,222,1)'], [.2, 'rgba(255,236,196,.5)'], [.55, 'rgba(240,214,160,.12)'], [1, 'rgba(240,214,160,0)']]);
       st.ao = document.createElement('canvas'); st.ao.width = 2; st.ao.height = 64;
@@ -222,7 +222,7 @@
           if (gone > 0) { const q = walk(T.inn, 1 - ease.in(gone)); pos = [mix(pos[0], q[0], smooth(c01(gone * 3))), mix(pos[1], q[1], smooth(c01(gone * 3)))]; al = 1 - smooth(seg(gone, .35, .9)); fl *= 1 - .3 * gone; }
           fl *= 1 - .18 * recoil * (1 - scatter);
         }
-        // a veil falls on the watchers as the calm light passes them
+        // a veil falls on the watchers as the Prophet passes them: their torches sink
         const dpr = Math.hypot(pos[0] - pr[0], pos[1] - pr[1]);
         if (pu > 0 && pu < 1) fl *= 1 - .4 * Math.exp(-(dpr * dpr) / 60) * Math.sin(Math.PI * pu);
         return { x: pos[0], z: pos[1], y: 2.25 + .05 * Math.sin((pos[0] + pos[1]) * 1.3 + T.ph), al, fl, ph: T.ph, i };
@@ -242,6 +242,12 @@
       const aliY = mix(.5, 1.9, rise);
       if (ali > 0) L.push({ x: BED.x, y: aliY, z: BED.z - .2, c: [1, .93, .8], i: 3.6 * ali, r2: 16 });
       L.forEach((l) => { l.cut2 = l.r2 * l.i * 40; });
+      // ---- the Prophet and Ali: veiled figures (scenes/holy.js) on their ground point, h from the standing height ----
+      // Ali lies under the izar; as it is thrown back he sits up on the bed, then stands before it. The pose switches
+      // at fixed points of the rise (one figure, one disc); his light on the walls still rises smoothly.
+      const famb = mix(.25, 1, dawn), dpr = W / (st.cv.clientWidth || W), heads = {};
+      const aliPose = rise < .55 ? 'lie' : rise < .9 ? 'sit' : 'stand';
+      const fig = (who, x, y, z, m, min, o) => { const d = z - cz; if (d < 1) return null; return Holy.draw(c, { who, x: X(x, z), y: Y(y, z), h: Math.max(min * dpr, m * F / d), t, amb: famb, ...o }); };
       const shade = (alb, a, nx, ny, nz, px, py, pz) => {
         let R = a[0], G = a[1], B = a[2];
         for (let k = 0; k < L.length; k++) {
@@ -330,7 +336,9 @@
       }
       st.palms.forEach((pm) => items.push([Math.hypot(pm.x - cx, pm.z - cz), () => palm(pm)]));
       torches.forEach((T) => items.push([Math.hypot(T.x - cx, T.z - cz), () => torch(T)]));
-      if (prA > 0) items.push([Math.hypot(pr[0] - cx, pr[1] - cz), () => orb(pr[0], prY, pr[1], .5, st.pale, .95 * prA)]);
+      if (prA > 0) items.push([Math.hypot(pr[0] - cx, pr[1] - cz), () => { // seen from high above: never under 22 css px
+        heads.pr = fig('prophet', pr[0], 0, pr[1], 1.85, 22, { pose: pu > 0 && pu < 1 ? 'walk' : 'stand', phase: pu ** 1.75 * PROPHET.len / 1.4, alpha: prA });
+      }]);
       { const b = st.bedBox; items.push([dist(b.x0, b.x1, b.z0, b.z1) - .06, () => drawCloak()]); }
       items.sort((m, n) => n[0] - m[0]);
 
@@ -364,14 +372,13 @@
           const q = walk(PROPHET, Math.max(0, pu ** 1.75 - k * .012)), dq = q[1] - cz;
           if (dq > 2) halo(X(q[0], q[1]), Y(.6, q[1]), 3.2 * F / dq, st.pale, .2 * prA * (1 - k / 11) * c01(pu * 8));
         }
-        halo(X(pr[0], pr[1]), Y(prY, pr[1]), 17 * F / d, st.pale, .42 * prA);
-        halo(X(pr[0], pr[1]), Y(prY, pr[1]), 5 * F / d, st.pale, .6 * prA);
+        const q = heads.pr; // a soft warm bloom at the disc
+        if (q) { halo(q.x, q.y, 17 * F / d, st.pale, .3 * prA); halo(q.x, q.y, 4 * q.r, st.pale, .22 * prA); }
       }
       if (ali > 0) {
         const d = BED.z - cz, ax = X(BED.x, BED.z), ay = Y(aliY, BED.z);
-        halo(ax, ay, 24 * F / d * (.6 + .4 * ali), st.pale, .3 * ali);
-        halo(ax, ay, 3.6 * F / d, st.pale, .7 * ali);
-        halo(ax, ay, 1 * F / d, st.glow, ali);
+        const q = heads.ali; // the light fills the room from his disc; under the izar, from where he lies
+        halo(q ? q.x : ax, q ? q.y : ay, 24 * F / d * (.6 + .4 * ali), st.pale, .24 * ali);
       }
       c.globalCompositeOperation = 'source-over';
       // grade: grain and vignette
@@ -552,14 +559,6 @@
         }
         c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
       }
-      function orb(x, y, z, R, img, a) {
-        const d = z - cz; if (d < 1 || a <= .01) return;
-        const s = F / d;
-        c.globalCompositeOperation = 'lighter';
-        halo(X(x, z), Y(y, z), R * 3 * s, img, a);
-        halo(X(x, z), Y(y, z), R * s, st.glow, a);
-        c.globalCompositeOperation = 'source-over';
-      }
       function drawCloak() {
         // the izar he slept under: undyed wool, a long soft heap with no shape in it, then thrown back
         const d = BED.z - cz; if (d < 1) return;
@@ -579,6 +578,8 @@
         // the bare mattress first: vellum, lit by the light once the cloak is gone
         const mat = shade([.86, .8, .66], amb.top, 0, 1, 0, BED.x, BED.y, BED.z);
         poly([P(-1, -1, 0), P(1, -1, 0), P(1, 1, 0), P(-1, 1, 0)]); c.fillStyle = rgb(mat); c.fill();
+        // Ali lies under the wool, head to the east end; the izar uncovers him as it is thrown back
+        if (cloak > 0 && aliPose === 'lie') heads.ali = fig('ali', BED.x, BED.y, BED.z, 1.8, 0, { pose: 'lie' });
         const NU = 14, NV = 6, wool = [.7, .6, .45]; // undyed wool
         for (let j = NV - 1; j >= 0; j--) {
           const v0 = 1 - 2 * j / NV, v1 = 1 - 2 * (j + 1) / NV;
@@ -607,6 +608,9 @@
           c.beginPath(); pts.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke();
           if (k % 2) { c.strokeStyle = 'rgba(30,20,10,.35)'; c.beginPath(); pts.forEach(([x, y], i) => (i ? c.lineTo(x + 1.5, y + 1.5) : c.moveTo(x + 1.5, y + 1.5))); c.stroke(); }
         });
+        // he sits up on the bed, clear of the rolled wool, then stands before it on the floor of the room
+        if (aliPose === 'sit') heads.ali = fig('ali', BED.x - .3, BED.y, BED.z, 1.8, 0, { pose: 'sit' });
+        if (aliPose === 'stand') heads.ali = fig('ali', BED.x - .25, .25, BED.z - .85, 1.8, 0, { pose: 'stand' });
       }
     },
   };

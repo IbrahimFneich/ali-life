@@ -4,7 +4,8 @@
 // groves. The camel with the red howdah stands at CAM0 inside a dense knot of defenders, facing west.
 // Beats: dawn over Basra, the two armies; they close and meet; arrows rain and lodge in the howdah until it bristles;
 // the camel is hamstrung, kneels and falls on its side; the fighting stops; in the evening a column of forty cloaked
-// riders escorts the howdah west, toward Medina, into the low sun. Ali is a calm light behind his army's centre.
+// riders escorts the howdah west, toward Medina, into the low sun. Ali stands behind his army's centre, a veiled figure
+// with a gold disc behind the head and Dhul-Fiqar at his side (scenes/holy.js); no face is ever drawn.
 const CAM0 = [150, 0, 0], HD = [-1, 0, 0], LW = [0, 0, -1]; // heading west; local +w is south
 const ALI = [-300, 1.3, 18], NEAR = .5;
 const v3 = {
@@ -469,6 +470,13 @@ S.camel = {
       if (s > 5) { c.strokeStyle = rgb(col); c.lineWidth = Math.max(.7, .05 * s); c.beginPath(); c.moveTo(bx - .05 * s * d * sq, by - 1.75 * s); c.lineTo(bx - .62 * s * d * sq, by - 1.18 * s); c.stroke(); } // the sword at the hip
       c.globalAlpha = 1;
     };
+    // ----- Ali: behind his army's centre, standing, Dhul-Fiqar at his side. Drawn inside the crowd at his depth, never
+    // smaller than 22 px; he does not enter the fighting.
+    const aliG = P([ALI[0], 0, ALI[2]]), aliBand = aliG ? bandOf(aliG[2]) : -1;
+    const drawAli = () => {
+      const hd = Holy.draw(c, { who: 'ali', pose: 'stand', sword: true, x: aliG[0], y: aliG[1], h: Math.max(22, 1.8 * F / aliG[2]), t, amb: 1 - .45 * low });
+      if (hd) { bc.fillStyle = `rgba(255,226,170,${.2 + .25 * low})`; bc.beginPath(); bc.arc(hd.x, hd.y, Math.max(8, hd.r * 4), 0, TAU); bc.fill(); }
+    };
     for (let b = 0; b < NB; b++) {
       const dm = bandMid(b), fk = fogK(dm);
       const pc = mixc(v3.mul([26, 30, 20], amb), haze, Math.min(.93, fk));
@@ -477,9 +485,10 @@ S.camel = {
       if (b < 5) { c.lineWidth = b >= 3 ? 1.2 : .8; c.beginPath(); L.p.forEach((i) => { const [x, z, h, l, v] = st.palms[i]; palm(x, z, h, l, v); }); c.stroke(); }
       else L.p.forEach((i) => { const [x, z, h, l, v] = st.palms[i]; c.lineWidth = Math.max(1, .3 * F / Math.hypot(x - e0, z - e2)); c.beginPath(); palm(x, z, h, l, v); c.stroke(); });
       column.filter((o) => bandOf(Math.hypot(o.x - e0, o.z - e2)) === b && !o.camel).sort((a, b2) => Math.hypot(b2.x - e0, b2.z - e2) - Math.hypot(a.x - e0, a.z - e2)).forEach((o) => drawColumnItem(o, fk));
-      if (b === camelBand) {
-        const zc = (pj(CAM0[0], 0, CAM0[2]), QZ);
-        drawCrowd(b, fk, zc + 1.5, 1e9);
+      // the camel and Ali stand inside the crowd: draw the band's crowd in slices between them, far to near
+      const cuts = [];
+      if (b === aliBand) cuts.push([aliG[2], drawAli]);
+      if (b === camelBand) cuts.push([(pj(CAM0[0], 0, CAM0[2]), QZ) + 1.5, () => {
         const scr = .6 * smooth(seg(p, .4, .48)) * (1 - smooth(seg(p, .7, .76)));
         if (scr > .01 && pj(CAM0[0], 2.4, CAM0[2] + 9)) {
           const r = 26 * F / QZ, g = c.createRadialGradient(QX, QY, 0, QX, QY, r);
@@ -488,8 +497,10 @@ S.camel = {
         }
         const cc = mixc(v3.mul([66, 46, 32], amb), haze, Math.min(.93, fogK(camelDist)));
         drawCamel(mainPose, { col: cc, howdah: howdahOn > .02, arrows: true, red: [158, 32, 26], skirt: mixc([120, 24, 20], haze, Math.min(.9, fogK(camelDist))), shaft: mixc([46, 34, 24], haze, Math.min(.9, fogK(camelDist))), dist: camelDist, rim: shadowK * .8, halter: p < .66 ? [CAM0[0] - 3.4, 1.15 * (1 - smooth(seg(p, .6, .64))), 0] : null });
-        drawCrowd(b, fk, -1e9, zc + 1.5);
-      } else drawCrowd(b, fk, -1e9, 1e9);
+      }]);
+      let zHi = 1e9;
+      cuts.sort((u, v) => v[0] - u[0]).forEach(([z, f]) => { drawCrowd(b, fk, z, zHi); f(); zHi = z; });
+      drawCrowd(b, fk, -1e9, zHi);
       column.filter((o) => o.camel && bandOf(Math.hypot(o.x - e0, o.z - e2)) === b).forEach((o) => drawColumnItem(o, fk));
     }
     // ----- arrows in flight, and those standing in the ground -----
@@ -529,19 +540,6 @@ S.camel = {
       c.strokeStyle = rgb(mixc(haze, [255, 230, 196], .2), .22); c.lineWidth = 1; c.beginPath();
       for (let i = 0; i < n; i++) { const [u, v, w, k] = st.grit[i], sp = .6 + k, L2 = 140; const x = e0 - 20 + (((u * L2 + 6 * sp * T0) % L2) + L2) % L2, z = e2 - 70 + (((w * 140 - 2 * sp * T0) % 140) + 140) % 140, y = v * v * 5; if (!pj(x, y, z)) continue; const ax = QX, ay = QY; if (!pj(x + .3 * sp + .8, y, z)) continue; c.moveTo(ax, ay); c.lineTo(QX, QY); }
       c.stroke();
-    }
-    // ----- Ali: a calm, warm light behind his army's centre, larger than any other -----
-    {
-      const q = P(ALI), g0 = P([ALI[0], .02, ALI[2]]);
-      if (q) {
-        const s = F / Math.max(30, q[2]), br = .93 + .07 * Math.sin(t * 1.1) + .12 * Math.sin(Math.PI * seg(p, .55, .6));
-        c.globalCompositeOperation = 'lighter';
-        if (g0) { c.save(); c.translate(g0[0], g0[1]); c.scale(1, .22); const g = c.createRadialGradient(0, 0, 0, 0, 0, s * 7); g.addColorStop(0, 'rgba(255,196,124,.3)'); g.addColorStop(1, 'rgba(255,196,124,0)'); c.fillStyle = g; c.fillRect(-s * 7, -s * 7, s * 14, s * 14); c.restore(); }
-        const glow = (r, col, a) => { const g = c.createRadialGradient(q[0], q[1], 0, q[0], q[1], r); g.addColorStop(0, col.replace('A', a)); g.addColorStop(1, col.replace('A', 0)); c.fillStyle = g; c.fillRect(q[0] - r, q[1] - r, r * 2, r * 2); };
-        glow(Math.max(46, s * 5), 'rgba(255,186,104,A)', .22 * br); glow(Math.max(14, s * 1.8), 'rgba(255,218,156,A)', .5 * br); glow(Math.max(3.2, s * .5), 'rgba(255,250,236,A)', .95);
-        bc.globalAlpha = .5; bc.drawImage(st.glowS, q[0] - s * 4, q[1] - s * 4, s * 8, s * 8); bc.globalAlpha = 1;
-        c.globalCompositeOperation = 'source-over';
-      }
     }
     // ----- bloom, grade -----
     if (sunP && sunP[1] < hy + 4) { bc.globalAlpha = .9 * sunK * low; const r = F * .14; bc.drawImage(st.glowS, sunP[0] - r, sunP[1] - r, r * 2, r * 2); bc.globalAlpha = 1; }
